@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <libAlgae_dsp/src/shell/dsp_graph.h>
-#include <libAlgae_dsp/src/shell/math_functions.h>
+#include "../src/shell/dsp_graph.h"
+#include "../src/shell/math_functions.h"
 #include <iostream>
 
 using algae::dsp::shell::dsp_node;

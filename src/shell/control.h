@@ -81,8 +81,7 @@ namespace algae::dsp::shell::control{
 
         virtual void process(frequency_t sampleRate=44100.0) override {
             
-            durations
-            this->outlets[0] = value.get()
+            this->outlets[0] = value.get();
             index++;
         }
     };

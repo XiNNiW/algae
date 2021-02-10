@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include <libAlgae_dsp/src/shell/dsp_graph.h>
-#include <libAlgae_dsp/src/shell/oscillator.h>
-#include <libAlgae_dsp/src/shell/filter.h>
+#include "../src/shell/dsp_graph.h"
+#include "../src/shell/oscillator.h"
+#include "../src/shell/filter.h"
 #include <iostream>
 
 using algae::dsp::shell::dsp_node;

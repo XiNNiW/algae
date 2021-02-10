@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <iostream>
-#include <libAlgae_dsp/src/shell/dsp_graph.h>
-#include <libAlgae_dsp/src/shell/math_functions.h>
-#include <libAlgae_dsp/src/shell/oscillator.h>
+#include "../src/shell/dsp_graph.h"
+#include "../src/shell/math_functions.h"
+#include "../src/shell/oscillator.h"
 
 using algae::dsp::shell::dsp_node;
 using algae::dsp::shell::connect;

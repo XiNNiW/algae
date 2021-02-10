@@ -37,24 +37,37 @@ namespace algae::dsp::core::control{
     };
 
     template<typename sample_t>
-    const ramp_t<sample_t> update_ramp(const ramp_t<sample_t>& state, const bool& trig, const sample_t& start, const sample_t& end, const long& ramptime_in_samples, const long& offset=0){
-        long index = (trig&&!state.trig)
-                    ? 0
-                    :(state.index>=offset)
-                    ? state.index-offset
-                    : 0;
+    const ramp_t<sample_t> update_ramp(const ramp_t<sample_t>& state, const sample_t& start, const sample_t& end, const long& ramptime_in_samples, const long& offset=0){
+        
+        long index = ((state.index-offset)>0)?state.index-offset:0;
         sample_t phase = (((sample_t)index)/((sample_t)ramptime_in_samples));
         sample_t value = 
             (index<ramptime_in_samples)
             ? start*(1.0-phase)+end*phase
             : end;
-        return ramp_t<sample_t>{trig,state.index+1,value};
+
+        return ramp_t<sample_t>{state.trig,state.index+1,value};
     }
 
     template<typename sample_t>
     const ramp_t<sample_t> reset_ramp(const ramp_t<sample_t>& state,const sample_t& start){
         return ramp_t<sample_t>{false,start,0};
     }
+
+    template<typename sample_t>
+    const ramp_t<sample_t> update_ad(
+        ramp_t<sample_t> state,
+        int a,
+        int d
+    ){
+        return    (state.index<=a)
+                ? update_ramp<sample_t>(state,0,1,a)
+                : (state.index<=d+a)
+                ? update_ramp<sample_t>(state,1,0,d,a)
+                : ramp_t<sample_t>();
+        // return update_ramp<sample_t>(state,0,1,a);
+    }
+
 
     template<typename sample_t,typename frequency_t>
     const ramp_t<sample_t> update_adsr(
@@ -63,28 +76,59 @@ namespace algae::dsp::core::control{
         const int& attack_time_in_samples, 
         const int& decay_time_in_samples, 
         const sample_t& sustain_level, 
-        const int& release_time_in_samples, 
-        const frequency_t& sampleRate=44100.0
+        const int& release_time_in_samples
     )
     {
+        
         if(trig){
-            ramp_t<sample_t> next = 
-                (state.index < attack_time_in_samples)
-                ? update_ramp(state, trig, state.value, 1.0, attack_time_in_samples-state.index)
-                : (state.index < attack_time_in_samples + decay_time_in_samples)
-                ? update_ramp(state, trig, 1.0, sustain_level, decay_time_in_samples, attack_time_in_samples)
-                : ramp_t<sample_t>{trig, state.index, sustain_level};
-            return next;
+            // ramp_t<sample_t> next = 
+            //     (state.index < attack_time_in_samples)
+            //     ? update_ramp<sample_t>(
+            //         state,
+            //         0.0,
+            //         1.0,
+            //         attack_time_in_samples
+            //     )
+            //     : (state.index < attack_time_in_samples + decay_time_in_samples)
+            //     ? update_ramp<sample_t>(
+            //         computeRampForEnvPhase(state,trig,attack_time_in_samples), 
+            //         1.0, 
+            //         sustain_level, 
+            //         decay_time_in_samples 
+            //     )
+            //     : ramp_t<sample_t>{trig, state.index, sustain_level};
+            // return next;
+            return update_ramp<sample_t>(
+                    state,
+                    0.0,
+                    1.0,
+                    attack_time_in_samples
+                );
         } else if(state.value == 0){
-            return state;
+            return ramp_t<sample_t>();
         } else {
             ramp_t<sample_t> next = 
                 (state.index < attack_time_in_samples + decay_time_in_samples + release_time_in_samples)
-                ? update_ramp(state, trig, sustain_level, 0.0, attack_time_in_samples+decay_time_in_samples)
+                ? update_ramp<sample_t>(
+                    computeRampForEnvPhase(state,trig,attack_time_in_samples+decay_time_in_samples),
+                    sustain_level,
+                    0.0,
+                    release_time_in_samples
+                )
                 : ramp_t<sample_t>{false,0,0};
             return next;
         }
 
+    }
+
+    template<typename sample_t>
+    ramp_t<sample_t> computeRampForEnvPhase(ramp_t<sample_t> state, bool trig, int offset){
+        long index = (trig&&!state.trig)
+                    ? 0
+                    :(state.index>=offset)
+                    ? state.index-offset
+                    : 0;
+        return ramp_t<sample_t>{trig, index, state.value};
     }
 
 }
