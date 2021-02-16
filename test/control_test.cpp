@@ -41,7 +41,7 @@ TEST(DSP_Test, CoreRampTest) {
     envState = update_ramp<double>(envState, initialValue, finalValue, ramptimeInSamples);
 
     EXPECT_FLOAT_EQ(1,envState.value);
-    EXPECT_EQ(6,envState.index);
+    EXPECT_EQ(5,envState.index);
 
 }
 
@@ -89,85 +89,206 @@ TEST(DSP_Test, CoreADTest) {
     ramp_t<double> envState = ramp_t<double>{false,0,0};
     int a= 4;
     int d= 4;
+    int index = 0;
+    auto advance = [&]{envState = update_ad<double>(envState,a,d); };
 
     ASSERT_FLOAT_EQ(0,envState.value);
-    ASSERT_EQ(0,envState.index);
+    ASSERT_EQ(index,envState.index);
 
     //attack phase
-    envState = update_ad<double>(envState,a,d); 
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(0,envState.value);
-    EXPECT_EQ(1,envState.index);
-    envState = update_ad<double>(envState,a,d); 
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(0.25,envState.value);
-    EXPECT_EQ(2,envState.index);
-    envState = update_ad<double>(envState,a,d); 
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(0.5,envState.value);
-    EXPECT_EQ(3,envState.index);
-    envState = update_ad<double>(envState,a,d); 
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(0.75,envState.value);
-    EXPECT_EQ(4,envState.index);
-    envState = update_ad<double>(envState,a,d); 
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(1,envState.value);
-    EXPECT_EQ(5,envState.index);
+    EXPECT_EQ(index,envState.index);
 
     //decay phase
 
-    envState = update_ad<double>(envState, a,d); 
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(0.75,envState.value);
-    EXPECT_EQ(6,envState.index);
-    envState = update_ad<double>(envState, a,d); 
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(0.5,envState.value);
-    EXPECT_EQ(7,envState.index);
-    envState = update_ad<double>(envState, a,d); 
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(0.25,envState.value);
-    EXPECT_EQ(8,envState.index);
-    envState = update_ad<double>(envState, a,d); 
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
     EXPECT_FLOAT_EQ(0,envState.value);
-    EXPECT_EQ(9,envState.index);
-    envState = update_ad<double>(envState, a,d); 
+    EXPECT_EQ(index,envState.index);
+    advance(); 
     EXPECT_FLOAT_EQ(0,envState.value);
-    EXPECT_EQ(0,envState.index);
+    EXPECT_EQ(index,envState.index);
 
 }
 
-
-
-// TEST(DSP_Test, CoreADSRTest) { 
+TEST(DSP_Test, CoreADTest2) { 
     
-//     ramp_t<double> envState = ramp_t<double>{false,0,0};
-//     int a,d,r = 3;
-//     double s = 0.5;
+    ramp_t<double> envState = ramp_t<double>{false,0,0};
+    int a= 4;
+    int d= 4;
+    int index = 0;
 
-//     ASSERT_FLOAT_EQ(0,envState.value);
-//     ASSERT_EQ(0,envState.index);
+    ASSERT_FLOAT_EQ(0,envState.value);
+    ASSERT_EQ(index,envState.index);
 
-//     envState = update_adsr<double,double>(envState, true, a,d,s,r);
-//     // envState = update_adsr<double,double>(envState, true, a,d,s,r);
-//     // envState = update_adsr<double,double>(envState, true, a,d,s,r); 
-//     EXPECT_FLOAT_EQ(1,envState.value);
-//     EXPECT_EQ(3,envState.index);
+    
+    auto advance = [&](){envState = update_ad<double>(envState,0,a,1,d,0); };
+    // auto ASSERT_ENV_STATE = [&](double expected){
+    //     advance(); 
+    //     EXPECT_FLOAT_EQ(expected,envState.value);
+    //     EXPECT_EQ(index,envState.index);
+    // };
 
-//     envState = update_adsr<double,double>(envState, true, a,d,s,r);
-//     envState = update_adsr<double,double>(envState, true, a,d,s,r);
-//     envState = update_adsr<double,double>(envState, true, a,d,s,r); 
-//     EXPECT_FLOAT_EQ(0.5,envState.value);
-//     EXPECT_EQ(6,envState.index);
+    //attack phase
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0.25,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0.5,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0.75,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(1,envState.value);
+    EXPECT_EQ(index,envState.index);
 
-//     envState = update_adsr<double,double>(envState, true, a,d,s,r);
-//     envState = update_adsr<double,double>(envState, true, a,d,s,r);
-//     envState = update_adsr<double,double>(envState, true, a,d,s,r); 
-//     EXPECT_FLOAT_EQ(0.5,envState.value);
-//     EXPECT_EQ(9,envState.index);
+    //decay phase
 
-//     envState = update_adsr<double,double>(envState, false, a,d,s,r);
-//     envState = update_adsr<double,double>(envState, false, a,d,s,r);
-//     envState = update_adsr<double,double>(envState, false, a,d,s,r); 
-//     EXPECT_FLOAT_EQ(0,envState.value);
-//     EXPECT_EQ(12,envState.index);
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0.75,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0.5,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0.25,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
 
+    EXPECT_FLOAT_EQ(0,envState.value);
+    EXPECT_EQ(index,envState.index);
 
+}
 
-// }
+TEST(DSP_Test, CoreADSRTest) { 
+    
+    ramp_t<double> envState = ramp_t<double>{false,0,0};
+    int a=4,d=4,r = 4;
+    double s = 0.5;
+    int call_index=0;
+
+    ASSERT_FLOAT_EQ(0,envState.value);
+    ASSERT_EQ(call_index,envState.index);
+
+    //ATTACK
+    envState = update_adsr<double,double>(envState, true, a,d,s,r);
+    call_index++;
+    EXPECT_FLOAT_EQ(0,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r);
+    call_index++;
+    EXPECT_FLOAT_EQ(0.25,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(0.5,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(0.75,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(1,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+
+    //DECAY
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(1-.125,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(1-2*.125,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(1-3*.125,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(0.5,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+
+    //SUSTAIN
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    EXPECT_FLOAT_EQ(0.5,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    EXPECT_FLOAT_EQ(0.5,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    EXPECT_FLOAT_EQ(0.5,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    EXPECT_FLOAT_EQ(0.5,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+
+    //RELEASE
+    envState = update_adsr<double,double>(envState, false, a,d,s,r);
+    call_index++;
+    EXPECT_FLOAT_EQ(0.5-.125,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, false, a,d,s,r);
+    call_index++;
+    EXPECT_FLOAT_EQ(0.5-2*.125,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, false, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(0.5-3*.125,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double,double>(envState, false, a,d,s,r); 
+    call_index++;
+    EXPECT_FLOAT_EQ(0.5-4*.125,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+
+}
 
 
 

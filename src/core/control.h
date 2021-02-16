@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
 namespace algae::dsp::core::control{
 
@@ -41,12 +43,12 @@ namespace algae::dsp::core::control{
         
         long index = ((state.index-offset)>0)?state.index-offset:0;
         sample_t phase = (((sample_t)index)/((sample_t)ramptime_in_samples));
-        sample_t value = 
-            (index<ramptime_in_samples)
-            ? start*(1.0-phase)+end*phase
-            : end;
+        return  
+            (index<=ramptime_in_samples)
+            ? ramp_t<sample_t>{state.trig, state.index+1, start*(1.0-phase)+end*phase}
+            : ramp_t<sample_t>{state.trig, state.index, end};
 
-        return ramp_t<sample_t>{state.trig,state.index+1,value};
+        // return ramp_t<sample_t>{state.trig,state.index+1,value};
     }
 
     template<typename sample_t>
@@ -60,14 +62,32 @@ namespace algae::dsp::core::control{
         int a,
         int d
     ){
-        return    (state.index<=a)
+        return  (state.index<=a)
                 ? update_ramp<sample_t>(state,0,1,a)
-                : (state.index<=d+a)
-                ? update_ramp<sample_t>(state,1,0,d,a)
-                : ramp_t<sample_t>();
-        // return update_ramp<sample_t>(state,0,1,a);
+                : update_ramp<sample_t>(state,1,0,d,a);
+                
     }
 
+    template<typename sample_t>
+    const ramp_t<sample_t> update_ad(
+        ramp_t<sample_t> state,
+        sample_t initial,
+        int a,
+        sample_t peak,
+        int d,
+        sample_t final
+    ){
+        return  (state.index<=a)
+                ? update_ramp<sample_t>(state,initial,peak,a)
+                : update_ramp<sample_t>(state,peak,final,d,a);
+                
+    }
+
+    template<typename sample_t>
+    struct adsr_t{
+        ramp_t<sample_t> env;
+        bool trig;
+    };
 
     template<typename sample_t,typename frequency_t>
     const ramp_t<sample_t> update_adsr(
@@ -79,6 +99,9 @@ namespace algae::dsp::core::control{
         const int& release_time_in_samples
     )
     {
+        const sample_t& a = attack_time_in_samples;
+        const sample_t& d = decay_time_in_samples;
+        const sample_t& r = release_time_in_samples;
         
         if(trig){
             // ramp_t<sample_t> next = 
@@ -98,25 +121,22 @@ namespace algae::dsp::core::control{
             //     )
             //     : ramp_t<sample_t>{trig, state.index, sustain_level};
             // return next;
-            return update_ramp<sample_t>(
-                    state,
-                    0.0,
-                    1.0,
-                    attack_time_in_samples
-                );
-        } else if(state.value == 0){
-            return ramp_t<sample_t>();
+            std::cout << "ATTACK/DECAY/SUSTAIN\n";
+            return update_ad<sample_t>(state,0,a,1.0,d,sustain_level);
         } else {
-            ramp_t<sample_t> next = 
-                (state.index < attack_time_in_samples + decay_time_in_samples + release_time_in_samples)
-                ? update_ramp<sample_t>(
-                    computeRampForEnvPhase(state,trig,attack_time_in_samples+decay_time_in_samples),
+            std::cout << "RELEASE\n";
+            // int sustain_time = state.sustain_time;
+            // if(trig!=state.trig) sustain_time = state.ramp.index;
+            return 
+                // (state.index <= a + d + r)?
+                update_ramp<sample_t>(
+                    state,
                     sustain_level,
                     0.0,
-                    release_time_in_samples
-                )
-                : ramp_t<sample_t>{false,0,0};
-            return next;
+                    r,
+                    a+d
+                );
+                // : ramp_t<sample_t>{state.trig,state.index+1,state.value};
         }
 
     }
