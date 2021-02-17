@@ -108,13 +108,15 @@ namespace algae::dsp::core::control{
             
             return 
                 
+                state.index>0?
                 update_ramp<sample_t>(
                     state,
                     sustain_level,
                     0.0,
                     r,
                     a+d
-                );
+                )
+                :state;
                
         }
 

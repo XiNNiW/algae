@@ -2,8 +2,6 @@
 #include "../src/core/control.h"
 #include <iostream>
 
-// using algae::dsp::shell::dsp_node;
-// using algae::dsp::shell::connect;
 using algae::dsp::core::control::ramp_t;
 using algae::dsp::core::control::update_ramp;
 using algae::dsp::core::control::update_ad;
@@ -286,6 +284,26 @@ TEST(DSP_Test, CoreADSRTest) {
     envState = update_adsr<double>(envState, false, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(0.5-4*.125,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+
+}
+
+TEST(DSP_Test, CoreADSRTest_default) { 
+    
+    ramp_t<double> envState = ramp_t<double>{false,0,0};
+    int a=0,d=0,r = 0;
+    double s = 0.5;
+    int call_index=0;
+
+    ASSERT_FLOAT_EQ(0,envState.value);
+    ASSERT_EQ(call_index,envState.index);
+
+    //RELEASE
+    envState = update_adsr<double>(envState, false, a,d,s,r);
+    EXPECT_FLOAT_EQ(0,envState.value);
+    EXPECT_EQ(call_index,envState.index);
+    envState = update_adsr<double>(envState, false, a,d,s,r);
+    EXPECT_FLOAT_EQ(0,envState.value);
     EXPECT_EQ(call_index,envState.index);
 
 }
