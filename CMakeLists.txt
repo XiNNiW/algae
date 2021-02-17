@@ -17,7 +17,9 @@ include(GoogleTest)
 
 #Algae (DSP)
 add_library( algae STATIC
-             ${PROJECT_SOURCE_DIR}/dsp.cpp)
+             ${PROJECT_SOURCE_DIR}/src/algae.cpp)
+set_target_properties(algae PROPERTIES PUBLIC_HEADER ${PROJECT_SOURCE_DIR}/src/algae.h)
+target_include_directories(algae PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 #Tests
 add_executable( AlgaeTests 

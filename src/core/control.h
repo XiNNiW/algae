@@ -48,7 +48,6 @@ namespace algae::dsp::core::control{
             ? ramp_t<sample_t>{state.trig, state.index+1, start*(1.0-phase)+end*phase}
             : ramp_t<sample_t>{state.trig, state.index, end};
 
-        // return ramp_t<sample_t>{state.trig,state.index+1,value};
     }
 
     template<typename sample_t>
@@ -89,7 +88,7 @@ namespace algae::dsp::core::control{
         bool trig;
     };
 
-    template<typename sample_t,typename frequency_t>
+    template<typename sample_t>
     const ramp_t<sample_t> update_adsr(
         const ramp_t<sample_t>& state, 
         const bool& trig, 
@@ -104,31 +103,11 @@ namespace algae::dsp::core::control{
         const sample_t& r = release_time_in_samples;
         
         if(trig){
-            // ramp_t<sample_t> next = 
-            //     (state.index < attack_time_in_samples)
-            //     ? update_ramp<sample_t>(
-            //         state,
-            //         0.0,
-            //         1.0,
-            //         attack_time_in_samples
-            //     )
-            //     : (state.index < attack_time_in_samples + decay_time_in_samples)
-            //     ? update_ramp<sample_t>(
-            //         computeRampForEnvPhase(state,trig,attack_time_in_samples), 
-            //         1.0, 
-            //         sustain_level, 
-            //         decay_time_in_samples 
-            //     )
-            //     : ramp_t<sample_t>{trig, state.index, sustain_level};
-            // return next;
-            std::cout << "ATTACK/DECAY/SUSTAIN\n";
             return update_ad<sample_t>(state,0,a,1.0,d,sustain_level);
         } else {
-            std::cout << "RELEASE\n";
-            // int sustain_time = state.sustain_time;
-            // if(trig!=state.trig) sustain_time = state.ramp.index;
+            
             return 
-                // (state.index <= a + d + r)?
+                
                 update_ramp<sample_t>(
                     state,
                     sustain_level,
@@ -136,7 +115,7 @@ namespace algae::dsp::core::control{
                     r,
                     a+d
                 );
-                // : ramp_t<sample_t>{state.trig,state.index+1,state.value};
+               
         }
 
     }

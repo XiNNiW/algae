@@ -217,73 +217,73 @@ TEST(DSP_Test, CoreADSRTest) {
     ASSERT_EQ(call_index,envState.index);
 
     //ATTACK
-    envState = update_adsr<double,double>(envState, true, a,d,s,r);
+    envState = update_adsr<double>(envState, true, a,d,s,r);
     call_index++;
     EXPECT_FLOAT_EQ(0,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r);
+    envState = update_adsr<double>(envState, true, a,d,s,r);
     call_index++;
     EXPECT_FLOAT_EQ(0.25,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(0.5,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(0.75,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(1,envState.value);
     EXPECT_EQ(call_index,envState.index);
 
     //DECAY
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(1-.125,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(1-2*.125,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(1-3*.125,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(0.5,envState.value);
     EXPECT_EQ(call_index,envState.index);
 
     //SUSTAIN
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     EXPECT_FLOAT_EQ(0.5,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     EXPECT_FLOAT_EQ(0.5,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     EXPECT_FLOAT_EQ(0.5,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, true, a,d,s,r); 
+    envState = update_adsr<double>(envState, true, a,d,s,r); 
     EXPECT_FLOAT_EQ(0.5,envState.value);
     EXPECT_EQ(call_index,envState.index);
 
     //RELEASE
-    envState = update_adsr<double,double>(envState, false, a,d,s,r);
+    envState = update_adsr<double>(envState, false, a,d,s,r);
     call_index++;
     EXPECT_FLOAT_EQ(0.5-.125,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, false, a,d,s,r);
+    envState = update_adsr<double>(envState, false, a,d,s,r);
     call_index++;
     EXPECT_FLOAT_EQ(0.5-2*.125,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, false, a,d,s,r); 
+    envState = update_adsr<double>(envState, false, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(0.5-3*.125,envState.value);
     EXPECT_EQ(call_index,envState.index);
-    envState = update_adsr<double,double>(envState, false, a,d,s,r); 
+    envState = update_adsr<double>(envState, false, a,d,s,r); 
     call_index++;
     EXPECT_FLOAT_EQ(0.5-4*.125,envState.value);
     EXPECT_EQ(call_index,envState.index);
