@@ -42,7 +42,8 @@ namespace algae::dsp::core::control{
     const ramp_t<sample_t> update_ramp(const ramp_t<sample_t>& state, const sample_t& start, const sample_t& end, const long& ramptime_in_samples, const long& offset=0){
         
         long index = ((state.index-offset)>0)?state.index-offset:0;
-        sample_t phase = (((sample_t)index)/((sample_t)ramptime_in_samples));
+        long r = ramptime_in_samples>0? ramptime_in_samples : 1;
+        sample_t phase = (((sample_t)index)/((sample_t)r));
         return  
             (index<=ramptime_in_samples)
             ? ramp_t<sample_t>{state.trig, state.index+1, start*(1.0-phase)+end*phase}
@@ -61,9 +62,7 @@ namespace algae::dsp::core::control{
         int a,
         int d
     ){
-        return  (state.index<=a)
-                ? update_ramp<sample_t>(state,0,1,a)
-                : update_ramp<sample_t>(state,1,0,d,a);
+        return update_ad<sample_t>(state,0.0,a,1.0,d,0.0);
                 
     }
 

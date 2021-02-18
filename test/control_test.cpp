@@ -151,11 +151,6 @@ TEST(DSP_Test, CoreADTest2) {
 
     
     auto advance = [&](){envState = update_ad<double>(envState,0,a,1,d,0); };
-    // auto ASSERT_ENV_STATE = [&](double expected){
-    //     advance(); 
-    //     EXPECT_FLOAT_EQ(expected,envState.value);
-    //     EXPECT_EQ(index,envState.index);
-    // };
 
     //attack phase
     advance(); 
@@ -202,6 +197,31 @@ TEST(DSP_Test, CoreADTest2) {
     EXPECT_FLOAT_EQ(0,envState.value);
     EXPECT_EQ(index,envState.index);
 
+}
+
+TEST(DSP_Test, CoreADTest_INIT) { 
+    
+    ramp_t<double> envState = ramp_t<double>{false,0,0};
+    int a= 0;
+    int d= 0;
+    int index = 0;
+
+    ASSERT_FLOAT_EQ(0,envState.value);
+    ASSERT_EQ(index,envState.index);
+
+    
+    auto advance = [&](){envState = update_ad<double>(envState,0,a,1,d,0); };
+    advance(); 
+    index++;
+    EXPECT_FLOAT_EQ(0,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    EXPECT_FLOAT_EQ(0,envState.value);
+    EXPECT_EQ(index,envState.index);
+    advance(); 
+    EXPECT_FLOAT_EQ(0,envState.value);
+    EXPECT_EQ(index,envState.index);
+   
 }
 
 TEST(DSP_Test, CoreADSRTest) { 
