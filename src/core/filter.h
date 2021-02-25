@@ -69,9 +69,10 @@ namespace algae::dsp::core::filter{
     const biquad_t<sample_t,frequency_t> bandpass(
         const biquad_t<sample_t,frequency_t>& state,
         const sample_t& cutoff,
-        const sample_t& q,
+        const sample_t& quality,
         const frequency_t sampleRate
     ){
+        sample_t q = quality>0?quality:0.01;
         frequency_t w0 = cutoff * M_PI_2 / sampleRate;
         frequency_t a = fabs(sin(w0) / (2 * q));
         frequency_t c = cos(w0);
@@ -88,32 +89,6 @@ namespace algae::dsp::core::filter{
         a2 = a2 / a0;
         return biquad_t<sample_t,frequency_t>{b0,b1,b2,a1,a2,state.y1,state.y2,state.x1,state.x2};
         
-    }
-
-
-    template<typename sample_t, typename frequency_t>
-    const biquad_t<sample_t,frequency_t> resonant_fail(
-        const biquad_t<sample_t,frequency_t>& state,
-        const sample_t& centerFrequency,
-        const sample_t& q,
-        const sample_t& g,
-        const frequency_t sampleRate=44100
-    )
-    {  
-        const sample_t& fc = centerFrequency;
-        const frequency_t& w = fc/sampleRate;
-        const frequency_t& R = exp(-M_PI*w/q);
-
-        const frequency_t& b0 = g;
-        const frequency_t& b1 = 0;
-        const frequency_t& b2 = -g*R;
-        const frequency_t& a1 = -2*R*cos(M_2_PI*w);
-        const frequency_t& a2 = R*R;
-
-        //update_biquad evaluates yn = b0*xn+b1*xn1+b2*xn2-a1*y1-a2*yn2
-        // target is yn = g*xn+-R*xn2+2R*y1-a2*yn2
-        return biquad_t<sample_t,frequency_t>{b0,b1,b2,a1,a2,state.y1,state.y2,state.x1,state.x2};
-
     }
 
     template<typename sample_t, typename frequency_t>
@@ -155,11 +130,48 @@ namespace algae::dsp::core::filter{
         frequency_t y2 = state.y2;
         frequency_t y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
         
-
-
         return biquad_t<sample_t,frequency_t>{b0,b1,b2,a1,a2,y0,y1,x0,x1};
     }
 
+    template<typename sample_t>
+    struct bandpass_t{
+        sample_t G, R, b1, b2;
+        sample_t x1,x2,y1,y2;
+    };
+
+    template<typename sample_t>
+    bandpass_t<sample_t> process_bandpass(bandpass_t<sample_t> state, sample_t input){
+        sample_t x = input;
+        sample_t x1 = state.x1;
+        sample_t x2 = state.x2;
+        sample_t y1 = state.y1;
+        sample_t y2 = state.y2;
+        sample_t G = state.G;
+        sample_t R = state.R;
+        sample_t b1 = state.b1;
+        sample_t b2 = state.b2;
+        sample_t y = G*(x - R*x2) + b1*y1 + b2*y2;
+        return bandpass_t<sample_t>{G,R,b1,b2,x,x1,y,y1};
+    }
+
+    template<typename sample_t, typename frequency_t>
+    bandpass_t<sample_t> update_coefficients(bandpass_t<sample_t> state, frequency_t center, sample_t q, sample_t sampleRate=44100){
+        sample_t x1 = state.x1;
+        sample_t x2 = state.x2;
+        sample_t y1 = state.y1;
+        sample_t y2 = state.y2;
+
+        center = center>0?center:10.0;
+        q = q>0?q:0.1;
+        sample_t w = center/sampleRate;
+        
+        sample_t R = exp(-M_PI*(w/q));
+
+        sample_t G  = 1.0-R;
+        sample_t b1 = 2*R*cos(M_2_PI*w);
+        sample_t b2 = -R*R;
+        return bandpass_t<sample_t>{G,R,b1,b2,x1,x2,y1,y2};
+    }
 
     template<typename sample_t>
     struct vcf_t{

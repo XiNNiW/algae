@@ -22,7 +22,7 @@ TEST(DSP_Test, LowpassFilter) {
     connect(noise_node,0,filter_node,1);
     connect(noise_node,0,filter_node,2);
     filter_node->update();
-    bool inRange = -1<filter_node->getOutputValue(0)<1;
+    bool inRange = -1<=filter_node->getOutputValue(0)<=1;
     ASSERT_TRUE(inRange);
 
 }
@@ -42,7 +42,7 @@ TEST(DSP_Test, HighPassFilter) {
     connect(noise_node,0,filter_node,1);
     connect(noise_node,0,filter_node,2);
     filter_node->update();
-    bool inRange = -1<filter_node->getOutputValue(0)<1;
+    bool inRange = -1<=filter_node->getOutputValue(0)<=1;
     ASSERT_TRUE(inRange);
 
 }
@@ -61,10 +61,57 @@ TEST(DSP_Test, BandPassFilter) {
     connect(noise_node,0,filter_node,1);
     connect(noise_node,0,filter_node,2);
     filter_node->update();
-    bool inRange = -1<filter_node->getOutputValue(0)<1;
+    bool inRange = -1<=filter_node->getOutputValue(0)<=1;
     ASSERT_TRUE(inRange);
 
 }
+
+
+using algae::dsp::core::filter::bandpass_t;
+using algae::dsp::core::filter::process_bandpass;
+using algae::dsp::core::filter::update_coefficients;
+TEST(DSP_Test, CORE_BandPassFilter_Moore_Has_BP_Characteristic) { 
+    // TODO: i need a dft function to do this properly
+    bandpass_t<double> filter;
+    double highest_frequency_signal[10] = {1,-1,1,-1,1,-1,1,-1,1,-1};
+    double lowest_frequency_signal[10] = {1,1,1,1,1,1,1,1,1,1};
+    double output[10]={};
+    double rms;
+
+    double sample_rate = 48000;
+    double half_sample_rate = 24000;
+    filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
+
+    for (int n=0; n<10; n++){
+        filter = process_bandpass<double>(filter, highest_frequency_signal[0]);
+        output[n] = filter.y1;
+        rms += output[n]*output[n];
+    }
+    
+    rms = sqrt(rms)/10.0;
+
+    EXPECT_GT(1, rms);
+    EXPECT_LT(0, rms);
+
+    rms = 0;
+
+    filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
+
+    for (int n=0; n<10; n++){
+        filter = process_bandpass<double>(filter, lowest_frequency_signal[0]);
+        output[n] = filter.y1;
+        rms += output[n]*output[n];
+
+    }
+
+    rms = sqrt(rms)/10.0;
+    
+    EXPECT_GT(1, rms);
+    EXPECT_LT(0, rms);
+    
+
+}
+
 
 
 

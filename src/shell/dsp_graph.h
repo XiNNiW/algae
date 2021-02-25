@@ -13,19 +13,19 @@ namespace algae::dsp::shell{
         std::shared_ptr <dsp_node<sample_t,frequency_t>> connectedNode;
         size_t index;
         const sample_t getValue(){
-            std::cout << "getting inlet value...\n";
+            // std::cout << "getting inlet value...\n";
 
-            if(connectedNode){
-                std::cout << "requested outlet is..."<<index<<"\n";
-                std::cout << "connected node value is..."<<connectedNode.get()->getOutputValue(index)<<"\n";
+            // if(connectedNode){
+            //     std::cout << "requested outlet is..."<<index<<"\n";
+            //     std::cout << "connected node value is..."<<connectedNode.get()->getOutputValue(index)<<"\n";
 
-            }
+            // }
 
             return connectedNode?connectedNode.get()->getOutputValue(index):0;
         }
         void updateConnectedNode(const frequency_t& sampleRate=44100.0){
             if(connectedNode){
-                std::cout << "updating connected node...\n";
+                // std::cout << "updating connected node...\n";
                 connectedNode.get()->update(sampleRate);
             }
         }
@@ -80,7 +80,7 @@ namespace algae::dsp::shell{
         virtual std::shared_ptr<dsp_node<sample_t,frequency_t>> getSharedPtr()=0;
         virtual std::unique_ptr<dsp_node<sample_t,frequency_t>> getUniquePtr()=0;
         virtual void update(const frequency_t& sampleRate=44100.0){
-            std::cout<<"in parent update... updatind deps\n";
+            // std::cout<<"in parent update... updatind deps\n";
             for(auto inlet: inlets){
                 inlet.updateConnectedNode(sampleRate);
             }

@@ -58,6 +58,8 @@ add_executable( AlgaeTests
     ${TEST_DIR}/math_functions_test.cpp
     ${TEST_DIR}/oscillator_test.cpp
     ${TEST_DIR}/filter_test.cpp
+    ${TEST_DIR}/dc_blocker_test.cpp
+    ${TEST_DIR}/integrator_test.cpp
     ${TEST_DIR}/control_test.cpp
 )
 # target_include_directories(AlgaeTests PUBLIC ${PROJECT_SOURCE_DIR}/src)

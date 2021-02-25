@@ -27,15 +27,15 @@ namespace algae::dsp::shell::oscillator{
         {}
         
         virtual void process( const frequency_t& sampleRate=44100.0) override{
-            std::cout<<"phasor is updating...\n";
+            // std::cout<<"phasor is updating...\n";
             auto freq = this->inlets[0].getValue();
-            std::cout<<"phasor freq is... "<<freq<<" ...\n";
+            // std::cout<<"phasor freq is... "<<freq<<" ...\n";
 
             state = update_phasor<sample_t,frequency_t>(state, freq, sampleRate);
             this->outlets[0] = state.phase;
-            std::cout<<"phasor phase is now... "<<state.phase<<" ...\n";
+            // std::cout<<"phasor phase is now... "<<state.phase<<" ...\n";
 
-            std::cout<<"phasor is updated...\n";
+            // std::cout<<"phasor is updated...\n";
 
         }
         virtual std::shared_ptr<dsp_node<sample_t,frequency_t>> getSharedPtr() override { 

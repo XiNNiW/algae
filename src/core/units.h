@@ -14,4 +14,10 @@ namespace algae::dsp::core::units{
         frequency_t SECONDS_PER_MINUTE = 60;
         return (n/bpm)*SECONDS_PER_MINUTE*sampleRate;
     };
+
+    template<typename sample_t, typename frequency_t>
+    sample_t msToSamples(sample_t ms, frequency_t sampleRate=44100.0) { 
+        const frequency_t MILLISECONDS_PER_SECOND = 1000.0;
+        return ms*MILLISECONDS_PER_SECOND*sampleRate;
+    };
 }

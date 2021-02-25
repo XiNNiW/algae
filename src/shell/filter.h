@@ -25,7 +25,7 @@ namespace algae::dsp::shell::filter{
             state = lowpass<sample_t,frequency_t>(state, cutoff, q, sampleRate);
             state = update_biquad<sample_t,frequency_t>(state,input);
             this->outlets[0] = state.y1;
-            std::cout<<"maybe here??\n";
+            // std::cout<<"maybe here??\n";
         }
 
         virtual std::shared_ptr<dsp_node<sample_t,frequency_t>> getSharedPtr() override {
