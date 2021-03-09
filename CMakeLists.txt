@@ -61,6 +61,7 @@ add_executable( AlgaeTests
     ${TEST_DIR}/dc_blocker_test.cpp
     ${TEST_DIR}/integrator_test.cpp
     ${TEST_DIR}/control_test.cpp
+    ${TEST_DIR}/units_test.cpp
 )
 # target_include_directories(AlgaeTests PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(AlgaeTests algae)
