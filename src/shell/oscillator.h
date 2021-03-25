@@ -64,7 +64,7 @@ namespace algae::dsp::shell::oscillator{
         virtual void process(const frequency_t& sampleRate=44100.0) override {
             auto freq = this->inlets[0].getValue();
             state = update_phasor<sample_t,frequency_t>(state, freq, sampleRate);
-            this->outlets[0] = sinOsc<sample_t,frequency_t>(state.phase);
+            this->outlets[0] = sinOsc<sample_t>(state.phase);
         }
         virtual std::shared_ptr<dsp_node<sample_t,frequency_t>> getSharedPtr() override {
             return std::make_shared<osc<sample_t,frequency_t>>(*this);

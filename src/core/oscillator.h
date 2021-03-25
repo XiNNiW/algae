@@ -3,12 +3,20 @@
 #include "dc_blocker.h"
 #include "integrator.h"
 
+
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
 namespace algae::dsp::core::oscillator{
 
-    template<typename sample_t, typename frequency_t>
+    const auto TWO_PI = 2.0*M_PI;
+
+    template<typename sample_t>
     const sample_t sinOsc(const sample_t& phase){
-        return sin(M_PI_2*phase);
+        return sin(TWO_PI*phase);
+    }
+
+    template<typename sample_t>
+    const sample_t cosOsc(const sample_t& phase){
+        return cos(TWO_PI*phase);
     }
 
 
@@ -21,14 +29,14 @@ namespace algae::dsp::core::oscillator{
     template<typename frequency_t>
     struct phasor_t{
         frequency_t phase=0;
-        frequency_t freq=0;
+        // frequency_t freq=0;
         // phasor_t()=default;
-        // phasor_t(frequency_t phase):phase(phase){}
+        // phasor_t(frequencDy_t phase):phase(phase){}
     };
 
     template<typename sample_t, typename frequency_t>
     const sample_t osc(const phasor_t<frequency_t>& phasor){
-        return sinf128(M_PI_2*phasor.phase);
+        return cosf128(TWO_PI*phasor.phase);
     }
 
     template<typename sample_t, typename frequency_t>
@@ -37,7 +45,7 @@ namespace algae::dsp::core::oscillator{
         frequency_t phase = phasor_state.phase;
         phase += phi;
         phase -= floor(phase);
-        return phasor_t<frequency_t>{phase, freq};
+        return phasor_t<frequency_t>{ phase };
     }
 
     //Moore, Elements of Computer Music, 1990
@@ -87,8 +95,8 @@ namespace algae::dsp::core::oscillator{
         const sample_t beta_phase, 
         const int number_of_harmonics
     ){
-        sample_t theta = M_PI_2*theta_phase;
-        sample_t beta = M_PI_2*beta_phase;
+        sample_t theta = TWO_PI*theta_phase;
+        sample_t beta = TWO_PI*beta_phase;
         int n = number_of_harmonics;
 
         sample_t B = Bn(n,beta);
@@ -101,7 +109,7 @@ namespace algae::dsp::core::oscillator{
         const sample_t phase, 
         const sample_t modulation_index
     ){
-        sample_t wt = phase*M_2_PI;
+        sample_t wt = phase*TWO_PI;
         sample_t k = modulation_index;
         return exp(k*cos(wt)-k)*cos(wt);
     }
@@ -111,7 +119,7 @@ namespace algae::dsp::core::oscillator{
         const sample_t phase, 
         const sample_t modulation_index
     ){
-        sample_t wt = phase*M_2_PI;
+        sample_t wt = phase*TWO_PI;
         sample_t k = modulation_index;
         return exp(k*cos(2*wt)-k)*cos(wt);
     }
