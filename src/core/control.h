@@ -33,7 +33,6 @@ namespace algae::dsp::core::control{
 
     template<typename sample_t>
     struct ramp_t {
-        bool trig;
         long index;
         sample_t value;
     };
@@ -46,14 +45,14 @@ namespace algae::dsp::core::control{
         sample_t phase = (((sample_t)index)/((sample_t)r));
         return  
             (index<=ramptime_in_samples)
-            ? ramp_t<sample_t>{state.trig, state.index+1, start*(1.0-phase)+end*phase}
-            : ramp_t<sample_t>{state.trig, state.index, end};
+            ? ramp_t<sample_t>{ state.index+1, start*(1.0-phase)+end*phase}
+            : ramp_t<sample_t>{ state.index, end};
 
     }
 
     template<typename sample_t>
     const ramp_t<sample_t> reset_ramp(const ramp_t<sample_t>& state,const sample_t& start){
-        return ramp_t<sample_t>{false,start,0};
+        return ramp_t<sample_t>{start,0};
     }
 
     template<typename sample_t>
@@ -84,12 +83,12 @@ namespace algae::dsp::core::control{
     template<typename sample_t>
     struct adsr_t{
         ramp_t<sample_t> env;
-        bool trig;
+        sample_t last;
     };
 
     template<typename sample_t>
-    const ramp_t<sample_t> update_adsr(
-        const ramp_t<sample_t>& state, 
+    const adsr_t<sample_t> update_adsr(
+        const adsr_t<sample_t>& state, 
         const bool& trig, 
         const int& attack_time_in_samples, 
         const int& decay_time_in_samples, 
@@ -102,19 +101,26 @@ namespace algae::dsp::core::control{
         const sample_t& r = release_time_in_samples;
         
         if(trig){
-            return update_ad<sample_t>(state,0,a,1.0,d,sustain_level);
+            ramp_t<sample_t> ramp = update_ad<sample_t>(state.env,0,a,1.0,d,sustain_level);
+            return adsr_t<sample_t>{
+                ramp,
+                ramp.value
+            };
         } else {
             
             return 
                 
-                state.index>0?
-                update_ramp<sample_t>(
-                    state,
-                    sustain_level,
-                    0.0,
-                    r,
-                    a+d
-                )
+                state.env.index>0?
+                adsr_t<sample_t>{
+                    update_ramp<sample_t>(
+                        state.env,
+                        state.last,
+                        0.0,
+                        r,
+                        a+d
+                    ),
+                    state.last
+                }
                 :state;
                
         }
