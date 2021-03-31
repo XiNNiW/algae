@@ -287,7 +287,7 @@ namespace algae::dsp::core::filter{
     template<typename sample_t>
     sample_t sigbp_qcos(sample_t f)
     {   
-        sample_t HALF_PI = M_PI/2.0;
+        sample_t HALF_PI = M_PI_2;
         if (f >= -(HALF_PI) && f <= HALF_PI)
         {
             sample_t g = f*f;

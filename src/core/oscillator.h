@@ -99,7 +99,7 @@ namespace algae::dsp::core::oscillator{
         sample_t beta = TWO_PI*beta_phase;
         int n = number_of_harmonics;
 
-        sample_t B = Bn(n,beta);
+        sample_t B = Bn(n, beta);
                     
         return (1.0/sample_t(n))*sin(theta + sample_t(n-1)*beta*0.5)*B;
     }
@@ -132,7 +132,7 @@ namespace algae::dsp::core::oscillator{
     ){
         const frequency_t& fc = carrierFrequency;
         const frequency_t& fm = modulatorFrequency;
-        return fm > 0 ? (sampleRate/2.0 - fc) / fm : 0;
+        return fm > 0 ? (sampleRate/3.0 - fc) / fm : 0;
     }
 
     using algae::dsp::core::filter::dc_block_t;
@@ -141,6 +141,10 @@ namespace algae::dsp::core::oscillator{
     using algae::dsp::core::filter::leaky_integrator_t;
     using algae::dsp::core::filter::leaky_integrator;
     using algae::dsp::core::filter::process_leaky_integrator;
+
+    using algae::dsp::core::filter::leaky_integrator_onepole_t;
+    using algae::dsp::core::filter::leaky_integrator_onepole;
+    using algae::dsp::core::filter::process_leaky_integrator_onepole;
 
     template<typename sample_t, typename frequency_t>
     struct fm_bl_saw_t{
@@ -151,7 +155,7 @@ namespace algae::dsp::core::oscillator{
         sample_t output;
     };
 
-        template<typename sample_t, typename frequency_t>
+    template<typename sample_t, typename frequency_t>
     const fm_bl_saw_t<sample_t,frequency_t> setFrequency(
         fm_bl_saw_t<sample_t,frequency_t> state,
         const frequency_t freq,
@@ -171,11 +175,11 @@ namespace algae::dsp::core::oscillator{
         const sample_t sampleRate
     ){
         
-        return fm_bl_saw_t<sample_t,frequency_t>{
+        return fm_bl_saw_t<sample_t,frequency_t> {
             freq,
             max_bl_modulation_index(freq, freq, sampleRate),
             phasor_t<frequency_t>(),
-            leaky_integrator<sample_t, frequency_t>(state.integrator,20.0,sampleRate),
+            leaky_integrator<sample_t, frequency_t>(state.integrator, 19.0, sampleRate),
             0
         };
         
@@ -228,7 +232,7 @@ namespace algae::dsp::core::oscillator{
             freq,
             max_bl_modulation_index(freq, freq, sampleRate),
             phasor_t<frequency_t>(),
-            leaky_integrator<sample_t, frequency_t>(state.integrator,20.0,sampleRate),
+            leaky_integrator<sample_t, frequency_t>(state.integrator, 19.0, sampleRate),
             0
         };
         
