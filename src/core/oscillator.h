@@ -48,6 +48,14 @@ namespace algae::dsp::core::oscillator{
         return phasor_t<frequency_t>{ phase };
     }
 
+    template<typename sample_t, typename frequency_t>
+    sample_t update_phase(sample_t phase, frequency_t freq, frequency_t sampleRate){
+        frequency_t phi = freq/sampleRate;
+        phase += phi;
+        phase -= floor(phase);
+        return phase;
+    }
+
     //Moore, Elements of Computer Music, 1990
     template<typename frequency_t>
     int max_number_of_harmonics(frequency_t freq, frequency_t sampleRate){
@@ -306,7 +314,206 @@ namespace algae::dsp::core::oscillator{
         tri.phasor = update_phasor<sample_t,frequency_t>(tri.phasor, tri.freq, sampleRate);
         tri.output = tri.integrator2.y1;
         return tri;
-    }    
+    }
+
+
+    //LP-BLIT: BANDLIMITED IMPULSE TRAIN SYNTHESIS OF LOWPASS-FILTEREDWAVEFORMSSebastian Kraft, Udo Zölzer
+    template<typename sample_t>
+    struct lp_integrator_t{
+        sample_t x1;
+        sample_t y1;
+        sample_t y2;
+        sample_t a;
+        sample_t b1;
+        sample_t b2;
+    };
+
+    template<typename sample_t, typename frequency_t> 
+    lp_integrator_t<sample_t> lp_integrator( frequency_t hipass_cutoff, frequency_t sampleRate){
+        
+        sample_t x1=0;
+        sample_t y1=0;
+        sample_t y2=0;
+        sample_t gamma = 0.9992;//exp(-TWO_PI*hipass_cutoff/sampleRate);//
+        sample_t a = M_PI*(gamma+1.0)/2.0;
+        sample_t b1 = 2.0*gamma;
+        sample_t b2 = gamma*gamma;
+
+        return lp_integrator_t<sample_t>{
+            x1,
+            y1,
+            y2,
+            a,
+            b1,
+            b2
+        };
+    }
+
+    template<typename sample_t> 
+    lp_integrator_t<sample_t> process(lp_integrator_t<sample_t> integrator, sample_t xn){
+        sample_t yn = integrator.a*(xn - integrator.x1) + integrator.b1*integrator.y1 - integrator.b2*integrator.y2;
+        return lp_integrator_t<sample_t>{
+            xn,
+            yn,
+            integrator.y1,
+            integrator.a,
+            integrator.b1,
+            integrator.b2
+        };
+    }
+
+
+
+
+    
+    template<typename sample_t, typename frequency_t>
+    struct lp_blit_square_t{
+        sample_t phase;
+        frequency_t frequency;
+        sample_t alpha;
+        int num_harmonics;
+        lp_integrator_t<sample_t> integrator;
+    };
+
+    template<typename sample_t, typename frequency_t>
+    lp_blit_square_t<sample_t, frequency_t> lp_blit_square(frequency_t frequency, frequency_t hipass_cutoff, frequency_t sampleRate){
+        sample_t phase = 0;
+        sample_t alpha = 1;
+        int num_harmonics = max_number_of_harmonics(frequency, sampleRate)-1;
+
+        return lp_blit_square_t<sample_t, frequency_t>{
+            phase,
+            frequency,
+            alpha,
+            num_harmonics,
+            lp_integrator<sample_t, frequency_t>(hipass_cutoff, sampleRate)
+        };
+    }
+
+    template<typename sample_t, typename frequency_t>
+    lp_blit_square_t<sample_t, frequency_t> setFrequency(lp_blit_square_t<sample_t, frequency_t> blit, frequency_t frequency, frequency_t sampleRate){
+        int num_harmonics = max_number_of_harmonics(frequency, sampleRate)-1;
+       
+        return lp_blit_square_t<sample_t, frequency_t>{
+            blit.phase,
+            frequency,
+            blit.alpha,
+            num_harmonics,
+            blit.integrator
+        };
+    }
+
+    template<typename sample_t, typename frequency_t>
+    lp_blit_square_t<sample_t, frequency_t> setBrightness(lp_blit_square_t<sample_t, frequency_t> blit, sample_t alpha){
+
+        return lp_blit_square_t<sample_t, frequency_t>{
+            blit.phase,
+            blit.frequency,
+            alpha,
+            blit.num_harmonics,
+            blit.integrator
+        };
+    }
+
+
+
+    template<typename sample_t, typename frequency_t>
+    lp_blit_square_t<sample_t, frequency_t> process(lp_blit_square_t<sample_t, frequency_t> blit, frequency_t sampleRate){
+        
+        sample_t omega = sample_t(blit.num_harmonics)*TWO_PI*blit.frequency*(TWO_PI*blit.phase-M_PI)/sampleRate;
+        sample_t xn = sin(M_PI*blit.phase)*blit.alpha*sin(omega)/sinh(blit.alpha*omega);
+        // sample_t xi = sin(M_PI*blit.phase)*blit.alpha*sin(2*omega)/sinh(2*blit.alpha*omega);
+        sample_t phase = update_phase<sample_t, frequency_t>(blit.phase, blit.frequency, sampleRate);
+        // xn = xn - xi;
+        // lp_integrator_t<sample_t> i = process(blit.integrator,xn);
+
+        return lp_blit_square_t<sample_t, frequency_t>{
+            phase,
+            blit.frequency,
+            blit.alpha,
+            blit.num_harmonics,
+            process(blit.integrator,xn)
+        };
+    }
+
+    
+
+
+
+    // template<typename sample_t, typename frequency_t>
+    // struct lp_blit_saw_t{
+    //     sample_t phase;
+    //     frequency_t frequency;
+    //     sample_t alpha;
+    //     int num_harmonics;
+    //     lp_integrator_t<sample_t> integrator1;
+    //     lp_integrator_t<sample_t> integrator2;
+    // };
+
+    // template<typename sample_t, typename frequency_t>
+    // lp_blit_saw_t<sample_t, frequency_t> lp_blit_saw(frequency_t frequency, frequency_t hipass_cutoff, frequency_t sampleRate){
+    //     sample_t phase = 0;
+    //     sample_t alpha = 1;
+    //     int num_harmonics = max_number_of_harmonics(frequency, sampleRate)-1;
+
+    //     return lp_blit_saw_t<sample_t, frequency_t>{
+    //         phase,
+    //         frequency,
+    //         alpha,
+    //         num_harmonics,
+    //         lp_integrator<sample_t, frequency_t>(hipass_cutoff, sampleRate),
+    //         lp_integrator<sample_t, frequency_t>(hipass_cutoff, sampleRate)
+    //     };
+    // }
+
+    // template<typename sample_t, typename frequency_t>
+    // lp_blit_saw_t<sample_t, frequency_t> setFrequency(lp_blit_saw_t<sample_t, frequency_t> blit, frequency_t frequency, frequency_t sampleRate){
+    //     int num_harmonics = max_number_of_harmonics(frequency, sampleRate)-1;
+       
+    //     return lp_blit_saw_t<sample_t, frequency_t>{
+    //         blit.phase,
+    //         frequency,
+    //         blit.alpha,
+    //         num_harmonics,
+    //         blit.integrator1,
+    //         blit.integrator2
+    //     };
+    // }
+
+    // template<typename sample_t, typename frequency_t>
+    // lp_blit_saw_t<sample_t, frequency_t> setBrightness(lp_blit_square_t<sample_t, frequency_t> blit, sample_t alpha){
+
+    //     return lp_blit_saw_t<sample_t, frequency_t>{
+    //         blit.phase,
+    //         blit.frequency,
+    //         alpha,
+    //         blit.num_harmonics,
+    //         blit.integrator1,
+    //         blit.integrator2
+    //     };
+    // }
+
+
+
+    // template<typename sample_t, typename frequency_t>
+    // lp_blit_saw_t<sample_t, frequency_t> process(lp_blit_saw_t<sample_t, frequency_t> blit, frequency_t sampleRate){
+        
+    //     sample_t omega = TWO_PI*blit.frequency*blit.phase*sample_t(blit.num_harmonics)/sampleRate;
+    //     sample_t xn = sin(blit.phase*M_PI)*blit.alpha*sin(omega-M_PI)/sinh(blit.alpha*omega - M_PI);
+    //     sample_t phase = update_phase<sample_t, frequency_t>(blit.phase, blit.frequency, sampleRate);
+    //     lp_integrator_t<sample_t> integrator1 = process(blit.integrator1,xn);
+    //     lp_integrator_t<sample_t> integrator2 = process(blit.integrator2,blit.integrator1.y1);
+    //     return lp_blit_saw_t<sample_t, frequency_t>{
+    //         phase,
+    //         blit.frequency,
+    //         blit.alpha,
+    //         blit.num_harmonics,
+    //         integrator1,
+    //         integrator2
+    //     };
+    // }
+
+
 
 
 
