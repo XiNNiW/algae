@@ -9,6 +9,13 @@ namespace algae::dsp::core::oscillator{
 
     const auto TWO_PI = 2.0*M_PI;
 
+    template<typename sample_t, typename frequency_t>
+    const sample_t update_phase_custom_period(sample_t phase, frequency_t increment, frequency_t period=TWO_PI){
+        phase += period*increment;
+        if ( phase >= period ) phase -= period;
+        return phase;
+    }
+
     template<typename sample_t>
     const sample_t sinOsc(const sample_t& phase){
         return sin(TWO_PI*phase);
@@ -436,88 +443,125 @@ namespace algae::dsp::core::oscillator{
         };
     }
 
+    template<typename sample_t, typename frequency_t>
+    struct stk_blit_saw_t{
+        int m;
+        sample_t phase_increment;
+        sample_t phase;
+        sample_t p;
+        sample_t c2;
+        sample_t a;
+        sample_t state;
+        sample_t lastFrame;
+    };
+    template<typename sample_t, typename frequency_t>
+    stk_blit_saw_t<sample_t, frequency_t> setFrequency(stk_blit_saw_t<sample_t, frequency_t> saw, frequency_t frequency, frequency_t sampleRate){
+
+        saw.p = sampleRate/frequency;
+        saw.c2 = 1/saw.p;
+        saw.phase_increment = M_PI*saw.c2;
+
+        int max_harmonics = floor(0.5*saw.p);
+        saw.m = 2*max_harmonics+1;
+        saw.a = saw.m / saw.p;
+
+        return saw;
+    }
     
+    template<typename sample_t, typename frequency_t>
+    stk_blit_saw_t<sample_t, frequency_t> stk_blit_saw(frequency_t frequency, frequency_t sampleRate){
+        stk_blit_saw_t<sample_t, frequency_t> saw;
 
+        saw = setFrequency(saw, frequency, sampleRate);
+        saw.state = -0.5 * saw.a;
+        return saw;
+    }
 
+    template<typename sample_t, typename frequency_t>
+    stk_blit_saw_t<sample_t, frequency_t> process(stk_blit_saw_t<sample_t, frequency_t> saw, frequency_t sampleRate){
+        sample_t tmp, denominator = sin( saw.phase );
+        if ( fabs(denominator) <= std::numeric_limits<sample_t>::epsilon() )
+            tmp = saw.a;
+        else {
+            tmp =  sin( saw.m * saw.phase );
+            tmp /= saw.p * denominator;
+        }
 
-    // template<typename sample_t, typename frequency_t>
-    // struct lp_blit_saw_t{
-    //     sample_t phase;
-    //     frequency_t frequency;
-    //     sample_t alpha;
-    //     int num_harmonics;
-    //     lp_integrator_t<sample_t> integrator1;
-    //     lp_integrator_t<sample_t> integrator2;
-    // };
+        tmp += saw.state - saw.c2;
+        saw.state = tmp * 0.995;
 
-    // template<typename sample_t, typename frequency_t>
-    // lp_blit_saw_t<sample_t, frequency_t> lp_blit_saw(frequency_t frequency, frequency_t hipass_cutoff, frequency_t sampleRate){
-    //     sample_t phase = 0;
-    //     sample_t alpha = 1;
-    //     int num_harmonics = max_number_of_harmonics(frequency, sampleRate)-1;
+        saw.phase += saw.phase_increment;
+        if ( saw.phase >= M_PI ) saw.phase -= M_PI;
+            
+        saw.lastFrame = tmp;
+        return saw;
+    }
 
-    //     return lp_blit_saw_t<sample_t, frequency_t>{
-    //         phase,
-    //         frequency,
-    //         alpha,
-    //         num_harmonics,
-    //         lp_integrator<sample_t, frequency_t>(hipass_cutoff, sampleRate),
-    //         lp_integrator<sample_t, frequency_t>(hipass_cutoff, sampleRate)
-    //     };
-    // }
+    template<typename sample_t, typename frequency_t>
+    struct stk_blit_square_t{
+        int m;
+        sample_t phase_increment;
+        sample_t phase;
+        sample_t p;
+        sample_t c2;
+        sample_t a;
+        sample_t state;
+        sample_t lastFrame;
+        sample_t last_blit_output;
+        sample_t dc_blocker_x1;
+    };
+    template<typename sample_t, typename frequency_t>
+    stk_blit_square_t<sample_t, frequency_t> setFrequency(stk_blit_square_t<sample_t, frequency_t> square, frequency_t frequency, frequency_t sampleRate){
 
-    // template<typename sample_t, typename frequency_t>
-    // lp_blit_saw_t<sample_t, frequency_t> setFrequency(lp_blit_saw_t<sample_t, frequency_t> blit, frequency_t frequency, frequency_t sampleRate){
-    //     int num_harmonics = max_number_of_harmonics(frequency, sampleRate)-1;
-       
-    //     return lp_blit_saw_t<sample_t, frequency_t>{
-    //         blit.phase,
-    //         frequency,
-    //         blit.alpha,
-    //         num_harmonics,
-    //         blit.integrator1,
-    //         blit.integrator2
-    //     };
-    // }
+        square.p = 0.5*sampleRate/frequency;
+        // square.c2 = 1/square.p;
+        square.phase_increment = M_PI/square.p;
 
-    // template<typename sample_t, typename frequency_t>
-    // lp_blit_saw_t<sample_t, frequency_t> setBrightness(lp_blit_square_t<sample_t, frequency_t> blit, sample_t alpha){
+        int max_harmonics = floor(0.5*square.p);
+        square.m = 2*(max_harmonics+1);
+        square.a = square.m / square.p;
 
-    //     return lp_blit_saw_t<sample_t, frequency_t>{
-    //         blit.phase,
-    //         blit.frequency,
-    //         alpha,
-    //         blit.num_harmonics,
-    //         blit.integrator1,
-    //         blit.integrator2
-    //     };
-    // }
+        return square;
+    }
+    
+    template<typename sample_t, typename frequency_t>
+    stk_blit_square_t<sample_t, frequency_t> stk_blit_square(frequency_t frequency, frequency_t sampleRate){
+        stk_blit_square_t<sample_t, frequency_t> square;
 
+        square = setFrequency(square, frequency, sampleRate);
+        // square.state = -0.5 * square.a;
+        return square;
+    }
 
-
-    // template<typename sample_t, typename frequency_t>
-    // lp_blit_saw_t<sample_t, frequency_t> process(lp_blit_saw_t<sample_t, frequency_t> blit, frequency_t sampleRate){
+    template<typename sample_t, typename frequency_t>
+    stk_blit_square_t<sample_t, frequency_t> process(stk_blit_square_t<sample_t, frequency_t> square, frequency_t sampleRate){
         
-    //     sample_t omega = TWO_PI*blit.frequency*blit.phase*sample_t(blit.num_harmonics)/sampleRate;
-    //     sample_t xn = sin(blit.phase*M_PI)*blit.alpha*sin(omega-M_PI)/sinh(blit.alpha*omega - M_PI);
-    //     sample_t phase = update_phase<sample_t, frequency_t>(blit.phase, blit.frequency, sampleRate);
-    //     lp_integrator_t<sample_t> integrator1 = process(blit.integrator1,xn);
-    //     lp_integrator_t<sample_t> integrator2 = process(blit.integrator2,blit.integrator1.y1);
-    //     return lp_blit_saw_t<sample_t, frequency_t>{
-    //         phase,
-    //         blit.frequency,
-    //         blit.alpha,
-    //         blit.num_harmonics,
-    //         integrator1,
-    //         integrator2
-    //     };
-    // }
+        sample_t tmp = square.last_blit_output;
+        sample_t denominator = sin( square.phase );
+        if ( fabs(denominator) <= std::numeric_limits<sample_t>::epsilon() )
+            if ( square.phase < 0.1f || square.phase > TWO_PI - 0.1 )
+                square.last_blit_output = square.a;
+            else
+                square.last_blit_output = -square.a;
+        else {
+            square.last_blit_output =  sin( square.m * square.phase );
+            square.last_blit_output /= square.p * denominator;
+        }
+
+        square.last_blit_output += tmp;
+        square.state = square.last_blit_output - square.dc_blocker_x1 + 0.999*square.state;
+
+        square.dc_blocker_x1 = square.last_blit_output;
+
+        square.phase += square.phase_increment;
+        if ( square.phase >= TWO_PI ) square.phase -= TWO_PI;
+            
+        return square;
+    }
 
 
 
-
-
-
+    
 
 }
 

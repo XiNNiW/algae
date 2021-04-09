@@ -68,7 +68,7 @@ TEST(DSP_Test, BandPassFilter) {
 
 
 using algae::dsp::core::filter::bandpass_t;
-using algae::dsp::core::filter::process_bandpass;
+using algae::dsp::core::filter::process;
 using algae::dsp::core::filter::update_coefficients;
 TEST(DSP_Test, CORE_BandPassFilter_Moore_Has_BP_Characteristic) { 
     // TODO: i need a dft function to do this properly
@@ -83,7 +83,7 @@ TEST(DSP_Test, CORE_BandPassFilter_Moore_Has_BP_Characteristic) {
     filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
 
     for (int n=0; n<10; n++){
-        filter = process_bandpass<double>(filter, highest_frequency_signal[0]);
+        filter = process<double>(filter, highest_frequency_signal[0]);
         output[n] = filter.y1;
         rms += output[n]*output[n];
     }
@@ -98,7 +98,7 @@ TEST(DSP_Test, CORE_BandPassFilter_Moore_Has_BP_Characteristic) {
     filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
 
     for (int n=0; n<10; n++){
-        filter = process_bandpass<double>(filter, lowest_frequency_signal[0]);
+        filter = process<double>(filter, lowest_frequency_signal[0]);
         output[n] = filter.y1;
         rms += output[n]*output[n];
 

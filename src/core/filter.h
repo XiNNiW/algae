@@ -140,7 +140,7 @@ namespace algae::dsp::core::filter{
     };
 
     template<typename sample_t>
-    bandpass_t<sample_t> process_bandpass(bandpass_t<sample_t> state, sample_t input){
+    bandpass_t<sample_t> process(bandpass_t<sample_t> state, sample_t input){
         sample_t x = input;
         sample_t x1 = state.x1;
         sample_t x2 = state.x2;
@@ -179,7 +179,7 @@ namespace algae::dsp::core::filter{
     };
 
     template<typename sample_t, typename frequency_t>
-    const vcf_t<sample_t> update_vcf(
+    const vcf_t<sample_t> process(
         const vcf_t<sample_t>& state, 
         const sample_t& x, 
         const frequency_t& cutoff, 
@@ -357,7 +357,60 @@ namespace algae::dsp::core::filter{
         };
     }
 
+    template<typename sample_t>
+    struct reson_bp_t{
+        sample_t b0d;
+        sample_t b1d;
+        sample_t b2d; 
+        sample_t a1d;
+        sample_t a2d;
+        sample_t x1;
+        sample_t x2;
+        sample_t y1;
+        sample_t y2;
+    };
 
+    template<typename sample_t, typename frequency_t>
+    reson_bp_t<sample_t> update_coefficients(reson_bp_t<sample_t> filter ,frequency_t freq, sample_t q, sample_t gain,frequency_t sampleRate){
+        q = q>0?q:0.01;
+        sample_t w = 2.0*M_PI*freq;
+        sample_t a1 = 1.0/q;
+        sample_t a0 = 1.0;
+        sample_t b2 = 0.0;
+        sample_t b1 = gain;
+        sample_t b0 = 0.0;
+        sample_t c = 1.0/tan(0.5*w/sampleRate);
+        sample_t csq = c*c;
+        sample_t d = a0 + a1*c + csq;
+
+        return reson_bp_t<sample_t>{
+            (b0 + b1*c + b2*csq)/d,
+            2*(b0 - b1*c + b2*csq)/d,
+            (b0 - b1*c + b2*csq)/d,
+            2*(a0 - csq)/d,
+            (a0 - a1*c + csq)/d
+        };
+    }
+
+    template<typename sample_t, typename frequency_t>
+    reson_bp_t<sample_t> reson_bp(frequency_t freq, sample_t q, sample_t gain,frequency_t sampleRate){
+        reson_bp_t<sample_t> filter;
+
+        return update_coefficients(filter, freq, q, gain, sampleRate); 
+    }
+
+    template<typename sample_t, typename frequency_t>
+    reson_bp_t<sample_t> process(reson_bp_t<sample_t> r, sample_t input){
+        sample_t xn = input;
+        sample_t yn = r.b0d*xn + r.b1d*r.x1 + r.b2d*r.x2 - r.a1d*r.y1 - r.a2d*r.y2;
+
+        r.y2 = r.y1;
+        r.y1 = yn;
+        r.x2 = r.x1;
+        r.x1 = xn;
+
+        return r;
+    }
     
 
 }
