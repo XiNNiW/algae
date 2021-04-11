@@ -22,7 +22,7 @@ TEST(DSP_Test, LowpassFilter) {
     connect(noise_node,0,filter_node,1);
     connect(noise_node,0,filter_node,2);
     filter_node->update();
-    bool inRange = -1<=filter_node->getOutputValue(0)<=1;
+    bool inRange = -1<=filter_node->getOutputValue(0) && filter_node->getOutputValue(0)<=1;
     ASSERT_TRUE(inRange);
 
 }
@@ -42,7 +42,7 @@ TEST(DSP_Test, HighPassFilter) {
     connect(noise_node,0,filter_node,1);
     connect(noise_node,0,filter_node,2);
     filter_node->update();
-    bool inRange = -1<=filter_node->getOutputValue(0)<=1;
+    bool inRange = -1<=filter_node->getOutputValue(0)&&filter_node->getOutputValue(0)<=1;
     ASSERT_TRUE(inRange);
 
 }
@@ -61,7 +61,7 @@ TEST(DSP_Test, BandPassFilter) {
     connect(noise_node,0,filter_node,1);
     connect(noise_node,0,filter_node,2);
     filter_node->update();
-    bool inRange = -1<=filter_node->getOutputValue(0)<=1;
+    bool inRange = -1<=filter_node->getOutputValue(0) && filter_node->getOutputValue(0)<=1;
     ASSERT_TRUE(inRange);
 
 }

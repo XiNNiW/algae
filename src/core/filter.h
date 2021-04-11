@@ -291,7 +291,7 @@ namespace algae::dsp::core::filter{
         if (f >= -(HALF_PI) && f <= HALF_PI)
         {
             sample_t g = f*f;
-            return (((g*g*g * (-1.0d/720.0d) + g*g*(1.0d/24.0d)) - g*0.5d) + 1);
+            return (((g*g*g * (-1.0/720.0) + g*g*(1.0/24.0)) - g*0.5) + 1);
         }
         else return (0);
     }
