@@ -2,12 +2,120 @@
 #include <math.h>
 #include "dc_blocker.h"
 #include "integrator.h"
+#include <array>
 
 
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
 namespace algae::dsp::core::oscillator{
 
-    const auto TWO_PI = 2.0*M_PI;
+    const double TWO_PI = 2.0*M_PI;
+    const int TWO_FACT = 2*1;
+    const int THREE_FACT = 3*2*1;
+    const int FOUR_FACT = 4*3*2*1;
+    const int FIVE_FACT = 5*4*3*2*1;
+    const int SIX_FACT = 6*5*4*3*2*1;
+    const int SEVEN_FACT = 7*6*5*4*3*2*1;
+    const int EIGHT_FACT = 8*7*6*5*4*3*2*1;
+    const int NINE_FACT = 9*8*7*6*5*4*3*2*1;
+
+
+    template<typename sample_t, int SIZE, std::size_t... INDEX>
+    constexpr const std::array<sample_t, SIZE> _makeSineTable(const std::index_sequence<INDEX...> index_seq){
+       
+        const sample_t phase_increment = 2.0*M_PI/sample_t(SIZE);
+        return {{sin(sample_t(INDEX)*phase_increment)...}};
+
+    }
+
+    template<typename sample_t, int SIZE, typename Indices = std::make_index_sequence<SIZE>>
+    constexpr const std::array<sample_t, SIZE> makeSineTable(){
+        return _makeSineTable<sample_t,SIZE>(Indices{});
+    }
+
+    template<typename sample_t, int SIZE, std::size_t... INDEX>
+    constexpr const std::array<sample_t, SIZE> _makeCosTable(const std::index_sequence<INDEX...> index_seq){
+       
+        const sample_t phase_increment = 2.0*M_PI/sample_t(SIZE);
+        return {{cos(sample_t(INDEX)*phase_increment)...}};
+
+    }
+
+    template<typename sample_t, int SIZE, typename Indices = std::make_index_sequence<SIZE>>
+    constexpr const std::array<sample_t, SIZE> makeCosTable(){
+        return _makeCosTable<sample_t,SIZE>(Indices{});
+    }
+
+    template<typename sample_t, int SIZE>
+    sample_t table_lookup_lin_interp(const sample_t* table, const sample_t& phase){
+        sample_t _phase = phase<0 ? -phase : phase;
+        _phase = _phase>1 ? _phase - floor(_phase) : _phase;
+        sample_t position = _phase*SIZE;
+        int index = floor(position)+1;
+        sample_t mantissa = index - position;
+        sample_t value = mantissa*table[index-1] + (1-mantissa)*table[index];
+        return value;
+    }
+
+    template<typename sample_t, int SIZE>
+    struct sine_t{
+        static constexpr std::array<sample_t, SIZE> TABLE = makeSineTable<sample_t,SIZE>();
+        inline static const sample_t lookup(const sample_t phase){
+            return table_lookup_lin_interp<sample_t,SIZE>(TABLE.data(), phase);
+        }
+    };
+
+    template<typename sample_t, int SIZE>
+    struct cos_t{
+        static constexpr std::array<sample_t, SIZE> TABLE = makeCosTable<sample_t,SIZE>();
+        inline static const sample_t lookup(const sample_t phase){
+            return table_lookup_lin_interp<sample_t,SIZE>(TABLE.data(), phase);
+        }
+    };
+
+    // template<typename sample_t, int SIZE, sample_t* TABLE=makeSineTable<sample_t, SIZE>().data()>
+    // sample_t sine_lookup_lin(const sample_t phase){
+    //     return table_lookup_lin_interp<sample_t, SIZE>(TABLE, phase);
+    // }
+
+    template<typename sample_t>
+    sample_t tanh_approx_pade(sample_t x)
+    {
+        if( x < -3 )
+            return -1;
+        else if( x > 3 )
+            return 1;
+        else
+            return x * ( 27 + x * x ) / ( 27 + 9 * x * x );
+    }
+
+    template<typename sample_t>
+    sample_t tanh_approx_pade_noclip(sample_t x)
+    {
+        return x * ( 27 + x * x ) / ( 27 + 9 * x * x );
+    }
+
+    template<typename sample_t>
+    sample_t sine_approx_taylor_4(sample_t x)
+    {
+        sample_t x2 = x*x;
+        sample_t x3 = x*x2;
+        sample_t x5 = x2*x3;
+        sample_t x7 = x2*x5;
+        sample_t x9 = x2*x7;
+        return x-(x3/THREE_FACT)+(x5/FIVE_FACT)-(x7/SEVEN_FACT)+(x9/NINE_FACT);
+       
+    }
+
+    template<typename sample_t>
+    sample_t cos_approx_taylor_4(sample_t x)
+    {
+        sample_t x2 = x*x;
+        sample_t x4 = x2*x2;
+        sample_t x6 = x2*x4;
+        sample_t x8 = x2*x6;
+        return x-(x2/TWO_FACT)+(x4/FOUR_FACT)-(x6/SIX_FACT)+(x8/EIGHT_FACT);
+       
+    }
 
     template<typename sample_t, typename frequency_t>
     const sample_t update_phase_custom_period(sample_t phase, frequency_t increment, frequency_t period=TWO_PI){

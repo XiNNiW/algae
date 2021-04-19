@@ -8,6 +8,8 @@ namespace algae::dsp::core::filter{
 // http://musicdsp.org/files/Audio-EQ-Cookbook.txt
 
     using algae::dsp::core::math::clamp;
+        
+    const auto HALF_PI = M_PI_2; 
 
     template<typename sample_t, typename frequency_t>
     struct biquad_t {
@@ -287,11 +289,10 @@ namespace algae::dsp::core::filter{
     template<typename sample_t>
     sample_t sigbp_qcos(sample_t f)
     {   
-        sample_t HALF_PI = M_PI_2;
         if (f >= -(HALF_PI) && f <= HALF_PI)
         {
             sample_t g = f*f;
-            return (((g*g*g * (-1.0d/720.0d) + g*g*(1.0d/24.0d)) - g*0.5d) + 1);
+            return (((g*g*g * (-1.0/720.0) + g*g*(1.0/24.0)) - g*0.5) + 1);
         }
         else return (0);
     }

@@ -184,3 +184,55 @@ TEST(DSP_Test, CORE_max_bl_modulation_index) {
     EXPECT_FLOAT_EQ(54.545456,max_bl_modulation_index<double>(0,440,48000));
     EXPECT_FLOAT_EQ(0,max_bl_modulation_index<double>(440,0,48000));
 }
+
+using algae::dsp::core::oscillator::makeSineTable;
+const std::array<double, 4> sine_4 = makeSineTable<double, 4>(); 
+const std::array<double, 4> expected_sine_4 = {0,1,.00000000000000012246469,-1}; 
+//sine wavetable
+TEST(DSP_Test, CORE_makeSineWave) {
+
+    size_t idx=0;
+    double val;
+    double expected;
+    val = sine_4[idx];
+    expected = expected_sine_4[idx++];
+    EXPECT_FLOAT_EQ(expected, val);
+    idx++;
+    val = sine_4[idx];
+    expected = expected_sine_4[idx++];
+    EXPECT_FLOAT_EQ(expected, val);
+    idx++;
+    val = sine_4[idx];
+    expected = expected_sine_4[idx++];
+    EXPECT_FLOAT_EQ(expected, val);
+    idx++;
+    val = sine_4[idx];
+    expected = expected_sine_4[idx++];
+    EXPECT_FLOAT_EQ(expected, val);
+    idx++;
+
+}
+
+using algae::dsp::core::oscillator::table_lookup_lin_interp;
+
+TEST(DSP_Test, CORE_lookupSine_linear_interp) {
+    const std::array<double, 4> table = makeSineTable<double, 4>(); 
+    size_t idx=0;
+    double val;
+    double expected;
+    val = table_lookup_lin_interp<double,4>(table.data(), idx/4.0);
+    expected = expected_sine_4[idx];
+    EXPECT_FLOAT_EQ(expected, val);
+    idx++;
+    val = table_lookup_lin_interp<double,4>(table.data(), idx/4.0);
+    expected = expected_sine_4[idx];
+    EXPECT_FLOAT_EQ(expected, val);
+    val = table_lookup_lin_interp<double,4>(table.data(), idx/4.0);
+    expected = expected_sine_4[idx];
+    EXPECT_FLOAT_EQ(expected, val);
+    val = table_lookup_lin_interp<double,4>(table.data(), idx/4.0);
+    expected = expected_sine_4[idx];
+    EXPECT_FLOAT_EQ(expected, val);
+
+
+}
