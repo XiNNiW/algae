@@ -9,34 +9,103 @@
 namespace algae::dsp::core::oscillator{
 
     const double TWO_PI = 2.0*M_PI;
-    const int TWO_FACT = 2*1;
-    const int THREE_FACT = 3*2*1;
-    const int FOUR_FACT = 4*3*2*1;
-    const int FIVE_FACT = 5*4*3*2*1;
-    const int SIX_FACT = 6*5*4*3*2*1;
-    const int SEVEN_FACT = 7*6*5*4*3*2*1;
-    const int EIGHT_FACT = 8*7*6*5*4*3*2*1;
-    const int NINE_FACT = 9*8*7*6*5*4*3*2*1;
 
+    template<typename sample_t, unsigned int x>
+    struct factorial_t{
+        static constexpr sample_t result=x*factorial_t<sample_t, x-1>::result;
+    };
+
+    template<typename sample_t>
+    struct factorial_t<sample_t,1>{
+        static constexpr sample_t result=1;
+    };
+
+    template<typename sample_t>
+    constexpr const sample_t _sin(const sample_t phase){
+        sample_t x = phase;
+        sample_t x2 = x*x;
+        sample_t x3 = x2*x;
+        sample_t x5 = x2*x3;
+        sample_t x7 = x2*x5;
+        sample_t x9 = x2*x7;
+        sample_t x11 = x2*x9;
+        sample_t x13 = x2*x11;
+        sample_t x15 = x2*x13;
+        sample_t x17 = x2*x15;
+        sample_t x19 = x2*x17;
+
+        return x
+            -(x3/factorial_t<sample_t,3>::result)
+            +(x5/factorial_t<sample_t,5>::result)
+            -(x7/factorial_t<sample_t,7>::result)
+            +(x9/factorial_t<sample_t,9>::result)
+            -(x11/factorial_t<sample_t,11>::result)
+            +(x13/factorial_t<sample_t,13>::result)
+            -(x15/factorial_t<sample_t,15>::result)
+            +(x17/factorial_t<sample_t,17>::result)
+            -(x19/factorial_t<sample_t,19>::result)
+            ;
+    }
+
+    template<typename sample_t>
+    constexpr const sample_t _cos(const sample_t phase){
+        sample_t x = phase;
+        sample_t x2 = x*x;
+        sample_t x4 = x2*x2;
+        sample_t x6 = x2*x4;
+        sample_t x8 = x2*x6;
+        sample_t x10 = x2*x8;
+        sample_t x12 = x2*x10;
+        sample_t x14 = x2*x12;
+        sample_t x16 = x2*x14;
+        sample_t x18 = x2*x16;
+
+        return 1
+            -(x2/factorial_t<sample_t,2>::result)
+            +(x4/factorial_t<sample_t,4>::result)
+            -(x6/factorial_t<sample_t,6>::result)
+            +(x8/factorial_t<sample_t,8>::result)
+            -(x10/factorial_t<sample_t,10>::result)
+            +(x12/factorial_t<sample_t,12>::result)
+            -(x14/factorial_t<sample_t,14>::result)
+            +(x16/factorial_t<sample_t,16>::result)
+            -(x18/factorial_t<sample_t,18>::result)
+            ;
+
+    }
+
+    // template<typename sample_t, int SIZE, std::size_t... INDEX>
+    // constexpr const std::array<sample_t, SIZE> _makeSineTable_debug(const std::index_sequence<INDEX...> index_seq){
+       
+    //     const sample_t phase_increment = 2.0*M_PI/sample_t(SIZE);
+    //     ((std::cout<<"increment: "<<sample_t(INDEX)*phase_increment<<"\n"),...);
+    //     return {{_sin<sample_t>(sample_t(INDEX)*phase_increment)...}};
+
+    // }
+
+    // template<typename sample_t, int SIZE, typename Indices = std::make_index_sequence<SIZE>>
+    // constexpr const std::array<sample_t, SIZE> makeSineTable_debug(){
+    //     return _makeSineTable_debug<sample_t, SIZE>(Indices{});
+    // }
 
     template<typename sample_t, int SIZE, std::size_t... INDEX>
     constexpr const std::array<sample_t, SIZE> _makeSineTable(const std::index_sequence<INDEX...> index_seq){
        
         const sample_t phase_increment = 2.0*M_PI/sample_t(SIZE);
-        return {{sin(sample_t(INDEX)*phase_increment)...}};
+        return {{_sin<sample_t>(sample_t(INDEX)*phase_increment)...}};
 
     }
 
     template<typename sample_t, int SIZE, typename Indices = std::make_index_sequence<SIZE>>
     constexpr const std::array<sample_t, SIZE> makeSineTable(){
-        return _makeSineTable<sample_t,SIZE>(Indices{});
+        return _makeSineTable<sample_t, SIZE>(Indices{});
     }
 
     template<typename sample_t, int SIZE, std::size_t... INDEX>
     constexpr const std::array<sample_t, SIZE> _makeCosTable(const std::index_sequence<INDEX...> index_seq){
        
         const sample_t phase_increment = 2.0*M_PI/sample_t(SIZE);
-        return {{cos(sample_t(INDEX)*phase_increment)...}};
+        return {{_cos<sample_t>(sample_t(INDEX)*phase_increment)...}};
 
     }
 
@@ -72,11 +141,6 @@ namespace algae::dsp::core::oscillator{
         }
     };
 
-    // template<typename sample_t, int SIZE, sample_t* TABLE=makeSineTable<sample_t, SIZE>().data()>
-    // sample_t sine_lookup_lin(const sample_t phase){
-    //     return table_lookup_lin_interp<sample_t, SIZE>(TABLE, phase);
-    // }
-
     template<typename sample_t>
     sample_t tanh_approx_pade(sample_t x)
     {
@@ -102,7 +166,11 @@ namespace algae::dsp::core::oscillator{
         sample_t x5 = x2*x3;
         sample_t x7 = x2*x5;
         sample_t x9 = x2*x7;
-        return x-(x3/THREE_FACT)+(x5/FIVE_FACT)-(x7/SEVEN_FACT)+(x9/NINE_FACT);
+        return x
+            -(x3/factorial_t<sample_t,3>::result)
+            +(x5/factorial_t<sample_t,5>::result)
+            -(x7/factorial_t<sample_t,7>::result)
+            +(x9/factorial_t<sample_t,9>::result);
        
     }
 
@@ -113,7 +181,11 @@ namespace algae::dsp::core::oscillator{
         sample_t x4 = x2*x2;
         sample_t x6 = x2*x4;
         sample_t x8 = x2*x6;
-        return x-(x2/TWO_FACT)+(x4/FOUR_FACT)-(x6/SIX_FACT)+(x8/EIGHT_FACT);
+        return x
+            -(x2/factorial_t<sample_t,2>::result)
+            +(x4/factorial_t<sample_t,4>::result)
+            -(x6/factorial_t<sample_t,6>::result)
+            +(x8/factorial_t<sample_t,8>::result);
        
     }
 
