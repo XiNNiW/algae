@@ -92,6 +92,7 @@ namespace algae::dsp::core::oscillator{
     constexpr const std::array<sample_t, SIZE> _makeSineTable(const std::index_sequence<INDEX...> index_seq){
        
         const sample_t phase_increment = 2.0*M_PI/sample_t(SIZE);
+        // return {{sin(sample_t(INDEX)*phase_increment)...}};
         return {{_sin<sample_t>(sample_t(INDEX)*phase_increment)...}};
 
     }
@@ -105,6 +106,7 @@ namespace algae::dsp::core::oscillator{
     constexpr const std::array<sample_t, SIZE> _makeCosTable(const std::index_sequence<INDEX...> index_seq){
        
         const sample_t phase_increment = 2.0*M_PI/sample_t(SIZE);
+        // return {{cos(sample_t(INDEX)*phase_increment)...}};
         return {{_cos<sample_t>(sample_t(INDEX)*phase_increment)...}};
 
     }
@@ -116,12 +118,15 @@ namespace algae::dsp::core::oscillator{
 
     template<typename sample_t, int SIZE>
     sample_t table_lookup_lin_interp(const sample_t* table, const sample_t& phase){
-        sample_t _phase = phase<0 ? -phase : phase;
-        _phase = _phase>1 ? _phase - floor(_phase) : _phase;
-        sample_t position = _phase*SIZE;
-        int index = floor(position)+1;
-        sample_t mantissa = index - position;
-        sample_t value = mantissa*table[index-1] + (1-mantissa)*table[index];
+        sample_t _phase = fmod(abs(phase),1);
+        // _phase = _phase>1 ? _phase - floor(_phase) : _phase;
+        sample_t position = _phase*(SIZE-1);
+        int index = floor(position);
+        int x0 = index;
+        int x1 = index+1;
+        x1 = x1>=SIZE?0:x1;
+        sample_t mantissa = position - index;
+        sample_t value = (1-mantissa)*table[x0] + mantissa*table[x1];
         return value;
     }
 
