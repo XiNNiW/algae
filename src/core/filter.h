@@ -18,14 +18,15 @@ namespace algae::dsp::core::filter{
     };
 
     template<typename sample_t, typename frequency_t>
-    const biquad_t<sample_t,frequency_t> lowpass(
+    const inline biquad_t<sample_t,frequency_t> lowpass(
         const biquad_t<sample_t,frequency_t>& state,
         const frequency_t& cutoff,
         const sample_t& q,
         const frequency_t& sampleRate=44100.0 
     ){
-        frequency_t w0 = cutoff * M_2_PI / sampleRate;
-        frequency_t a = fabs(sin(w0) / (2 * q));
+        frequency_t _q = q<=0?0.01:q;
+        frequency_t w0 = cutoff * 2* M_PI / sampleRate;
+        frequency_t a = fabs(sin(w0) / (2 * _q));
         frequency_t c = cos(w0);
         frequency_t b0 = (1 - c) / 2, b1 = 1 - c, b2 = (1 - c) / 2;
         frequency_t a0 = 1 + a, a1 = -2 * c, a2 = 1 - a;
@@ -119,7 +120,7 @@ namespace algae::dsp::core::filter{
     }
 
     template<typename sample_t, typename frequency_t>
-    const biquad_t<sample_t,frequency_t> update_biquad(const biquad_t<sample_t,frequency_t>& state, const sample_t& x0){
+    const inline biquad_t<sample_t,frequency_t> update_biquad(const biquad_t<sample_t,frequency_t>& state, const sample_t& x0){
 
         frequency_t b0 = state.b0;
         frequency_t b1 = state.b1;
@@ -225,8 +226,8 @@ namespace algae::dsp::core::filter{
     }
 
     template<typename sample_t,typename frequency_t>
-    const onepole_t<sample_t,frequency_t> update_onepole_hip(
-        const onepole_t<sample_t,frequency_t>& state,
+    const inline onepole_t<sample_t,frequency_t> update_onepole_hip(
+        onepole_t<sample_t,frequency_t> state,
         const sample_t& x, const sample_t& cutoff,
         const frequency_t& sampleRate=44100.0
     ){
@@ -234,51 +235,68 @@ namespace algae::dsp::core::filter{
         const frequency_t a = (1 - sin(w)) / cos(w);
         const frequency_t b = (1 + a) / 2;
         const frequency_t y = b * (x - state.x) + a * state.y;
+        state.x = x;
+        state.y = y;
 
-        return onepole_t<sample_t,frequency_t>{x,y};
+        return state;
     }
 
-    template<typename sample_t,typename frequency_t>
+    template<typename sample_t, typename frequency_t>
     struct moog_t {
-        frequency_t ya1;
-        frequency_t wa1;
-        frequency_t yb1;
-        frequency_t wb1;
-        frequency_t yc1;
-        frequency_t wc1;
-        frequency_t yd1;
+        sample_t ya1;
+        sample_t wa1;
+        sample_t yb1;
+        sample_t wb1;
+        sample_t yc1;
+        sample_t wc1;
+        sample_t yd1;
+        sample_t r;
+        sample_t g;
     };
 
     template<typename sample_t, typename frequency_t>
-    const moog_t<sample_t,frequency_t> update_moog(
+    const inline moog_t<sample_t, frequency_t> setFilterParameters(
+        moog_t<sample_t, frequency_t> state,
+        const frequency_t& frequency,
+        const sample_t& q,
+        const frequency_t& sampleRate=41000.0
+    ){
+        sample_t f = frequency;
+        state.r = q;
+        state.g = 1 - exp(-M_PI_2 * f / sampleRate);
+        return state;
+    }
+
+
+    using algae::dsp::core::math::tanh_approx_pade;
+
+    template<typename sample_t, typename frequency_t>
+    const inline moog_t<sample_t,frequency_t> update_moog(
         const moog_t<sample_t,frequency_t>& state,
-        const sample_t& audio,
-        const sample_t& frequency,
-        const sample_t resonance,
-        const frequency_t sampleRate=44100.0
+        const sample_t& input,
+        const frequency_t& sampleRate=44100.0
     ){
 
-        frequency_t ya1 = state.ya1;
-        frequency_t wa1 = state.wa1;
-        frequency_t yb1 = state.yb1;
-        frequency_t wb1 = state.wb1;
-        frequency_t yc1 = state.yc1;
-        frequency_t wc1 = state.wc1;
-        frequency_t yd1 = state.yd1;
-        frequency_t v = 2;
-        frequency_t x = audio;
-        frequency_t f = frequency;
-        frequency_t r = resonance;
-        frequency_t g = 1 - exp(-M_PI_2 * f / sampleRate);
-        frequency_t ya = ya1 + v * g * tanh((x - 4 * r * yd1) / v - wa1);
-        frequency_t wa = tanh(ya / v);
-        frequency_t yb = yb1 + v * g * (wa - wb1);
-        frequency_t wb = tanh(yb / v);
-        frequency_t yc = yc1 + v * g * (wb - wc1);
-        frequency_t wc = tanh(yc / v);
-        frequency_t yd = yd1 + v * g * (wc - tanh(yd1 / v));
+        sample_t ya1 = state.ya1;
+        sample_t wa1 = state.wa1;
+        sample_t yb1 = state.yb1;
+        sample_t wb1 = state.wb1;
+        sample_t yc1 = state.yc1;
+        sample_t wc1 = state.wc1;
+        sample_t yd1 = state.yd1;
+        sample_t v = 2;
+        sample_t x = input;
+        sample_t r = state.r;
+        sample_t g = state.g;
+        sample_t ya = ya1 + v * g * tanh_approx_pade<sample_t>((x - 4 * r * yd1) / v - wa1);
+        sample_t wa = tanh_approx_pade<sample_t>(ya / v);
+        sample_t yb = yb1 + v * g * (wa - wb1);
+        sample_t wb = tanh_approx_pade<sample_t>(yb / v);
+        sample_t yc = yc1 + v * g * (wb - wc1);
+        sample_t wc = tanh_approx_pade<sample_t>(yc / v);
+        sample_t yd = yd1 + v * g * (wc - tanh_approx_pade<sample_t>(yd1 / v));
 
-        return moog_t{ya,wa,yb,wb,yc,wc,yd};
+        return moog_t<sample_t, frequency_t>{ya,wa,yb,wb,yc,wc,yd,r,g};
     }
 
     template<typename sample_t>
@@ -372,10 +390,14 @@ namespace algae::dsp::core::filter{
     };
 
     template<typename sample_t, typename frequency_t>
-    reson_bp_t<sample_t> update_coefficients(reson_bp_t<sample_t> filter ,frequency_t freq, sample_t q, sample_t gain,frequency_t sampleRate){
-        q = q>0?q:0.01;
+    const inline reson_bp_t<sample_t> update_coefficients(
+        reson_bp_t<sample_t> filter, 
+        const frequency_t& freq, const sample_t& q, 
+        const sample_t& gain, const frequency_t& sampleRate=44100
+    ){
+        sample_t _q = q>0?q:0.01;
         sample_t w = 2.0*M_PI*freq;
-        sample_t a1 = 1.0/q;
+        sample_t a1 = 1.0/_q;
         sample_t a0 = 1.0;
         sample_t b2 = 0.0;
         sample_t b1 = gain;
@@ -384,24 +406,28 @@ namespace algae::dsp::core::filter{
         sample_t csq = c*c;
         sample_t d = a0 + a1*c + csq;
 
-        return reson_bp_t<sample_t>{
-            (b0 + b1*c + b2*csq)/d,
-            2*(b0 - b1*c + b2*csq)/d,
-            (b0 - b1*c + b2*csq)/d,
-            2*(a0 - csq)/d,
-            (a0 - a1*c + csq)/d
-        };
+        filter.b0d = (b0 + b1*c + b2*csq)/d;
+        filter.b1d = 2*(b0 - b1*c + b2*csq)/d;
+        filter.b2d = (b0 - b1*c + b2*csq)/d;
+        filter.a1d =  2*(a0 - csq)/d;
+        filter.a2d =(a0 - a1*c + csq)/d;
+
+        return filter;
     }
 
     template<typename sample_t, typename frequency_t>
-    reson_bp_t<sample_t> reson_bp(frequency_t freq, sample_t q, sample_t gain,frequency_t sampleRate){
+    const inline reson_bp_t<sample_t> reson_bp(
+        const frequency_t& freq, 
+        const sample_t& q, const sample_t& gain,
+        const frequency_t& sampleRate
+    ){
         reson_bp_t<sample_t> filter;
 
         return update_coefficients(filter, freq, q, gain, sampleRate); 
     }
 
     template<typename sample_t, typename frequency_t>
-    reson_bp_t<sample_t> process(reson_bp_t<sample_t> r, sample_t input){
+    const inline reson_bp_t<sample_t> process(reson_bp_t<sample_t> r, const sample_t& input){
         sample_t xn = input;
         sample_t yn = r.b0d*xn + r.b1d*r.x1 + r.b2d*r.x2 - r.a1d*r.y1 - r.a2d*r.y2;
 

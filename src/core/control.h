@@ -87,7 +87,7 @@ namespace algae::dsp::core::control{
     };
 
     template<typename sample_t>
-    const adsr_t<sample_t> update_adsr(
+    const inline adsr_t<sample_t> update_adsr(
         const adsr_t<sample_t>& state, 
         const bool& trig, 
         const int& attack_time_in_samples, 
@@ -128,7 +128,7 @@ namespace algae::dsp::core::control{
     }
 
     template<typename sample_t>
-    ramp_t<sample_t> computeRampForEnvPhase(ramp_t<sample_t> state, bool trig, int offset){
+    const ramp_t<sample_t> inline computeRampForEnvPhase(ramp_t<sample_t> state, bool trig, int offset){
         long index = (trig&&!state.trig)
                     ? 0
                     :(state.index>=offset)

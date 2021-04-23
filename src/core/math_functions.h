@@ -3,6 +3,24 @@
 
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
 namespace algae::dsp::core::math{
+
+    template<typename sample_t>
+    const inline sample_t tanh_approx_pade(const sample_t& x)
+    {
+        if( x < -3 )
+            return -1;
+        else if( x > 3 )
+            return 1;
+        else
+            return x * ( 27 + x * x ) / ( 27 + 9 * x * x );
+    }
+
+    template<typename sample_t>
+    const inline sample_t tanh_approx_pade_noclip(const sample_t& x)
+    {
+        return x * ( 27 + x * x ) / ( 27 + 9 * x * x );
+    }
+
     template<typename sample_t, typename frequency_t>
     const sample_t sin(const sample_t& phase){
         return math::sin(phase);

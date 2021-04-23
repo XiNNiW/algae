@@ -118,15 +118,17 @@ namespace algae::dsp::core::oscillator{
 
     template<typename sample_t, int SIZE>
     sample_t table_lookup_lin_interp(const sample_t* table, const sample_t& phase){
-        sample_t _phase = fmod(abs(phase),1);
-        // _phase = _phase>1 ? _phase - floor(_phase) : _phase;
+        // sample_t _phase = fmod(abs(phase),1);
+        sample_t _phase = phase-floor(phase);
+        _phase = _phase<0 ? _phase+1 : _phase; 
         sample_t position = _phase*(SIZE-1);
         int index = floor(position);
         int x0 = index;
         int x1 = index+1;
         x1 = x1>=SIZE?0:x1;
         sample_t mantissa = position - index;
-        sample_t value = (1-mantissa)*table[x0] + mantissa*table[x1];
+        sample_t value = table[x0] + mantissa*(table[x1] - table[x0]);
+        // sample_t value = (1-mantissa)*table[x0] + mantissa*table[x1];
         return value;
     }
 
@@ -145,23 +147,6 @@ namespace algae::dsp::core::oscillator{
             return table_lookup_lin_interp<sample_t,SIZE>(TABLE.data(), phase);
         }
     };
-
-    template<typename sample_t>
-    sample_t tanh_approx_pade(sample_t x)
-    {
-        if( x < -3 )
-            return -1;
-        else if( x > 3 )
-            return 1;
-        else
-            return x * ( 27 + x * x ) / ( 27 + 9 * x * x );
-    }
-
-    template<typename sample_t>
-    sample_t tanh_approx_pade_noclip(sample_t x)
-    {
-        return x * ( 27 + x * x ) / ( 27 + 9 * x * x );
-    }
 
     template<typename sample_t>
     sample_t sine_approx_taylor_4(sample_t x)
@@ -195,7 +180,7 @@ namespace algae::dsp::core::oscillator{
     }
 
     template<typename sample_t, typename frequency_t>
-    const sample_t update_phase_custom_period(sample_t phase, frequency_t increment, frequency_t period=TWO_PI){
+    const inline sample_t update_phase_custom_period(sample_t phase, const frequency_t& increment, const frequency_t& period=TWO_PI){
         phase += period*increment;
         if ( phase >= period ) phase -= period;
         return phase;
@@ -356,10 +341,10 @@ namespace algae::dsp::core::oscillator{
     };
 
     template<typename sample_t, typename frequency_t>
-    const fm_bl_saw_t<sample_t,frequency_t> setFrequency(
+    const inline fm_bl_saw_t<sample_t,frequency_t> setFrequency(
         fm_bl_saw_t<sample_t,frequency_t> state,
-        const frequency_t freq,
-        const sample_t sampleRate
+        const frequency_t& freq,
+        const sample_t& sampleRate = 41000
     ){
         
         state.freq = freq;
@@ -640,7 +625,7 @@ namespace algae::dsp::core::oscillator{
         sample_t lastFrame;
     };
     template<typename sample_t, typename frequency_t>
-    stk_blit_saw_t<sample_t, frequency_t> setFrequency(stk_blit_saw_t<sample_t, frequency_t> saw, frequency_t frequency, frequency_t sampleRate){
+    const inline stk_blit_saw_t<sample_t, frequency_t> setFrequency(stk_blit_saw_t<sample_t, frequency_t> saw, const frequency_t& frequency, const frequency_t& sampleRate){
 
         saw.p = sampleRate/frequency;
         saw.c2 = 1/saw.p;
@@ -654,7 +639,7 @@ namespace algae::dsp::core::oscillator{
     }
     
     template<typename sample_t, typename frequency_t>
-    stk_blit_saw_t<sample_t, frequency_t> stk_blit_saw(frequency_t frequency, frequency_t sampleRate){
+    const inline stk_blit_saw_t<sample_t, frequency_t> stk_blit_saw(const frequency_t& frequency, const frequency_t& sampleRate=44100){
         stk_blit_saw_t<sample_t, frequency_t> saw;
 
         saw = setFrequency(saw, frequency, sampleRate);
@@ -663,7 +648,7 @@ namespace algae::dsp::core::oscillator{
     }
 
     template<typename sample_t, typename frequency_t>
-    stk_blit_saw_t<sample_t, frequency_t> process(stk_blit_saw_t<sample_t, frequency_t> saw, frequency_t sampleRate){
+    const inline stk_blit_saw_t<sample_t, frequency_t> process(stk_blit_saw_t<sample_t, frequency_t> saw, const frequency_t& sampleRate=44100){
         sample_t tmp, denominator = sin( saw.phase );
         if ( fabs(denominator) <= std::numeric_limits<sample_t>::epsilon() )
             tmp = saw.a;
@@ -710,7 +695,7 @@ namespace algae::dsp::core::oscillator{
     }
     
     template<typename sample_t, typename frequency_t>
-    stk_blit_square_t<sample_t, frequency_t> stk_blit_square(frequency_t frequency, frequency_t sampleRate){
+    const inline stk_blit_square_t<sample_t, frequency_t> stk_blit_square(const frequency_t& frequency, const frequency_t& sampleRate=44100){
         stk_blit_square_t<sample_t, frequency_t> square;
 
         square = setFrequency(square, frequency, sampleRate);
@@ -719,7 +704,7 @@ namespace algae::dsp::core::oscillator{
     }
 
     template<typename sample_t, typename frequency_t>
-    stk_blit_square_t<sample_t, frequency_t> process(stk_blit_square_t<sample_t, frequency_t> square, frequency_t sampleRate){
+    const inline stk_blit_square_t<sample_t, frequency_t> process(stk_blit_square_t<sample_t, frequency_t> square, const frequency_t& sampleRate=44100){
         
         sample_t tmp = square.last_blit_output;
         sample_t denominator = sin( square.phase );

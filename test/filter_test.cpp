@@ -66,51 +66,76 @@ TEST(DSP_Test, BandPassFilter) {
 
 }
 
-
-using algae::dsp::core::filter::bandpass_t;
-using algae::dsp::core::filter::process;
-using algae::dsp::core::filter::update_coefficients;
-TEST(DSP_Test, CORE_BandPassFilter_Moore_Has_BP_Characteristic) { 
-    // TODO: i need a dft function to do this properly
-    bandpass_t<double> filter;
-    double highest_frequency_signal[10] = {1,-1,1,-1,1,-1,1,-1,1,-1};
-    double lowest_frequency_signal[10] = {1,1,1,1,1,1,1,1,1,1};
-    double output[10]={};
-    double rms;
-
-    double sample_rate = 48000;
-    double half_sample_rate = 24000;
-    filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
-
-    for (int n=0; n<10; n++){
-        filter = process<double>(filter, highest_frequency_signal[0]);
-        output[n] = filter.y1;
-        rms += output[n]*output[n];
-    }
+using algae::dsp::core::oscillator::noise;
+using algae::dsp::core::filter::moog_t;
+using algae::dsp::core::filter::update_moog;
+using algae::dsp::core::filter::setFilterParameters;
+TEST(DSP_Test, CORE_MoogFilter) { 
+    // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
     
-    rms = sqrt(rms)/10.0;
+    moog_t<double,double> filter;
+    double output[1000];
 
-    EXPECT_GT(1, rms);
-    EXPECT_LT(0, rms);
+    filter = setFilterParameters<double,double>(filter,220,0.5,48000);
 
-    rms = 0;
-
-    filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
-
-    for (int n=0; n<10; n++){
-        filter = process<double>(filter, lowest_frequency_signal[0]);
-        output[n] = filter.y1;
-        rms += output[n]*output[n];
-
+    for(int i = 0; i<1000; i++){
+        double x = noise<double>();
+        filter = update_moog<double,double>(filter,x,48000);
+        output[i] = filter.ya1;
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
     }
 
-    rms = sqrt(rms)/10.0;
-    
-    EXPECT_GT(1, rms);
-    EXPECT_LT(0, rms);
-    
 
 }
+
+
+
+// using algae::dsp::core::filter::bandpass_t;
+// using algae::dsp::core::filter::process;
+// using algae::dsp::core::filter::update_coefficients;
+// TEST(DSP_Test, CORE_BandPassFilter_Moore_Has_BP_Characteristic) { 
+//     // TODO: i need a dft function to do this properly
+//     bandpass_t<double> filter;
+//     double highest_frequency_signal[10] = {1,-1,1,-1,1,-1,1,-1,1,-1};
+//     double lowest_frequency_signal[10] = {1,1,1,1,1,1,1,1,1,1};
+//     double output[10]={};
+//     double rms;
+
+//     double sample_rate = 48000;
+//     double half_sample_rate = 24000;
+//     filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
+
+//     for (int n=0; n<10; n++){
+//         filter = process<double>(filter, highest_frequency_signal[0]);
+//         output[n] = filter.y1;
+//         rms += output[n]*output[n];
+//     }
+    
+//     rms = sqrt(rms)/10.0;
+
+//     EXPECT_GT(1, rms);
+//     EXPECT_LT(0, rms);
+
+//     rms = 0;
+
+//     filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
+
+//     for (int n=0; n<10; n++){
+//         filter = process<double>(filter, lowest_frequency_signal[0]);
+//         output[n] = filter.y1;
+//         rms += output[n]*output[n];
+
+//     }
+
+//     rms = sqrt(rms)/10.0;
+    
+//     EXPECT_GT(1, rms);
+//     EXPECT_LT(0, rms);
+    
+
+// }
 
 
 
