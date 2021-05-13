@@ -59,7 +59,7 @@ add_executable( AlgaeTests
     ${TEST_DIR}/oscillator_test.cpp
     ${TEST_DIR}/filter_test.cpp
     ${TEST_DIR}/dc_blocker_test.cpp
-    ${TEST_DIR}/integrator_test.cpp
+    ${TEST_DIR}/audio_block_test.cpp
     ${TEST_DIR}/control_test.cpp
     ${TEST_DIR}/units_test.cpp
 )

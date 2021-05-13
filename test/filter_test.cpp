@@ -6,136 +6,170 @@
 
 using algae::dsp::shell::dsp_node;
 using algae::dsp::shell::connect;
-
-TEST(DSP_Test, LowpassFilter) { 
-    // what is a compelling way to test these? i should probably just sit down and do the math
-    // in the mean time i just want some verification that they don't blow up when you hook them up
-    dsp_node<double,double>* filter_node = new algae::dsp::shell::filter::lpf<double,double>();
-
-    ASSERT_EQ(0,filter_node->getOutputValue(0));
-    filter_node->update();
-
-
-    dsp_node<double,double>* noise_node = new algae::dsp::shell::oscillator::noise<double,double>();
-
-    connect(noise_node,0,filter_node,0);
-    connect(noise_node,0,filter_node,1);
-    connect(noise_node,0,filter_node,2);
-    filter_node->update();
-    bool inRange = -1<=filter_node->getOutputValue(0) && filter_node->getOutputValue(0)<=1;
-    ASSERT_TRUE(inRange);
-
-}
-
-TEST(DSP_Test, HighPassFilter) { 
-    // what is a compelling way to test these? i should probably just sit down and do the math
-    // in the mean time i just want some verification that they don't blow up when you hook them up
-    dsp_node<double,double>* filter_node = new algae::dsp::shell::filter::hpf<double,double>();
-
-    ASSERT_EQ(0,filter_node->getOutputValue(0));
-    filter_node->update();
-
-
-    dsp_node<double,double>* noise_node = new algae::dsp::shell::oscillator::noise<double,double>();
-
-    connect(noise_node,0,filter_node,0);
-    connect(noise_node,0,filter_node,1);
-    connect(noise_node,0,filter_node,2);
-    filter_node->update();
-    bool inRange = -1<=filter_node->getOutputValue(0)&&filter_node->getOutputValue(0)<=1;
-    ASSERT_TRUE(inRange);
-
-}
-
-TEST(DSP_Test, BandPassFilter) { 
-    // what is a compelling way to test these? i should probably just sit down and do the math
-    // in the mean time i just want some verification that they don't blow up when you hook them up
-    dsp_node<double,double>* filter_node = new algae::dsp::shell::filter::bpf<double,double>();
-
-    ASSERT_EQ(0,filter_node->getOutputValue(0));
-    filter_node->update();
-
-    dsp_node<double,double>* noise_node =  new algae::dsp::shell::oscillator::noise<double,double>();
-
-    connect(noise_node,0,filter_node,0);
-    connect(noise_node,0,filter_node,1);
-    connect(noise_node,0,filter_node,2);
-    filter_node->update();
-    bool inRange = -1<=filter_node->getOutputValue(0) && filter_node->getOutputValue(0)<=1;
-    ASSERT_TRUE(inRange);
-
-}
-
+using algae::dsp::core::AudioBlock;
+using algae::dsp::core::filter::process;
 using algae::dsp::core::oscillator::noise;
-using algae::dsp::core::filter::moog_t;
-using algae::dsp::core::filter::update_moog;
-using algae::dsp::core::filter::setFilterParameters;
-TEST(DSP_Test, CORE_MoogFilter) { 
+
+
+
+
+using algae::dsp::core::filter::biquad_t;
+using algae::dsp::core::filter::lowpass;
+
+TEST(DSP_Test, CORE_biquad_lowpass) { 
     // what is a compelling way to test these? i should probably just sit down and do the math
     // in the mean time i just want some verification that they don't blow up when you hook them up
-    
-    moog_t<double,double> filter;
-    double output[1000];
+    constexpr size_t BLOCKSIZE = 64;
+    biquad_t<double> filter;
+    AudioBlock<double,BLOCKSIZE> input;
+    AudioBlock<double,BLOCKSIZE> output;
 
-    filter = setFilterParameters<double,double>(filter,220,0.5,48000);
+    filter = lowpass<double,double>(filter,220,0.5,48000);
 
-    for(int i = 0; i<1000; i++){
-        double x = noise<double>();
-        filter = update_moog<double,double>(filter,x,48000);
-        output[i] = filter.ya1;
+    for(int i = 0; i<BLOCKSIZE; i++){
+        input[i] = noise<double>();
+    }
+
+    std::tie(filter,output) = process<double,double>(filter,input);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);
         EXPECT_LT(output[i],1.0001);
     }
-
-
+    
 }
 
+using algae::dsp::core::filter::highpass;
 
+TEST(DSP_Test, CORE_biquad_highpass) { 
+    // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
+    constexpr size_t BLOCKSIZE = 64;
+    biquad_t<double> filter;
+    AudioBlock<double,BLOCKSIZE> input;
+    AudioBlock<double,BLOCKSIZE> output;
 
-// using algae::dsp::core::filter::bandpass_t;
-// using algae::dsp::core::filter::process;
-// using algae::dsp::core::filter::update_coefficients;
-// TEST(DSP_Test, CORE_BandPassFilter_Moore_Has_BP_Characteristic) { 
-//     // TODO: i need a dft function to do this properly
-//     bandpass_t<double> filter;
-//     double highest_frequency_signal[10] = {1,-1,1,-1,1,-1,1,-1,1,-1};
-//     double lowest_frequency_signal[10] = {1,1,1,1,1,1,1,1,1,1};
-//     double output[10]={};
-//     double rms;
+    filter = highpass<double,double>(filter,220,0.5,48000);
 
-//     double sample_rate = 48000;
-//     double half_sample_rate = 24000;
-//     filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
+    for(int i = 0; i<BLOCKSIZE; i++){
+        input[i] = noise<double>();
+    }
 
-//     for (int n=0; n<10; n++){
-//         filter = process<double>(filter, highest_frequency_signal[0]);
-//         output[n] = filter.y1;
-//         rms += output[n]*output[n];
-//     }
+    std::tie(filter,output) = process<double,double>(filter,input);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
     
-//     rms = sqrt(rms)/10.0;
+}
 
-//     EXPECT_GT(1, rms);
-//     EXPECT_LT(0, rms);
+using algae::dsp::core::filter::bandpass;
 
-//     rms = 0;
+TEST(DSP_Test, CORE_biquad_bandpass) { 
+    // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
+    constexpr size_t BLOCKSIZE = 64;
+    biquad_t<double> filter;
+    AudioBlock<double,BLOCKSIZE> input;
+    AudioBlock<double,BLOCKSIZE> output;
 
-//     filter = update_coefficients<double,double>(bandpass_t<double>(), half_sample_rate, 0, sample_rate );
+    filter = bandpass<double,double>(filter,220,0.5,48000);
 
-//     for (int n=0; n<10; n++){
-//         filter = process<double>(filter, lowest_frequency_signal[0]);
-//         output[n] = filter.y1;
-//         rms += output[n]*output[n];
+    for(int i = 0; i<BLOCKSIZE; i++){
+        input[i] = noise<double>();
+    }
 
-//     }
+    std::tie(filter,output) = process<double,double>(filter,input);
 
-//     rms = sqrt(rms)/10.0;
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
     
-//     EXPECT_GT(1, rms);
-//     EXPECT_LT(0, rms);
-    
+}
 
-// }
+using algae::dsp::core::filter::onepole_hip_t;
+using algae::dsp::core::filter::hip;
+
+TEST(DSP_Test, CORE_onepole_hip) { 
+    // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
+    constexpr size_t BLOCKSIZE = 64;
+    onepole_hip_t<double> filter;
+    AudioBlock<double,BLOCKSIZE> input;
+    AudioBlock<double,BLOCKSIZE> output;
+
+    filter = hip<double,double>(filter, 220.0, 48000.0);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        input[i] = noise<double>();
+    }
+
+    std::tie(filter,output) = process<double,double>(filter, input);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
+    
+}
+
+using algae::dsp::core::filter::onepole_lop_t;
+using algae::dsp::core::filter::lop;
+
+TEST(DSP_Test, CORE_onepole_lop) { 
+    // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
+    constexpr size_t BLOCKSIZE = 64;
+    onepole_lop_t<double> filter;
+    AudioBlock<double,BLOCKSIZE> input;
+    AudioBlock<double,BLOCKSIZE> output;
+
+    filter = lop<double,double>(filter, 220.0, 48000.0);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        input[i] = noise<double>();
+    }
+
+    std::tie(filter,output) = process<double,double>(filter, input);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
+    
+}
+
+using algae::dsp::core::filter::reson_bp_t;
+using algae::dsp::core::filter::update_coefficients;
+
+TEST(DSP_Test, CORE_reson_bandpass) { 
+    // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
+    constexpr size_t BLOCKSIZE = 64;
+    reson_bp_t<double> filter;
+    AudioBlock<double,BLOCKSIZE> input;
+    AudioBlock<double,BLOCKSIZE> output;
+
+    //NOTE: for fairly normal values of gain parameters and normal signals, the reson algorithm will clip
+    //is there a better way to structure the parameters to prevent this?
+    //some filter designs divide out the gain introduced by the peak... however... sometimes you want a boost
+    filter = update_coefficients<double,double>(filter, 220.0, 0.5, 0.25, 48000.0);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        input[i] = 0.125*noise<double>();
+    }
+
+    std::tie(filter,output) = process<double,double>(filter, input);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
+    
+}
+
 
 
 

@@ -43,22 +43,41 @@ TEST(DSP_Test, CORE_mtof) {
     */
     
 
-    EXPECT_FLOAT_EQ(261.63, mtof<double>(60.0));
-    EXPECT_FLOAT_EQ(277.18, mtof<double>(61.0));
-    EXPECT_FLOAT_EQ(293.66, mtof<double>(62.0));
-    EXPECT_FLOAT_EQ(311.13, mtof<double>(63.0));
-    EXPECT_FLOAT_EQ(329.63, mtof<double>(64.0));
-    EXPECT_FLOAT_EQ(349.23, mtof<double>(65.0));
-    EXPECT_FLOAT_EQ(369.99, mtof<double>(66.0));
-    EXPECT_FLOAT_EQ(392.0,  mtof<double>(67.0));
-    EXPECT_FLOAT_EQ(415.3,  mtof<double>(68.0));
+    EXPECT_FLOAT_EQ(261.62558, mtof<double>(60.0));
+    EXPECT_FLOAT_EQ(277.18262, mtof<double>(61.0));
+    EXPECT_FLOAT_EQ(293.66476, mtof<double>(62.0));
+    EXPECT_FLOAT_EQ(311.12698, mtof<double>(63.0));
+    EXPECT_FLOAT_EQ(329.62756, mtof<double>(64.0));
+    EXPECT_FLOAT_EQ(349.22824, mtof<double>(65.0));
+    EXPECT_NEAR(369.984427, mtof<double>(66.0),0.01);
+    EXPECT_FLOAT_EQ(391.99542,  mtof<double>(67.0));
+    EXPECT_FLOAT_EQ(415.30469,  mtof<double>(68.0));
     EXPECT_FLOAT_EQ(440.0,  mtof<double>(69.0));
-    EXPECT_FLOAT_EQ(466.16, mtof<double>(70.0));
-    EXPECT_FLOAT_EQ(493.88, mtof<double>(71.0));
-    EXPECT_FLOAT_EQ(523.25, mtof<double>(72.0));
+    EXPECT_FLOAT_EQ(466.16376, mtof<double>(70.0));
+    EXPECT_FLOAT_EQ(493.8833, mtof<double>(71.0));
+    EXPECT_FLOAT_EQ(523.25116, mtof<double>(72.0));
 
 
 
 }
 
+using algae::dsp::core::units::beats;
+TEST(DSP_Test, CORE_beats) { 
+    
+    double bpm = 120;
+    double num_beats = 4;
+
+    ASSERT_FLOAT_EQ(96000, beats(num_beats,bpm,48000));
+
+}
+
+using algae::dsp::core::units::dbtorms;
+TEST(DSP_Test, CORE_dbtorms) { 
+    
+    double db = 100;
+    double rms = 1;
+
+    ASSERT_FLOAT_EQ(rms, dbtorms(db));
+
+}
 

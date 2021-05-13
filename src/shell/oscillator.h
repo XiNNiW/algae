@@ -3,13 +3,12 @@
 #include "dsp_graph.h"
 
 namespace algae::dsp::shell::oscillator{
-    using algae::dsp::core::oscillator::phasor_t;
-    using algae::dsp::core::oscillator::update_phasor;
-    using algae::dsp::core::oscillator::sinOsc;
+
+   
 
     template<typename sample_t, typename frequency_t>
     struct phasor:dsp_node<sample_t,frequency_t>{
-        phasor_t<frequency_t> state = phasor_t<frequency_t>();
+        // phasor_t<frequency_t> state = phasor_t<frequency_t>();
 
         // static dsp_node<sample_t,frequency_t> make(){
         //     return dsp_node<sample_t,frequency_t>(
@@ -31,8 +30,8 @@ namespace algae::dsp::shell::oscillator{
             auto freq = this->inlets[0].getValue();
             // std::cout<<"phasor freq is... "<<freq<<" ...\n";
 
-            state = update_phasor<sample_t,frequency_t>(state, freq, sampleRate);
-            this->outlets[0] = state.phase;
+            // state = update_phasor<sample_t,frequency_t>(state, freq, sampleRate);
+            // this->outlets[0] = state.phase;
             // std::cout<<"phasor phase is now... "<<state.phase<<" ...\n";
 
             // std::cout<<"phasor is updated...\n";
@@ -52,7 +51,7 @@ namespace algae::dsp::shell::oscillator{
 
     template<typename sample_t, typename frequency_t>
     struct osc:dsp_node<sample_t,frequency_t>{
-        phasor_t<frequency_t> state = phasor_t<frequency_t>();
+        // phasor_t<frequency_t> state = phasor_t<frequency_t>();
 
         osc()
         :dsp_node<sample_t,frequency_t>(
@@ -62,9 +61,9 @@ namespace algae::dsp::shell::oscillator{
         {}
         
         virtual void process(const frequency_t& sampleRate=44100.0) override {
-            auto freq = this->inlets[0].getValue();
-            state = update_phasor<sample_t,frequency_t>(state, freq, sampleRate);
-            this->outlets[0] = sinOsc<sample_t>(state.phase);
+            // auto freq = this->inlets[0].getValue();
+            // state = update_phasor<sample_t,frequency_t>(state, freq, sampleRate);
+            // this->outlets[0] = sinOsc<sample_t>(state.phase);
         }
         virtual std::shared_ptr<dsp_node<sample_t,frequency_t>> getSharedPtr() override {
             return std::make_shared<osc<sample_t,frequency_t>>(*this);
@@ -96,6 +95,8 @@ namespace algae::dsp::shell::oscillator{
         }
 
     };
+
+    
 
 
 }

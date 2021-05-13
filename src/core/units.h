@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-// Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
+
 namespace algae::dsp::core::units{
     template<typename frequency_t>
     frequency_t mtof(frequency_t n){
@@ -19,7 +19,22 @@ namespace algae::dsp::core::units{
 
     template<typename sample_t, typename frequency_t>
     sample_t msToSamples(sample_t ms, frequency_t sampleRate=44100.0) { 
-        const frequency_t MILLISECONDS_PER_SECOND = 1000.0;
-        return ms*MILLISECONDS_PER_SECOND*sampleRate;
+        const frequency_t SECONDS_PER_MILLISECOND = 1/1000.0;
+        return ms*sampleRate*SECONDS_PER_MILLISECOND;
     };
+
+ // implementation borrowed from Miller Puckette's PD
+    template<typename sample_t>
+    const inline sample_t dbtorms(sample_t db){
+        const sample_t LOGTEN = 2.302585092994046;
+        if (db <= 0){
+            return(0);
+        }
+        else
+        {
+            if (db > 485)
+                db = 485;
+        }
+        return (exp((LOGTEN * 0.05) * (db-100.)));
+    }
 }

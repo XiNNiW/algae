@@ -3,187 +3,19 @@
 #include "../src/shell/dsp_graph.h"
 #include "../src/shell/math_functions.h"
 #include "../src/shell/oscillator.h"
+#include "../src/core/audio_block.h"
 #include "../src/core/oscillator.h"
 
+using algae::dsp::core::AudioBlock;
 using algae::dsp::shell::dsp_node;
 using algae::dsp::shell::connect;
 using algae::dsp::shell::math::constant_node;
 using algae::dsp::shell::oscillator::phasor;
 using algae::dsp::shell::oscillator::osc;
 
-TEST(DSP_Test, PhasorNode) { 
-    dsp_node<double,double>* phasor_node = new phasor<double,double>();
-
-    ASSERT_EQ(0,phasor_node->getOutputValue(0));
-    phasor_node->update();
-
-    ASSERT_EQ(0,phasor_node->getOutputValue(0));
-
-    dsp_node<double,double>* number = new constant_node<double,double>(22050.0);
-
-    connect<double,double>(*number,0,*phasor_node,0);
-    ASSERT_EQ(0,phasor_node->getOutputValue(0));
-
-    phasor_node->update();
-
-    ASSERT_EQ(0.5,phasor_node->getOutputValue(0));
-
-}
+// 
 
 
-TEST(DSP_Test, OscNode) { 
-    dsp_node<double,double>* phasor_node = new osc<double,double>();
-
-    ASSERT_EQ(0,phasor_node->getOutputValue(0));
-    phasor_node->update();
-
-    ASSERT_EQ(0,phasor_node->getOutputValue(0));
-
-    dsp_node<double,double>* number = new constant_node<double,double>(22050.0);
-
-    connect<double,double>(*number,0,*phasor_node,0);
-    ASSERT_EQ(0,phasor_node->getOutputValue(0));
-
-    phasor_node->update();
-
-    ASSERT_FLOAT_EQ(0.70710677,phasor_node->getOutputValue(0));
-
-    delete phasor_node;
-    delete number;
-    
-}
-
-TEST(DSP_Test, Noise) { 
-    dsp_node<double,double>* noise_node = new algae::dsp::shell::oscillator::noise<double,double>();
-
-    ASSERT_EQ(0,noise_node->getOutputValue(0));
-    noise_node->update();
-
-    int iterations = 44100*10;
-    double avgSample=0;
-    for(size_t idx=0;idx<iterations;idx++){
-        auto samp = noise_node->getOutputValue(0);
-        bool resultInRange = (-1<=samp) && (samp<=1);
-        ASSERT_TRUE(resultInRange);
-
-        avgSample += samp*samp;
-    }
-
-    avgSample /=(double)iterations;
-    avgSample = sqrt(avgSample);
-
-    // ASSERT_NEAR(0, avgSample,0.025);
-    //so that fails actually... it doesn't avg to zero like i naively thought...
-    
-}
-
-using algae::dsp::core::oscillator::phasor_t;
-using algae::dsp::core::oscillator::update_phasor;
-using algae::dsp::core::oscillator::dsf_bl_pulse;
-
-TEST(DSP_Test, CORE_dsf_blp_does_not_explode) { 
-    phasor_t<double> phasor = phasor_t<double>();
-    phasor_t<double> phasor2 = phasor_t<double>();
-    const int iterations = 100;
-    double output[iterations] = {};
-    double expected_output[iterations] = {};
-    double freq = 10;
-    double sampleRate = 1000;
-
-    for(int n=0;n<iterations;n++){
-        double output = dsf_bl_pulse<double>(phasor.phase, phasor2.phase, sampleRate);
-        EXPECT_LT(output,1);
-        EXPECT_GT(output,-1);
-        phasor = update_phasor<double,double>(phasor,freq);
-    }
-}
-
-using algae::dsp::core::oscillator::Bn;
-TEST(DSP_Test, CORE_Bn_bandlimited_component_generator) { 
-    
-    EXPECT_FLOAT_EQ(Bn(5,7.0*M_PI),5.0);
-    EXPECT_FLOAT_EQ(Bn(8,7.0*M_PI),-8.0);
-    EXPECT_FLOAT_EQ(Bn(8,6.0*M_PI),8.0);
-    EXPECT_FLOAT_EQ(Bn(8,6.01*M_PI),-7.9792895);
-}
-
-
-using algae::dsp::core::oscillator::fm_bl_saw_t;
-using algae::dsp::core::oscillator::dc_block_t;
-using algae::dsp::core::oscillator::fm_bl_saw;
-using algae::dsp::core::oscillator::process_fm_bl_saw;
-TEST(DSP_Test, CORE_fm_blp_saw) { 
-    phasor_t<double> phasor = phasor_t<double>();
-    double freq = 100;
-    double index = 10;
-    double sampleRate = 1000;
-
-    fm_bl_saw_t<double,double> state = fm_bl_saw<double,double>(fm_bl_saw_t<double,double>(),freq,sampleRate);
-    const int iterations = 100;
-    double output[iterations] = {};
-    double expected_output[iterations] = {};
-    
-    for(int n=0;n<iterations;n++){
-        state = process_fm_bl_saw<double>(state, sampleRate);
-        double output = state.output;
-        EXPECT_LT(output,1.0001);
-        EXPECT_GT(output,-1.0001);
-    }
-}
-
-using algae::dsp::core::oscillator::fm_bl_square_t;
-using algae::dsp::core::oscillator::fm_bl_square;
-using algae::dsp::core::oscillator::process_fm_bl_square;
-TEST(DSP_Test, CORE_fm_blp_square) { 
-    phasor_t<double> phasor = phasor_t<double>();
-    double freq = 100;
-    double index = 10;
-    double sampleRate = 1000;
-
-    fm_bl_square_t<double,double> state = fm_bl_square<double,double>(fm_bl_square_t<double,double>(),freq, sampleRate);
-    const int iterations = 100;
-    double output[iterations] = {};
-    double expected_output[iterations] = {};
-    
-    for(int n=0;n<iterations;n++){
-        state = process_fm_bl_square<double>(state, sampleRate);
-        double output = state.output;
-
-        EXPECT_LT(output,1);
-        EXPECT_GT(output,-1);
-    }
-}
-
-using algae::dsp::core::oscillator::fm_bl_tri_t;
-using algae::dsp::core::oscillator::fm_bl_tri;
-using algae::dsp::core::oscillator::process_fm_bl_tri;
-TEST(DSP_Test, CORE_fm_blp_tri) { 
-    phasor_t<double> phasor = phasor_t<double>();
-    double freq = 100;
-    double sampleRate = 1000;
-    fm_bl_tri_t<double,double> state = fm_bl_tri<double,double>(fm_bl_tri_t<double,double>(),freq,sampleRate);
-    const int iterations = 100;
-    double output[iterations] = {};
-    double expected_output[iterations] = {};
-    
-    for(int n=0;n<iterations;n++){
-        state = process_fm_bl_tri<double>(state, sampleRate);
-        double output = state.output;
-
-        EXPECT_LT(output,1);
-        EXPECT_GT(output,-1);
-    }
-}
-
-//max_bl_modulation_index
-using algae::dsp::core::oscillator::max_bl_modulation_index;
-TEST(DSP_Test, CORE_max_bl_modulation_index) { 
-    EXPECT_FLOAT_EQ(108.09091,max_bl_modulation_index<double>(220,220,48000));
-    EXPECT_FLOAT_EQ(53.545456,max_bl_modulation_index<double>(440,440,48000));
-    EXPECT_FLOAT_EQ(26.772728,max_bl_modulation_index<double>(440,880,48000));
-    EXPECT_FLOAT_EQ(54.545456,max_bl_modulation_index<double>(0,440,48000));
-    EXPECT_FLOAT_EQ(0,max_bl_modulation_index<double>(440,0,48000));
-}
 
 using algae::dsp::core::oscillator::makeSineTable;
 // using algae::dsp::core::oscillator::makeSineTable_debug;
@@ -221,26 +53,22 @@ TEST(DSP_Test, CORE_makeSineWave) {
 }
 
 using algae::dsp::core::oscillator::table_lookup_lin_interp;
+using algae::dsp::core::oscillator::update_phase;
 
 TEST(DSP_Test, CORE_lookupSine_linear_interp) {
-    const std::array<double, 4> table = makeSineTable<double, 4>(); 
-    size_t idx=0;
-    double error = 0.0001;
+    constexpr size_t TABLE_SIZE = 1024;
+    const std::array<double, TABLE_SIZE> table = makeSineTable<double, TABLE_SIZE>(); 
+
+    double error = 0.01;
     double val;
     double expected;
-    val = table_lookup_lin_interp<double,4>(table.data(), idx/4.0);
-    expected = expected_sine_4[idx];
-    EXPECT_NEAR(expected, val, error);
-    idx++;
-    val = table_lookup_lin_interp<double,4>(table.data(), idx/4.0);
-    expected = expected_sine_4[idx];
-    EXPECT_NEAR(expected, val, error);
-    val = table_lookup_lin_interp<double,4>(table.data(), idx/4.0);
-    expected = expected_sine_4[idx];
-    EXPECT_NEAR(expected, val, error);
-    val = table_lookup_lin_interp<double,4>(table.data(), idx/4.0);
-    expected = expected_sine_4[idx];
-    EXPECT_NEAR(expected, val, error);
+    double phase = 0;
+    for(size_t i; i<48000; i++){
+        val = table_lookup_lin_interp<double,TABLE_SIZE>(table.data(), phase);
+        expected = sin(2*M_PI*phase);
+        EXPECT_NEAR(expected, val, error);
+        phase=update_phase<double,double>(phase,440.0/48000.0,1.0);
+    }
 
 }
 
@@ -276,4 +104,67 @@ TEST(DSP_Test, CORE_factorial_t) {
     expected = 4*3*2*1;
     actual = factorial_t<double,4>::result;
     EXPECT_FLOAT_EQ(expected, actual);
+}
+
+using algae::dsp::core::oscillator::process_sineOsc;
+TEST(DSP_Test, CORE_sine_t_process) {
+ // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
+    constexpr size_t BLOCKSIZE = 64;
+    constexpr float SR = 48000;
+
+
+    AudioBlock<float,BLOCKSIZE> output;
+    float phase=0;
+    float phi = 2*M_PI/SR;
+
+    std::tie(phase,output) = process_sineOsc<float, 1024, BLOCKSIZE>(phase, phi);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
+}
+
+using algae::dsp::core::oscillator::stk_blit_saw_t;
+using algae::dsp::core::oscillator::stk_blit_saw;
+using algae::dsp::core::oscillator::process;
+TEST(DSP_Test, CORE_stk_blit_saw_process) {
+ // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
+    constexpr size_t BLOCKSIZE = 64;
+    constexpr float SR = 48000;
+
+
+    stk_blit_saw_t<float> osc = stk_blit_saw<float,float>(440,SR);
+    AudioBlock<float,BLOCKSIZE> output;
+
+
+    std::tie(osc, output) = process<float, BLOCKSIZE>(osc);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
+}
+
+using algae::dsp::core::oscillator::stk_blit_square_t;
+using algae::dsp::core::oscillator::stk_blit_square;
+TEST(DSP_Test, CORE_stk_blit_square_process) {
+ // what is a compelling way to test these? i should probably just sit down and do the math
+    // in the mean time i just want some verification that they don't blow up when you hook them up
+    constexpr size_t BLOCKSIZE = 64;
+    constexpr float SR = 48000;
+
+
+    stk_blit_square_t<float> osc = stk_blit_square<float,float>(440,SR);
+    AudioBlock<float,BLOCKSIZE> output;
+
+
+    std::tie(osc, output) = process<float, BLOCKSIZE>(osc);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
 }

@@ -33,8 +33,8 @@ namespace algae::dsp::core::control{
 
     template<typename sample_t>
     struct ramp_t {
-        long index;
-        sample_t value;
+        long index=0;
+        sample_t value=0;
     };
 
     template<typename sample_t>

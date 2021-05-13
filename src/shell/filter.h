@@ -4,14 +4,14 @@
 
 namespace algae::dsp::shell::filter{
     using algae::dsp::core::filter::biquad_t;
-    using algae::dsp::core::filter::update_biquad;
+    using algae::dsp::core::filter::process;
     using algae::dsp::core::filter::highpass;
     using algae::dsp::core::filter::lowpass;
     using algae::dsp::core::filter::bandpass;
 
     template<typename sample_t, typename frequency_t>
     struct lpf:dsp_node<sample_t, frequency_t>{
-        biquad_t<sample_t,frequency_t> state = biquad_t<sample_t,frequency_t>();
+        biquad_t<sample_t> state = biquad_t<sample_t>();
 
         lpf()
         :dsp_node<sample_t,frequency_t>(
@@ -23,8 +23,10 @@ namespace algae::dsp::shell::filter{
         virtual void process(const frequency_t& sampleRate=44100.0) override {
             sample_t input = this->inlets[0].getValue(), cutoff = this->inlets[1].getValue(), q = this->inlets[2].getValue();
             state = lowpass<sample_t,frequency_t>(state, cutoff, q, sampleRate);
-            state = update_biquad<sample_t,frequency_t>(state,input);
-            this->outlets[0] = state.y1;
+            //TODO implement block processing for these nodes
+            // algae::dsp::core::AudioBlock<sample_t,1> output;
+            // std::tie(state,output) = process<sample_t,frequency_t,1>(state,algae::dsp::core::AudioBlock<sample_t,1>(input));
+            // this->outlets[0] = state.y1;
             // std::cout<<"maybe here??\n";
         }
 
@@ -39,7 +41,7 @@ namespace algae::dsp::shell::filter{
 
     template<typename sample_t, typename frequency_t>
     struct hpf:dsp_node<sample_t, frequency_t>{
-        biquad_t<sample_t,frequency_t> state=biquad_t<sample_t,frequency_t>();
+        biquad_t<sample_t> state=biquad_t<sample_t>();
 
         hpf()
         :dsp_node<sample_t,frequency_t>(
@@ -50,9 +52,9 @@ namespace algae::dsp::shell::filter{
 
         virtual void process(const frequency_t& sampleRate=44100.0) override {
             sample_t input = this->inlets[0].getValue(), cutoff = this->inlets[1].getValue(), q = this->inlets[2].getValue();
-            state = highpass<sample_t,frequency_t>(state, cutoff, q, sampleRate);
-            state = update_biquad<sample_t,frequency_t>(state,input);
-            this->outlets[0] = state.y1;
+            // state = highpass<sample_t,frequency_t>(state, cutoff, q, sampleRate);
+            // state = update_biquad<sample_t,frequency_t>(state,input);
+            // this->outlets[0] = state.y1;
         }
 
         virtual std::shared_ptr<dsp_node<sample_t,frequency_t>> getSharedPtr() override {
@@ -66,7 +68,7 @@ namespace algae::dsp::shell::filter{
 
     template<typename sample_t, typename frequency_t>
     struct bpf:dsp_node<sample_t, frequency_t>{
-        biquad_t<sample_t,frequency_t> state=biquad_t<sample_t,frequency_t>();
+        biquad_t<sample_t> state=biquad_t<sample_t>();
 
         bpf()
         :dsp_node<sample_t,frequency_t>(
@@ -77,9 +79,10 @@ namespace algae::dsp::shell::filter{
 
         virtual void process(const frequency_t& sampleRate=44100.0) override {
             sample_t input = this->inlets[0].getValue(), cutoff = this->inlets[1].getValue(), q = this->inlets[2].getValue();
-            state = bandpass<sample_t,frequency_t>(state, cutoff, q, sampleRate);
-            state = update_biquad<sample_t,frequency_t>(state,input);
-            this->outlets[0] = state.y1;
+            // state = bandpass<sample_t,frequency_t>(state, cutoff, q, sampleRate);
+            // algae::dsp::core::AudioBlock<sample_t,1> out;
+            // std::tie(state,out) = process<sample_t,frequency_t>(state,input);
+            // this->outlets[0] = state.y1;
         }
 
         virtual std::shared_ptr<dsp_node<sample_t,frequency_t>> getSharedPtr() override {
