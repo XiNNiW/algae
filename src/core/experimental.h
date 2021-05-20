@@ -2,6 +2,8 @@
 #include "filter.h"
 #include <math.h>
 namespace algae::dsp::core::filter{
+    
+
     template<typename sample_t>
     struct integrator_t{
         sample_t y1;

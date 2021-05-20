@@ -3,6 +3,18 @@
 
 using algae::dsp::core::AudioBlock;
 
+TEST(DSP_Test, Core_block_empty) { 
+    
+   constexpr auto SR = 48000.0;
+   constexpr auto BLOCKSIZE = 64;
+
+   AudioBlock<float,BLOCKSIZE> x = AudioBlock<float, BLOCKSIZE>::empty();
+
+   for(size_t idx;idx<BLOCKSIZE;idx++){
+       ASSERT_EQ(x[idx],0);
+   }
+
+}
 
 TEST(DSP_Test, Core_block_multiply) { 
     

@@ -8,6 +8,11 @@ namespace algae::dsp::core{
             std::array<sample_t,BLOCK_SIZE> samples;
 
         public:
+            static inline const AudioBlock<sample_t,BLOCK_SIZE> empty() {
+                AudioBlock<sample_t,BLOCK_SIZE> block;
+                block*=0;
+                return block;
+            }
 
             inline sample_t& operator[](const size_t& index){
                 return samples[index];
@@ -152,5 +157,8 @@ namespace algae::dsp::core{
                 return sample;
             }
     };
+
+    template<typename sample_t, size_t BLOCK_SIZE>
+    using StereoBlock = std::array<AudioBlock<sample_t,BLOCK_SIZE>,2>;
 }
 

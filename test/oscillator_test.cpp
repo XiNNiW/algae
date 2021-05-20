@@ -64,7 +64,7 @@ TEST(DSP_Test, CORE_lookupSine_linear_interp) {
     double expected;
     double phase = 0;
     for(size_t i; i<48000; i++){
-        val = table_lookup_lin_interp<double,TABLE_SIZE>(table.data(), phase);
+        val = table_lookup_lin_interp<double,TABLE_SIZE>(table, phase);
         expected = sin(2*M_PI*phase);
         EXPECT_NEAR(expected, val, error);
         phase=update_phase<double,double>(phase,440.0/48000.0,1.0);
@@ -106,19 +106,18 @@ TEST(DSP_Test, CORE_factorial_t) {
     EXPECT_FLOAT_EQ(expected, actual);
 }
 
-using algae::dsp::core::oscillator::process_sineOsc;
+using algae::dsp::core::oscillator::sineOsc;
 TEST(DSP_Test, CORE_sine_t_process) {
- // what is a compelling way to test these? i should probably just sit down and do the math
+    // what is a compelling way to test these? i should probably just sit down and do the math
     // in the mean time i just want some verification that they don't blow up when you hook them up
     constexpr size_t BLOCKSIZE = 64;
     constexpr float SR = 48000;
-
 
     AudioBlock<float,BLOCKSIZE> output;
     float phase=0;
     float phi = 2*M_PI/SR;
 
-    std::tie(phase,output) = process_sineOsc<float, 1024, BLOCKSIZE>(phase, phi);
+    std::tie(phase,output) = sineOsc<float, 1024, BLOCKSIZE>::process(phase, phi);
 
     for(int i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);

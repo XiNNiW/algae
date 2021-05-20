@@ -108,17 +108,17 @@ namespace algae::dsp::core::oscillator{
     }
 
     template<typename sample_t, int TABLE_SIZE>
-    sample_t table_lookup_lin_interp(const sample_t* table, const sample_t& phase){
+    const inline sample_t table_lookup_lin_interp(const std::array<sample_t,TABLE_SIZE>& table, const sample_t& phase){
     
         sample_t _phase = phase-floor(phase);
         _phase = _phase<0 ? _phase+1 : _phase; 
-        sample_t position = _phase*(TABLE_SIZE-1);
-        int index = floor(position);
-        int x0 = index;
+        const sample_t position = _phase*(TABLE_SIZE-1);
+        const int index = floor(position);
+        const int x0 = index;
         int x1 = index+1;
         x1 = x1>=TABLE_SIZE?0:x1;
-        sample_t mantissa = position - index;
-        sample_t value = table[x0] + mantissa*(table[x1] - table[x0]);
+        const sample_t mantissa = position - index;
+        const sample_t value = table[x0] + mantissa*(table[x1] - table[x0]);
         return value;
     }
 
@@ -126,28 +126,47 @@ namespace algae::dsp::core::oscillator{
     struct sine_t{
         static constexpr std::array<sample_t, TABLE_SIZE> TABLE = makeSineTable<sample_t,TABLE_SIZE>();
         inline static const sample_t lookup(const sample_t& phase){
-            return table_lookup_lin_interp<sample_t,TABLE_SIZE>(TABLE.data(), phase);
+            return table_lookup_lin_interp<sample_t,TABLE_SIZE>(TABLE, phase);
         }
 
     };
 
-    template<typename sample_t, size_t TABLE_SIZE, size_t BLOCK_SIZE>
-    inline const std::pair<sample_t, AudioBlock<sample_t,BLOCK_SIZE>>process_sineOsc(sample_t phase, const sample_t& phi){
-        AudioBlock<sample_t, BLOCK_SIZE> output;
-        for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-            output[idx] = sine_t<sample_t,TABLE_SIZE>::lookup(phase);
-            phase = update_phase<sample_t,sample_t>(phase, phi, 1.0);
+    template<typename sample_t>
+    struct sine_t<sample_t,0>{
+        inline static const sample_t lookup(const sample_t& phase){
+            return sin(phase);
         }
-        return std::pair(phase, output);
-    }
+
+    };
+
+
+    template<typename sample_t, size_t TABLE_SIZE, size_t BLOCK_SIZE>
+    struct sineOsc{
+        inline static const std::pair<sample_t, AudioBlock<sample_t,BLOCK_SIZE>>process(sample_t phase, const sample_t& phi){
+            AudioBlock<sample_t, BLOCK_SIZE> output;
+            for(size_t idx=0; idx<BLOCK_SIZE; idx++){
+                output[idx] = sine_t<sample_t,TABLE_SIZE>::lookup(phase);
+                phase = update_phase<sample_t,sample_t>(phase, phi, 1.0);
+            }
+            return std::pair(phase, output);
+        }
+    };
+   
 
     template<typename sample_t, int TABLE_SIZE>
     struct cos_t{
         static constexpr std::array<sample_t, TABLE_SIZE> TABLE = makeCosTable<sample_t,TABLE_SIZE>();
-        inline static const sample_t lookup(const sample_t phase){
-            return table_lookup_lin_interp<sample_t,TABLE_SIZE>(TABLE.data(), phase);
+        inline static const sample_t lookup(const sample_t& phase){
+            return table_lookup_lin_interp<sample_t,TABLE_SIZE>(TABLE, phase);
         }
         
+    };
+
+    template<typename sample_t>
+    struct cos_t<sample_t, 0>{
+        inline static const sample_t lookup(const sample_t& phase){
+            return cos(phase);
+        }
     };
 
 

@@ -1,13 +1,16 @@
 #pragma once
 #include <math.h>
+#include <utility>
 #include "audio_block.h"
 #include "math_functions.h"
+#include "oscillator.h"
 
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
 namespace algae::dsp::core::filter{
 // http://musicdsp.org/files/Audio-EQ-Cookbook.txt
 
     using algae::dsp::core::math::clamp;
+    using algae::dsp::core::oscillator::cos_t;
 
     constexpr auto HALF_PI = M_PI_2; 
     constexpr auto TWO_PI = 2*M_PI; 
@@ -45,7 +48,7 @@ namespace algae::dsp::core::filter{
     }
 
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const inline biquad_t<sample_t> process(biquad_t<sample_t> state, const sample_t& input){
 
         const sample_t b0 = state.b0;
@@ -67,13 +70,13 @@ namespace algae::dsp::core::filter{
         return state;
     }
 
-    template<typename sample_t, typename frequency_t, size_t BLOCK_SIZE>
+    template<typename sample_t, size_t BLOCK_SIZE>
     const inline std::pair<biquad_t<sample_t>, AudioBlock<sample_t, BLOCK_SIZE>> process(biquad_t<sample_t> state, const AudioBlock<sample_t,BLOCK_SIZE>& input){
 
 
         AudioBlock<sample_t, BLOCK_SIZE> output;
         for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-            state = process<sample_t,frequency_t>(state,input[idx]);
+            state = process<sample_t>(state,input[idx]);
 
             output[idx] = state.y1;
         }
@@ -81,6 +84,16 @@ namespace algae::dsp::core::filter{
 
         return std::pair(state,output);
     }
+
+    // template<typename sample_t, typename frequency_t, size_t MAX_UNISON, size_t BLOCK_SIZE>
+    // const inline std::pair<biquad_t<sample_t>, std::array<AudioBlock<sample_t, BLOCK_SIZE>, MAX_UNISON>> process(std::array<biquad_t<sample_t>,MAX_UNISON>state, const std::array<AudioBlock<sample_t,BLOCK_SIZE>, MAX_UNISON>& input, const size_t& unison){
+    //     size_t _unison = unison>MAX_UNISON?MAX_UNISON:unison;
+    //     std::array<AudioBlock<sample_t, BLOCK_SIZE>,MAX_UNISON> output;
+    //     for(size_t unison_idx=0; unison_idx<_unison; unison_idx++){
+    //         std::tie(state[unison_idx],output[unison_idx]) = process<sample_t,BLOCK_SIZE>(state[unison_idx],output[unison_idx]);
+    //     }
+    //     return std::pair(state,output);
+    // }
 
 
     template<typename sample_t, typename frequency_t>
@@ -304,7 +317,7 @@ namespace algae::dsp::core::filter{
         return update_coefficients(filter, freq, q, gain, sampleRate); 
     }
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const inline reson_bp_t<sample_t> process(reson_bp_t<sample_t> r, const sample_t& input){
   
         sample_t xn = input;
@@ -318,17 +331,49 @@ namespace algae::dsp::core::filter{
         return r;
     }
 
-    template<typename sample_t, typename frequency_t, size_t BLOCK_SIZE>
+    template<typename sample_t, size_t BLOCK_SIZE>
     const inline std::pair<reson_bp_t<sample_t>, AudioBlock<sample_t,BLOCK_SIZE>> process(reson_bp_t<sample_t> r, const AudioBlock<sample_t, BLOCK_SIZE>& input){
         
         AudioBlock<sample_t,BLOCK_SIZE> output;
         for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-            r = process<sample_t,frequency_t>(r, input[idx]);
+            r = process<sample_t>(r, input[idx]);
             output[idx] = r.y1;
         }
         
         return std::pair(r,output);
     }
+
+
+    template<typename sample_t>
+    struct chaotic_resonator_t {
+        reson_bp_t<sample_t> resonator;
+        sample_t feedback_amt;
+        sample_t chaos_gain;
+    };
+
+    template<typename sample_t, const sample_t (* fn)(const sample_t &), size_t BLOCKSIZE>
+    inline const std::pair<chaotic_resonator_t<sample_t>, AudioBlock<sample_t,BLOCKSIZE>> process(
+        chaotic_resonator_t<sample_t> r, 
+        const AudioBlock<sample_t, BLOCKSIZE>& input
+    )
+    {
+        const sample_t fb = r.feedback_amt;
+        const sample_t g  = r.chaos_gain;
+        AudioBlock<sample_t, BLOCKSIZE> block;
+        for(size_t idx=0; idx<BLOCKSIZE; idx++){
+            sample_t fb_signal = fn(-fb*r.resonator.y1);
+            
+            fb_signal = input[idx] + g*fb_signal;
+            fb_signal *= 0.5;
+            r.resonator = process<sample_t>(r.resonator, fb_signal);
+            block[idx] = r.resonator.y1;
+        }
+
+        return std::pair(r, block);
+    }
+
+
+
   
 
 }
