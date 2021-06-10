@@ -140,14 +140,21 @@ namespace algae::dsp::core::oscillator{
     };
 
 
-    template<typename sample_t, size_t TABLE_SIZE, size_t BLOCK_SIZE>
+    template<typename sample_t, size_t TABLE_SIZE>
     struct sineOsc{
-        inline static const std::pair<sample_t, AudioBlock<sample_t,BLOCK_SIZE>>process(sample_t phase, const sample_t& phi){
-            AudioBlock<sample_t, BLOCK_SIZE> output;
-            for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                output[idx] = sine_t<sample_t,TABLE_SIZE>::lookup(phase);
+        // inline static const std::pair<sample_t, AudioBlock<sample_t,BLOCK_SIZE>>process(sample_t phase, const sample_t& phi){
+        //     AudioBlock<sample_t, BLOCK_SIZE> output;
+        //     for(size_t idx=0; idx<BLOCK_SIZE; idx++){
+        //         output[idx] = sine_t<sample_t,TABLE_SIZE>::lookup(phase);
+        //         phase = update_phase<sample_t,sample_t>(phase, phi, 1.0);
+        //     }
+        //     return std::pair(phase, output);
+        // }
+        inline static const std::pair<sample_t, sample_t>process(sample_t phase, const sample_t& phi){
+
+                sample_t output = sine_t<sample_t,TABLE_SIZE>::lookup(phase);
                 phase = update_phase<sample_t,sample_t>(phase, phi, 1.0);
-            }
+
             return std::pair(phase, output);
         }
     };
@@ -221,7 +228,7 @@ namespace algae::dsp::core::oscillator{
     }
 
     template<typename sample_t>
-    const inline stk_blit_saw_t<sample_t> process(stk_blit_saw_t<sample_t> saw){
+    const inline std::pair<stk_blit_saw_t<sample_t>,sample_t> process(stk_blit_saw_t<sample_t> saw){
         sample_t tmp, denominator = sin( saw.phase );
         if ( fabs(denominator) <= std::numeric_limits<sample_t>::epsilon() )
             tmp = saw.a;
@@ -237,19 +244,19 @@ namespace algae::dsp::core::oscillator{
         if ( saw.phase >= M_PI ) saw.phase -= M_PI;
             
         saw.lastFrame = tmp;
-        return saw;
+        return std::pair(saw,saw.state);
     }
-    template<typename sample_t, size_t BLOCKSIZE>
-    const inline std::pair<stk_blit_saw_t<sample_t>,AudioBlock<sample_t,BLOCKSIZE>> process(stk_blit_saw_t<sample_t> saw) {
+    // template<typename sample_t, size_t BLOCKSIZE>
+    // const inline std::pair<stk_blit_saw_t<sample_t>,AudioBlock<sample_t,BLOCKSIZE>> process(stk_blit_saw_t<sample_t> saw) {
         
-        AudioBlock<sample_t,BLOCKSIZE> output;
-        for(size_t idx=0;idx<BLOCKSIZE;idx++){
-            saw = process<sample_t>(saw);
-            output[idx] = saw.state;
-        }
+    //     AudioBlock<sample_t,BLOCKSIZE> output;
+    //     for(size_t idx=0;idx<BLOCKSIZE;idx++){
+    //         saw = process<sample_t>(saw);
+    //         output[idx] = saw.state;
+    //     }
         
-        return std::pair(saw,output);
-    }
+    //     return std::pair(saw,output);
+    // }
 
     template<typename sample_t>
     struct stk_blit_square_t{
@@ -288,7 +295,7 @@ namespace algae::dsp::core::oscillator{
     }
 
     template<typename sample_t>
-    const inline stk_blit_square_t<sample_t> process(stk_blit_square_t<sample_t> square){
+    const inline std::pair<stk_blit_square_t<sample_t>,sample_t> process(stk_blit_square_t<sample_t> square){
         
         sample_t tmp = square.last_blit_output;
         sample_t denominator = sin( square.phase );
@@ -310,20 +317,20 @@ namespace algae::dsp::core::oscillator{
         square.phase += square.phase_increment;
         if ( square.phase >= TWO_PI ) square.phase -= TWO_PI;
             
-        return square;
+        return std::pair(square,square.state);
     }
 
-    template<typename sample_t, size_t BLOCKSIZE>
-    const inline std::pair<stk_blit_square_t<sample_t>,AudioBlock<sample_t,BLOCKSIZE>> process(stk_blit_square_t<sample_t> sq) {
+    // template<typename sample_t, size_t BLOCKSIZE>
+    // const inline std::pair<stk_blit_square_t<sample_t>,AudioBlock<sample_t,BLOCKSIZE>> process(stk_blit_square_t<sample_t> sq) {
         
-        AudioBlock<sample_t,BLOCKSIZE> output;
-        for(size_t idx=0;idx<BLOCKSIZE;idx++){
-            sq = process<sample_t>(sq);
-            output[idx] = sq.state;
-        }
+    //     AudioBlock<sample_t,BLOCKSIZE> output;
+    //     for(size_t idx=0;idx<BLOCKSIZE;idx++){
+    //         sq = process<sample_t>(sq);
+    //         output[idx] = sq.state;
+    //     }
         
-        return std::pair(sq,output);
-    }
+    //     return std::pair(sq,output);
+    // }
 
 
 
