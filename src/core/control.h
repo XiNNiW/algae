@@ -45,7 +45,7 @@ namespace algae::dsp::core::control{
         sample_t phase = (((sample_t)index)/((sample_t)r));
         return  
             (index<=ramptime_in_samples)
-            ? ramp_t<sample_t>{ state.index+1, start*(1.0-phase)+end*phase}
+            ? ramp_t<sample_t>{ state.index+1, static_cast<sample_t>(start*(1.0-phase)+end*phase)}
             : ramp_t<sample_t>{ state.index, end};
 
     }

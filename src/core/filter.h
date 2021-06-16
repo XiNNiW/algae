@@ -361,7 +361,7 @@ namespace algae::dsp::core::filter{
         const sample_t g  = r.chaos_gain;
         AudioBlock<sample_t, BLOCKSIZE> block;
         for(size_t idx=0; idx<BLOCKSIZE; idx++){
-            sample_t fb_signal = fn(-fb*r.resonator.y1);
+            sample_t fb_signal = fn(fb*r.resonator.y1);
             
             fb_signal = input[idx] + g*fb_signal;
             fb_signal *= 0.5;

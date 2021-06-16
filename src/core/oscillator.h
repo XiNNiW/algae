@@ -134,7 +134,7 @@ namespace algae::dsp::core::oscillator{
     template<typename sample_t>
     struct sine_t<sample_t,0>{
         inline static const sample_t lookup(const sample_t& phase){
-            return sin(phase);
+            return sin(TWO_PI*phase);
         }
 
     };

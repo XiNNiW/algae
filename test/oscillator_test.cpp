@@ -84,6 +84,16 @@ TEST(DSP_Test, CORE_sin_t) {
 
 }
 
+TEST(DSP_Test, CORE_sin_t_template_specialized) {
+    size_t idx=0;
+    double val;
+    double expected;
+    val = sine_t<double,0>::lookup(idx/4.0);
+    expected = sin(idx/4.0);
+    EXPECT_FLOAT_EQ(expected, val);
+
+}
+
 using algae::dsp::core::oscillator::factorial_t;
 TEST(DSP_Test, CORE_factorial_t) {
     double expected;

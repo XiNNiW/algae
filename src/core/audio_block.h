@@ -156,6 +156,87 @@ namespace algae::dsp::core{
             inline const sample_t& operator[](const size_t& index) const{
                 return sample;
             }
+            static inline const AudioBlock<sample_t,1> empty() {
+                AudioBlock<sample_t,1> block;
+                block*=0;
+                return block;
+            }
+
+            
+            inline const AudioBlock operator*(const AudioBlock& rhs) const {
+                AudioBlock output;
+                output.sample = sample * rhs.sample;
+                return output;
+            }
+            inline const AudioBlock& operator*=(const AudioBlock& rhs){
+        
+                this->sample = sample * rhs.sample;
+                return *(this);
+            }
+            inline const AudioBlock operator*(const sample_t& rhs) const {
+                AudioBlock output;
+                output.sample = sample * rhs;
+                return output;
+            }
+            inline const AudioBlock& operator*=(const sample_t& rhs){
+
+                this->sample = sample * rhs;
+                return *(this);
+            }
+            inline const AudioBlock operator/(const AudioBlock& rhs) const {
+                AudioBlock output;
+                output.sample = sample / rhs.sample;
+                return output;
+            }
+            inline const AudioBlock& operator/=(const AudioBlock& rhs){
+                this->sample = sample / rhs.sample;
+                return *(this);
+            }
+            inline const AudioBlock operator/(const sample_t& rhs) const {
+                AudioBlock output;
+                output.sample = sample / rhs;
+                return output;
+            }
+            inline const AudioBlock& operator/=(const sample_t& rhs){
+                this->sample = sample / rhs;
+                return *(this);
+            }
+            inline const AudioBlock operator+(const AudioBlock& rhs) const {
+                AudioBlock output;
+                output.sample = sample + rhs.sample;
+                return output;
+            }
+            inline const AudioBlock& operator+=(const AudioBlock& rhs){
+                this->sample = sample + rhs.sample;
+                return *(this);
+            }
+            inline const AudioBlock operator+(const sample_t& rhs) const {
+                AudioBlock output;
+                output.sample = sample + rhs;
+                return output;
+            }
+            inline const AudioBlock& operator+=(const sample_t& rhs){
+                this->sample = sample + rhs;
+                return *(this);
+            }
+            inline const AudioBlock operator-(const AudioBlock& rhs) const {
+                AudioBlock output;
+                output.sample = sample - rhs.sample;
+                return output;
+            }
+            inline const AudioBlock& operator-=(const AudioBlock& rhs){
+                this->sample = sample - rhs.sample;
+                return *(this);
+            }
+            inline const AudioBlock operator-(const sample_t& rhs) const {
+                AudioBlock output;
+                output.sample = sample - rhs;
+                return output;
+            }
+            inline const AudioBlock& operator-=(const sample_t& rhs){
+                this->sample = sample - rhs;
+                return *(this);
+            }
     };
 
     template<typename sample_t, size_t BLOCK_SIZE>
