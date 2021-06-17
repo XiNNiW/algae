@@ -2,6 +2,7 @@
 #include <math.h>
 #include "audio_block.h"
 
+
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
 namespace algae::dsp::core::math{
 
@@ -73,9 +74,39 @@ namespace algae::dsp::core::math{
         return unary_block_op<sample_t,BLOCKSIZE,tanh_approx_pade_noclip<sample_t>>(x);
     };
 
+    template<typename sample_t>
+    const inline sample_t lowered_bell(const sample_t& x){
+        return 2.0/(x*x+1.0) -1.0;
+    }
+
+    template<typename sample_t, size_t BLOCKSIZE>
+    const inline AudioBlock<sample_t, BLOCKSIZE> lowered_bell(const AudioBlock<sample_t,BLOCKSIZE>& x) {
+        return unary_block_op<sample_t,BLOCKSIZE,lowered_bell<sample_t>>(x);
+    };
+
+    template<typename sample_t>
+    const inline sample_t clip(const sample_t& x){
+        return (x>1)?1:(x<-1)?-1:x;
+    }
+
+    template<typename sample_t, size_t BLOCKSIZE>
+    const inline AudioBlock<sample_t, BLOCKSIZE> atan(const AudioBlock<sample_t,BLOCKSIZE>& x) {
+        return unary_block_op<sample_t,BLOCKSIZE,clip<sample_t>>(x);
+    };
+
+    template<typename sample_t>
+    const inline sample_t atan(const sample_t& x){
+        return std::atan(x);
+    }
+
+    template<typename sample_t, size_t BLOCKSIZE>
+    const inline AudioBlock<sample_t, BLOCKSIZE> clip(const AudioBlock<sample_t,BLOCKSIZE>& x) {
+        return unary_block_op<sample_t,BLOCKSIZE,clip<sample_t>>(x);
+    };
+
     template<typename sample_t, typename frequency_t>
     const sample_t sin(const sample_t& phase){
-        return math::sin(phase);
+        return std::sin(phase);
     }
 
     template<typename sample_t, size_t BLOCKSIZE>
@@ -85,7 +116,7 @@ namespace algae::dsp::core::math{
 
     template<typename sample_t, typename frequency_t>
     const sample_t cos(const sample_t& phase){
-        return math::cos(phase);
+        return std::cos(phase);
     }
 
     template<typename sample_t, size_t BLOCKSIZE>
@@ -95,7 +126,7 @@ namespace algae::dsp::core::math{
 
     template<typename sample_t, typename frequency_t>
     const sample_t tan(const sample_t& phase){
-        return math::tan(phase);
+        return std::tan(phase);
     }
 
     template<typename sample_t, size_t BLOCKSIZE>
@@ -105,7 +136,7 @@ namespace algae::dsp::core::math{
 
     template<typename sample_t, typename frequency_t>
     const sample_t tanh(const sample_t& phase){
-        return math::tanh(phase);
+        return std::tanh(phase);
     }
 
     template<typename sample_t, size_t BLOCKSIZE>
@@ -115,7 +146,7 @@ namespace algae::dsp::core::math{
 
     template<typename sample_t, typename frequency_t>
     const sample_t sqrt(const sample_t& phase){
-        return math::sqrt(phase);
+        return std::sqrt(phase);
     }
 
     template<typename sample_t, size_t BLOCKSIZE>
@@ -135,7 +166,7 @@ namespace algae::dsp::core::math{
 
 
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const sample_t wrap(const sample_t& x){
         return x-floor(x);
     }
@@ -188,18 +219,16 @@ namespace algae::dsp::core::math{
 
 
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const sample_t wrapat(const sample_t& x, const sample_t& y){
         return wrap(x)/y;
     }
 
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const sample_t fmod(const sample_t& x, const sample_t& y){
         return wrap(x/y)*y;
     }
-
-
 
     template<typename sample_t>
     const sample_t multiply(const sample_t& lhs,const sample_t& rhs){
