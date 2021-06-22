@@ -164,8 +164,6 @@ namespace algae::dsp::core::math{
         return unary_block_op<sample_t,BLOCKSIZE,abs<sample_t>>(x);
     };
 
-
-
     template<typename sample_t>
     const sample_t wrap(const sample_t& x){
         return x-floor(x);
@@ -195,7 +193,6 @@ namespace algae::dsp::core::math{
     const inline AudioBlock<sample_t, BLOCKSIZE> clamp( const sample_t& x, const AudioBlock<sample_t,BLOCKSIZE>& y) {
         return binary_block_op<sample_t,BLOCKSIZE,clamp<sample_t>>(x,y);
     };
-
 
     template<typename sample_t, typename frequency_t>
     const sample_t wrapto(const sample_t& x, const sample_t& y){
@@ -253,5 +250,11 @@ namespace algae::dsp::core::math{
     template<typename sample_t>
     const sample_t power(const sample_t& lhs,const sample_t& rhs){
         return pow(lhs,rhs);
+    }
+
+    template<typename sample_t>
+    const inline sample_t lerp(sample_t origin, sample_t dest, sample_t amt){
+        amt = (amt>1)?1:(amt<0)?0:amt;
+        return origin + amt*(dest-origin);
     }
 }
