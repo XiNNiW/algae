@@ -23,10 +23,10 @@ namespace algae::dsp::core::units{
         return ms*sampleRate*SECONDS_PER_MILLISECOND;
     };
 
- // implementation borrowed from Miller Puckette's PD
+    #define LOGTEN  2.302585092994046
+    // implementation borrowed from Miller Puckette's PD
     template<typename sample_t>
     const inline sample_t dbtorms(sample_t db){
-        const sample_t LOGTEN = 2.302585092994046;
         if (db <= 0){
             return(0);
         }
@@ -36,5 +36,32 @@ namespace algae::dsp::core::units{
                 db = 485;
         }
         return (exp((LOGTEN * 0.05) * (db-100.)));
+    }
+    //implementation borrowed from Miller Puckette's Pure Data project
+
+    template<typename sample_t>
+    const inline sample_t dbtopow(sample_t db){
+        if (db <= 0)
+            return(0);
+        else
+        {
+            if (db > 870)
+                db = 870;
+            return (exp((LOGTEN * 0.1) * (db-100.)));
+        }
+
+    }
+
+    //Implementation borrowed from Miller Puckette's Pure Data
+    template<typename sample_t>
+    const inline sample_t rmstodb(sample_t rms){
+
+        if (rms <= 0) return (0);
+        else
+        {
+            sample_t val = 100 + 20./LOGTEN * log(rms);
+            return (val < 0 ? 0 : val);
+        }
+    
     }
 }

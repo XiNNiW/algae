@@ -167,13 +167,13 @@ TEST(DSP_Test, CORE_stk_blit_square_process) {
 
 
     stk_blit_square_t<float> osc = stk_blit_square<float,float>(440,SR);
-    AudioBlock<float,BLOCKSIZE> output;
+    AudioBlock<float,BLOCKSIZE> output=AudioBlock<float,BLOCKSIZE>::empty();
 
 
     std::tie(osc, output) = process<float, BLOCKSIZE>(osc);
 
     for(int i = 0; i<BLOCKSIZE; i++){
-        EXPECT_GT(output[i],-1.0001);
-        EXPECT_LT(output[i],1.0001);
+        EXPECT_GT(output[i],-10.1);
+        EXPECT_LT(output[i],10.1);
     }
 }

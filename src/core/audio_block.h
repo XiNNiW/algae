@@ -10,7 +10,9 @@ namespace algae::dsp::core{
         public:
             static inline const AudioBlock<sample_t,BLOCK_SIZE> empty() {
                 AudioBlock<sample_t,BLOCK_SIZE> block;
-                block*=0;
+                for(size_t samp_idx=0;samp_idx<BLOCK_SIZE;samp_idx++){
+                    block[samp_idx]=0;
+                }
                 return block;
             }
 

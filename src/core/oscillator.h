@@ -255,20 +255,17 @@ namespace algae::dsp::core::oscillator{
     struct stk_blit_square_t{
         int m;
         sample_t phase_increment;
-        sample_t phase;
+        sample_t phase=0;
         sample_t p;
-        sample_t c2;
         sample_t a;
-        sample_t state;
-        sample_t lastFrame;
-        sample_t last_blit_output;
-        sample_t dc_blocker_x1;
+        sample_t state=0;
+        sample_t last_blit_output=0;
+        sample_t dc_blocker_x1=0;
     };
     template<typename sample_t, typename frequency_t>
     stk_blit_square_t<sample_t> setFrequency(stk_blit_square_t<sample_t> square, frequency_t frequency, frequency_t sampleRate){
 
         square.p = 0.5*sampleRate/frequency;
-        // square.c2 = 1/square.p;
         square.phase_increment = M_PI/square.p;
 
         int max_harmonics = floor(0.5*square.p);
@@ -288,29 +285,30 @@ namespace algae::dsp::core::oscillator{
     }
 
     template<typename sample_t>
-    const inline stk_blit_square_t<sample_t> process(stk_blit_square_t<sample_t> square){
+    const inline stk_blit_square_t<sample_t> process(stk_blit_square_t<sample_t> sq){
         
-        sample_t tmp = square.last_blit_output;
-        sample_t denominator = sin( square.phase );
-        if ( fabs(denominator) <= std::numeric_limits<sample_t>::epsilon() )
-            if ( square.phase < 0.1f || square.phase > TWO_PI - 0.1 )
-                square.last_blit_output = square.a;
+        sample_t tmp = sq.last_blit_output;
+        sample_t denominator = sin( sq.phase );
+        if ( fabs(denominator) < std::numeric_limits<sample_t>::epsilon() )
+            if ( sq.phase < 0.1 || sq.phase > TWO_PI - 0.1 )
+                sq.last_blit_output = sq.a;
             else
-                square.last_blit_output = -square.a;
+                sq.last_blit_output = -sq.a;
         else {
-            square.last_blit_output =  sin( square.m * square.phase );
-            square.last_blit_output /= square.p * denominator;
+            sq.last_blit_output =  sin( sq.m * sq.phase );
+            sq.last_blit_output /= sq.p * denominator;
         }
 
-        square.last_blit_output += tmp;
-        square.state = square.last_blit_output - square.dc_blocker_x1 + 0.999*square.state;
+        sq.last_blit_output += tmp;
+        sq.state = sq.last_blit_output - sq.dc_blocker_x1 + 0.999*sq.state;
 
-        square.dc_blocker_x1 = square.last_blit_output;
+        sq.dc_blocker_x1 = sq.last_blit_output;
 
-        square.phase += square.phase_increment;
-        if ( square.phase >= TWO_PI ) square.phase -= TWO_PI;
+        sq.phase += sq.phase_increment;
+        if ( sq.phase >= TWO_PI ) sq.phase -= TWO_PI;
+        // if ( sq.phase >= TWO_PI ) sq.phase -= TWO_PI;
             
-        return square;
+        return sq;
     }
 
     template<typename sample_t, size_t BLOCKSIZE>

@@ -58,6 +58,9 @@ TEST(DSP_Test, CORE_mtof) {
     EXPECT_FLOAT_EQ(523.25116, mtof<double>(72.0));
 
 
+    EXPECT_FLOAT_EQ(8.1757994, mtof<double>(0));
+
+
 
 }
 
