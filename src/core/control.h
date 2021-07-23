@@ -82,16 +82,16 @@ namespace algae::dsp::core::control{
 
     template<typename sample_t>
     struct adsr_params_t {
-        size_t attack;
-        size_t decay;
-        sample_t sustain;
-        size_t release;
+        size_t attack=20;
+        size_t decay=150;
+        sample_t sustain=0.77;
+        size_t release=100;
     };
 
     template<typename sample_t>
     struct adsr_t{
         ramp_t<sample_t> env;
-        sample_t last;
+        sample_t last=0;
         static inline const adsr_t<sample_t> process( 
             const adsr_t<sample_t>& state, 
             const bool& trig, 

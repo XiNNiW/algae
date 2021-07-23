@@ -139,7 +139,6 @@ namespace algae::dsp::core::oscillator{
 
     };
 
-
     template<typename sample_t, size_t TABLE_SIZE, size_t BLOCK_SIZE>
     struct sineOsc{
         inline static const std::pair<sample_t, AudioBlock<sample_t,BLOCK_SIZE>>process(sample_t phase, const sample_t& phi){
@@ -151,7 +150,6 @@ namespace algae::dsp::core::oscillator{
             return std::pair(phase, output);
         }
     };
-   
 
     template<typename sample_t, int TABLE_SIZE>
     struct cos_t{
@@ -165,11 +163,9 @@ namespace algae::dsp::core::oscillator{
     template<typename sample_t>
     struct cos_t<sample_t, 0>{
         inline static const sample_t lookup(const sample_t& phase){
-            return cos(phase);
+            return cos(TWO_PI*phase);
         }
     };
-
-
 
     template<typename sample_t>
     const sample_t noise(){
@@ -197,6 +193,7 @@ namespace algae::dsp::core::oscillator{
         sample_t lastFrame;
         
     };
+
     template<typename sample_t, typename frequency_t>
     const inline stk_blit_saw_t<sample_t> setFrequency(stk_blit_saw_t<sample_t> saw, const frequency_t& frequency, const frequency_t& sampleRate){
 
@@ -239,6 +236,7 @@ namespace algae::dsp::core::oscillator{
         saw.lastFrame = tmp;
         return saw;
     }
+
     template<typename sample_t, size_t BLOCKSIZE>
     const inline std::pair<stk_blit_saw_t<sample_t>,AudioBlock<sample_t,BLOCKSIZE>> process(stk_blit_saw_t<sample_t> saw) {
         
@@ -262,6 +260,7 @@ namespace algae::dsp::core::oscillator{
         sample_t last_blit_output=0;
         sample_t dc_blocker_x1=0;
     };
+
     template<typename sample_t, typename frequency_t>
     stk_blit_square_t<sample_t> setFrequency(stk_blit_square_t<sample_t> square, frequency_t frequency, frequency_t sampleRate){
 
@@ -322,10 +321,6 @@ namespace algae::dsp::core::oscillator{
         
         return std::pair(sq,output);
     }
-
-
-
-    
 
 }
 
