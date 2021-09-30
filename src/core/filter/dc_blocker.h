@@ -1,4 +1,5 @@
 #include <math.h>
+#pragma once
 namespace algae::dsp::core::filter{
 
     // Yates and Lyons, DC Blocker Algorithms, http://www.digitalsignallabs.com/downloads/dcblock.pdf

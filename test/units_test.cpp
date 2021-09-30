@@ -64,13 +64,13 @@ TEST(DSP_Test, CORE_mtof) {
 
 }
 
-using algae::dsp::core::units::beats;
+using algae::dsp::core::units::beatsToSamples;
 TEST(DSP_Test, CORE_beats) { 
     
     double bpm = 120;
     double num_beats = 4;
 
-    ASSERT_FLOAT_EQ(96000, beats(num_beats,bpm,48000));
+    ASSERT_FLOAT_EQ(96000, beatsToSamples(num_beats,bpm,48000));
 
 }
 
