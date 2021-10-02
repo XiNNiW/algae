@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../src/core/filter/dc_blocker.h"
+#include "../../src/core/filter/dc_blocker.h"
 #include <math.h>
 
 using algae::dsp::core::filter::dc_block_t;

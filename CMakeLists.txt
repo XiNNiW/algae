@@ -51,17 +51,21 @@ install(FILES ${PROJECT_SOURCE_DIR}/src/algae.h DESTINATION include)
 configure_file(algae.pc.in algae.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/algae.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 
+file(GLOB_RECURSE TEST_FILES
+  "${TEST_DIR}/**/*_test.cpp",
+  "${TEST_DIR}/*_test.cpp"
 
+)
 
 #Tests
 add_executable( AlgaeTests 
-    ${TEST_DIR}/math_functions_test.cpp
-    ${TEST_DIR}/oscillator_test.cpp
-    ${TEST_DIR}/filter_test.cpp
-    ${TEST_DIR}/dc_blocker_test.cpp
-    ${TEST_DIR}/audio_block_test.cpp
-    ${TEST_DIR}/control_test.cpp
-    ${TEST_DIR}/units_test.cpp
+${TEST_FILES}
+    # ${TEST_DIR}/math_functions_test.cpp
+    # ${TEST_DIR}/oscillator_test.cpp
+    # ${TEST_DIR}/dc_blocker_test.cpp
+    # ${TEST_DIR}/audio_block_test.cpp
+    # ${TEST_DIR}/control_test.cpp
+    # ${TEST_DIR}/units_test.cpp
 )
 # target_include_directories(AlgaeTests PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(AlgaeTests algae)

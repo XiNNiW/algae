@@ -1,29 +1,9 @@
 #include <gtest/gtest.h>
-#include "../src/core/units.h"
+#include "../../src/core/units.h"
 #include <iostream>
 
 using algae::dsp::core::units::msToSamples;
 using algae::dsp::core::units::mtof;
-
-
-TEST(DSP_Test, CORE_mstosamps) { 
-    
-    double ms = 1000.0;
-    double sample_rate = 44100;
-
-    ASSERT_FLOAT_EQ(44100.0, msToSamples(ms,sample_rate));
-
-    ms = 500.0;
-    sample_rate = 44100;
-
-    ASSERT_FLOAT_EQ(22050.0, msToSamples(ms,sample_rate));
-
-    ms = 1000;
-    sample_rate = 8000.0;
-
-    ASSERT_FLOAT_EQ(8000.0, msToSamples(ms,sample_rate));
-
-}
 
 TEST(DSP_Test, CORE_mtof) { 
     /*
@@ -63,24 +43,3 @@ TEST(DSP_Test, CORE_mtof) {
 
 
 }
-
-using algae::dsp::core::units::beatsToSamples;
-TEST(DSP_Test, CORE_beats) { 
-    
-    double bpm = 120;
-    double num_beats = 4;
-
-    ASSERT_FLOAT_EQ(96000, beatsToSamples(num_beats,bpm,48000));
-
-}
-
-using algae::dsp::core::units::dbtorms;
-TEST(DSP_Test, CORE_dbtorms) { 
-    
-    double db = 100;
-    double rms = 1;
-
-    ASSERT_FLOAT_EQ(rms, dbtorms(db));
-
-}
-

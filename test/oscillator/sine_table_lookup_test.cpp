@@ -1,19 +1,9 @@
 #include <gtest/gtest.h>
 #include <iostream>
-#include "../src/shell/dsp_graph.h"
-#include "../src/shell/math_functions.h"
-#include "../src/shell/oscillator.h"
-#include "../src/core/audio_block.h"
-#include "../src/core/oscillator.h"
+#include "../../src/core/audio_block.h"
+#include "../../src/core/oscillator.h"
 
 using algae::dsp::core::AudioBlock;
-using algae::dsp::shell::dsp_node;
-using algae::dsp::shell::connect;
-using algae::dsp::shell::math::constant_node;
-using algae::dsp::shell::oscillator::phasor;
-using algae::dsp::shell::oscillator::osc;
-
-// 
 
 
 
@@ -94,27 +84,6 @@ TEST(DSP_Test, CORE_sin_t_template_specialized) {
 
 }
 
-using algae::dsp::core::oscillator::factorial_t;
-TEST(DSP_Test, CORE_factorial_t) {
-    double expected;
-    double actual;
-
-    expected = 1;
-    actual = factorial_t<double,1>::result;
-    EXPECT_FLOAT_EQ(expected, actual);
-
-    expected = 2;
-    actual = factorial_t<double,2>::result;
-    EXPECT_FLOAT_EQ(expected, actual);
-
-    expected = 3*2*1;
-    actual = factorial_t<double,3>::result;
-    EXPECT_FLOAT_EQ(expected, actual);
-
-    expected = 4*3*2*1;
-    actual = factorial_t<double,4>::result;
-    EXPECT_FLOAT_EQ(expected, actual);
-}
 
 using algae::dsp::core::oscillator::sineOsc;
 TEST(DSP_Test, CORE_sine_t_process) {
@@ -132,48 +101,5 @@ TEST(DSP_Test, CORE_sine_t_process) {
     for(int i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);
         EXPECT_LT(output[i],1.0001);
-    }
-}
-
-using algae::dsp::core::oscillator::stk_blit_saw_t;
-using algae::dsp::core::oscillator::stk_blit_saw;
-using algae::dsp::core::oscillator::process;
-TEST(DSP_Test, CORE_stk_blit_saw_process) {
- // what is a compelling way to test these? i should probably just sit down and do the math
-    // in the mean time i just want some verification that they don't blow up when you hook them up
-    constexpr size_t BLOCKSIZE = 64;
-    constexpr float SR = 48000;
-
-
-    stk_blit_saw_t<float> osc = stk_blit_saw<float,float>(440,SR);
-    AudioBlock<float,BLOCKSIZE> output;
-
-
-    std::tie(osc, output) = process<float, BLOCKSIZE>(osc);
-
-    for(int i = 0; i<BLOCKSIZE; i++){
-        EXPECT_GT(output[i],-1.0001);
-        EXPECT_LT(output[i],1.0001);
-    }
-}
-
-using algae::dsp::core::oscillator::stk_blit_square_t;
-using algae::dsp::core::oscillator::stk_blit_square;
-TEST(DSP_Test, CORE_stk_blit_square_process) {
- // what is a compelling way to test these? i should probably just sit down and do the math
-    // in the mean time i just want some verification that they don't blow up when you hook them up
-    constexpr size_t BLOCKSIZE = 64;
-    constexpr float SR = 48000;
-
-
-    stk_blit_square_t<float> osc = stk_blit_square<float,float>(440,SR);
-    AudioBlock<float,BLOCKSIZE> output=AudioBlock<float,BLOCKSIZE>::empty();
-
-
-    std::tie(osc, output) = process<float, BLOCKSIZE>(osc);
-
-    for(int i = 0; i<BLOCKSIZE; i++){
-        EXPECT_GT(output[i],-10.1);
-        EXPECT_LT(output[i],10.1);
     }
 }
