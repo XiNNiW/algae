@@ -12,6 +12,7 @@ using algae::dsp::core::filter::biquad_t;
 using algae::dsp::core::filter::lowpass;
 
 using algae::dsp::core::filter::chaotic_resonator_t;
+using algae::dsp::core::filter::update_coefficients;
 // using algae::dsp::core::filter::process_chaos;
 using algae::dsp::core::oscillator::cos_t;
 

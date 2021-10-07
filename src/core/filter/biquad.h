@@ -21,8 +21,8 @@ namespace algae::dsp::core::filter {
     ) {
         q = q<=0?0.01:q;
         const frequency_t w0 = cutoff * TWO_PI / sampleRate;
-        const frequency_t a = fabs(sin(w0) / (2 * q));
-        const frequency_t c = cos(w0);
+        const frequency_t a  = fabs(sin(w0) / (2 * q));
+        const frequency_t c  = cos(w0);
         const frequency_t b0 = (1 - c) / 2, b1 = 1 - c, b2 = (1 - c) / 2;
         const frequency_t a0 = 1 + a, a1 = -2 * c, a2 = 1 - a;
 

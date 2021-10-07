@@ -15,6 +15,23 @@ enable_testing()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
+
+find_library(
+        FFTW_DOUBLE_LIB
+        NAMES "fftw3"
+        PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
+        )
+find_path(FFTW_INCLUDE_DIRS
+    NAMES "fftw3.h"
+    PATHS ${PKG_FFTW_INCLUDE_DIRS} ${INCLUDE_INSTALL_DIR}
+)
+
+add_library(FFTW::Double INTERFACE IMPORTED)
+set_target_properties(FFTW::Double
+    PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${FFTW_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "${FFTW_DOUBLE_LIB}"
+    )
+
 #Algae (DSP)
 add_library(algae STATIC
              ${PROJECT_SOURCE_DIR}/src/algae.cpp )
@@ -25,6 +42,7 @@ target_include_directories(algae
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
                            "$<INSTALL_INTERFACE:include>"
 )
+target_link_libraries(algae FFTW::Double)
 
 set(cmake_package_name algae)
 # set(targets_export_name ${cmake_package_name}Targets CACHE INTERNAL "")
