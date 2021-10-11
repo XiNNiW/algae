@@ -2,18 +2,18 @@
 #include <iostream>
 #include "../../src/core/audio_block.h"
 #include "../../src/core/oscillator.h"
+#include "sine_table_lookup_test.h"
+#include "../frequency_test_utilities.h"
 
 using algae::dsp::core::AudioBlock;
 
 
 
 using algae::dsp::core::oscillator::makeSineTable;
-// using algae::dsp::core::oscillator::makeSineTable_debug;
 const std::array<double, 4> sine_4 = makeSineTable<double, 4>(); 
 const std::array<double, 4> expected_sine_4 = {0, 1, 0, -1}; 
 //sine wavetable
 TEST(DSP_Test, CORE_makeSineWave) {
-    // const std::array<double, 4> sine_4 = makeSineTable_debug<double, 4>(); 
 
     size_t idx=0;
     double error = 0.0001;
@@ -84,11 +84,8 @@ TEST(DSP_Test, CORE_sin_t_template_specialized) {
 
 }
 
-
 using algae::dsp::core::oscillator::sineOsc;
 TEST(DSP_Test, CORE_sine_t_process) {
-    // what is a compelling way to test these? i should probably just sit down and do the math
-    // in the mean time i just want some verification that they don't blow up when you hook them up
     constexpr size_t BLOCKSIZE = 64;
     constexpr float SR = 48000;
 
@@ -103,3 +100,41 @@ TEST(DSP_Test, CORE_sine_t_process) {
         EXPECT_LT(output[i],1.0001);
     }
 }
+
+using algae::dsp::core::oscillator::compute_phase_increment;
+TEST_P(SineOscFixture, SpectraConformsToKnownSpectra){
+    
+    const auto periodsInFrame = GetParam();
+    // std::cout << "HARMONIC UNDER TEST: " << periodsPerBin << std::endl;
+
+    const double expectedBaseFreq = periodsInFrame/double(FREQ_BINS/SAMPLE_RATE);
+    const size_t bin_of_fundamental_freq = expectedBaseFreq/resolution;
+    double phi = compute_phase_increment(expectedBaseFreq,SAMPLE_RATE);
+    const auto [finalPhase, sineTimeseries] = sineOsc<double, 1024, 2*FREQ_BINS>::process(0,phi);
+
+    const std::array<double, FREQ_BINS> actualSpectra = compute_whole_spectrum_magnitude<double, FREQ_BINS>(sineTimeseries, SAMPLE_RATE);
+
+    const double quietInDB = -27;
+
+    for(size_t bin=0; bin < bin_of_fundamental_freq; bin++){
+        EXPECT_LT(actualSpectra[bin],quietInDB);
+
+    }
+
+    EXPECT_NEAR(0, actualSpectra[bin_of_fundamental_freq],3);
+
+    for(size_t bin=bin_of_fundamental_freq+1; bin < FREQ_BINS; bin++){
+        EXPECT_LT(actualSpectra[bin],quietInDB);
+
+    }
+    // std::cout<<std::endl;   
+    // EXPECT_EQ(1,0); 
+    
+}
+
+INSTANTIATE_TEST_CASE_P(
+        SpectraConformsToKnownSpectra,
+        SineOscFixture,
+        ::testing::Values(
+               4,8,16
+        ));

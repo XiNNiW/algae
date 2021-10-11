@@ -39,7 +39,7 @@ namespace algae::dsp::core::filter{
         filter.b1d = 2*(b0 - b1*c + b2*csq)/d;
         filter.b2d = (b0 - b1*c + b2*csq)/d;
         filter.a1d =  2*(a0 - csq)/d;
-        filter.a2d =(a0 - a1*c + csq)/d;
+        filter.a2d = (a0 - a1*c + csq)/d;
 
         return filter;
     }
@@ -71,7 +71,8 @@ namespace algae::dsp::core::filter{
     }
 
     template<typename sample_t, size_t BLOCK_SIZE>
-    const inline std::pair<reson_bp_t<sample_t>, AudioBlock<sample_t,BLOCK_SIZE>> process(reson_bp_t<sample_t> r, const AudioBlock<sample_t, BLOCK_SIZE>& input){
+    const inline std::pair<reson_bp_t<sample_t>, AudioBlock<sample_t,BLOCK_SIZE>> 
+    process(reson_bp_t<sample_t> r, const AudioBlock<sample_t, BLOCK_SIZE>& input){
         
         AudioBlock<sample_t,BLOCK_SIZE> output;
         for(size_t idx=0; idx<BLOCK_SIZE; idx++){

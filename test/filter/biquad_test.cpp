@@ -100,7 +100,6 @@ TEST(DSP_Test, CORE_biquad_lowpass_amplitude_response) {
         0.0000103679451089572
     };
     for(size_t bin_idx=0; bin_idx<NUM_BINS; bin_idx++){
-        // std::cout << expected_response[bin_idx] << " , " << amp_response[bin_idx] << std::endl;
         EXPECT_NEAR(expected_response[bin_idx], amp_response[bin_idx],0.01);
     }
 }
@@ -216,13 +215,6 @@ TEST(DSP_Test, CORE_biquad_bandpass_amplitude_response) {
 
     biquad_t<double> filter;
     filter = bandpass<double,double>(filter, 4000, 0.8, 48000);
-
-    std::cout << "a0 = " << 1  << std::endl;
-    std::cout << "a1 = " << filter.a1  << std::endl;
-    std::cout << "a2 = " << filter.a2  << std::endl;
-    std::cout << "b0 = " << filter.b0  << std::endl;
-    std::cout << "b1 = " << filter.b1  << std::endl;
-    std::cout << "b2 = " << filter.b2  << std::endl;
     
     std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, biquad_t<double>, NUM_BINS, FRAME_SIZE>(filter, SAMPLE_RATE);
 
@@ -262,7 +254,6 @@ TEST(DSP_Test, CORE_biquad_bandpass_amplitude_response) {
         0.016454965933504
     };
     for(size_t bin_idx=0; bin_idx<NUM_BINS; bin_idx++){
-        // std::cout << expected_response[bin_idx] << " , " << amp_response[bin_idx] << std::endl;
         EXPECT_NEAR(expected_response[bin_idx], amp_response[bin_idx],0.01);
     }
 }

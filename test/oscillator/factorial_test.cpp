@@ -6,10 +6,6 @@
 
 using algae::dsp::core::AudioBlock;
 
-
-// 
-
-
 using algae::dsp::core::oscillator::factorial_t;
 TEST(DSP_Test, CORE_factorial_t) {
     double expected;

@@ -4,11 +4,11 @@
 namespace algae::dsp::core::oscillator {
    template<typename sample_t>
     struct stk_blit_square_t{
-        int m;
-        sample_t phase_increment;
+        int m=0;
+        sample_t phase_increment=0;
         sample_t phase=0;
-        sample_t p;
-        sample_t a;
+        sample_t p=0;
+        sample_t a=0;
         sample_t state=0;
         sample_t last_blit_output=0;
         sample_t dc_blocker_x1=0;

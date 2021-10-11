@@ -4,14 +4,14 @@
 namespace algae::dsp::core::oscillator {
     template<typename sample_t>
     struct stk_blit_saw_t{
-        int m;
-        sample_t phase_increment;
-        sample_t phase;
-        sample_t p;
-        sample_t c2;
-        sample_t a;
-        sample_t state;
-        sample_t lastFrame;
+        int m=0;
+        sample_t phase_increment=0;
+        sample_t phase=0;
+        sample_t p=0;
+        sample_t c2=0;
+        sample_t a=0;
+        sample_t state=0;
+        sample_t lastFrame=0;
         
     };
 
