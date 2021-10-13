@@ -53,7 +53,7 @@ TEST(DSP_Test, CORE_resonant_bandpass_amplitude_response) {
     std::cout << "b1 = " << filter.b1d  << std::endl;
     std::cout << "b2 = " << filter.b2d  << std::endl;
     
-    std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, reson_bp_t<double>, NUM_BINS, FRAME_SIZE>(filter, SAMPLE_RATE);
+    std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, reson_bp_t<double>, NUM_BINS>(filter, SAMPLE_RATE);
 
     //expected values computed in octave using freqz function to evaluate filter response based on coefficients
     std::array<double, NUM_BINS> expected_response = {

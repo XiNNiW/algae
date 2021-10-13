@@ -4,7 +4,7 @@
 namespace algae::dsp::core::oscillator {
     template<typename sample_t>
     const sample_t noise(){
-        return  2.0 * (( rand() /  RAND_MAX) - 0.5);
+        return  2.0 * (( static_cast<sample_t>(rand()) /  static_cast<sample_t>(RAND_MAX)) - 0.5);
     }
 
     template<typename sample_t, size_t BLOCKSIZE>

@@ -55,14 +55,13 @@ TEST(DSP_Test, CORE_biquad_lowpass_coefficients) {
 }
 
 TEST(DSP_Test, CORE_biquad_lowpass_amplitude_response) { 
-    constexpr size_t FRAME_SIZE = 128;
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 
     biquad_t<double> filter;
     filter = lowpass<double,double>(filter, 1000, 0.5, 48000);
     
-    std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, biquad_t<double>, NUM_BINS, FRAME_SIZE>(filter, SAMPLE_RATE);
+    std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, biquad_t<double>, NUM_BINS>(filter, SAMPLE_RATE);
 
     //expected values computed in octave using freqz function to evaluate filter response based on coefficients
     std::array<double, NUM_BINS> expected_response = {
@@ -133,14 +132,13 @@ TEST(DSP_Test, CORE_biquad_highpass) {
 }
 
 TEST(DSP_Test, CORE_biquad_highpass_amplitude_response) { 
-    constexpr size_t FRAME_SIZE = 128;
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 
     biquad_t<double> filter;
     filter = highpass<double,double>(filter, 2000, 0.5, 48000);
     
-    std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, biquad_t<double>, NUM_BINS, FRAME_SIZE>(filter, SAMPLE_RATE);
+    std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, biquad_t<double>, NUM_BINS>(filter, SAMPLE_RATE);
 
     //expected values computed in octave using freqz function to evaluate filter response based on coefficients
     std::array<double, NUM_BINS> expected_response = {
@@ -209,14 +207,13 @@ TEST(DSP_Test, CORE_biquad_bandpass) {
 }
 
 TEST(DSP_Test, CORE_biquad_bandpass_amplitude_response) { 
-    constexpr size_t FRAME_SIZE = 128;
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 
     biquad_t<double> filter;
     filter = bandpass<double,double>(filter, 4000, 0.8, 48000);
     
-    std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, biquad_t<double>, NUM_BINS, FRAME_SIZE>(filter, SAMPLE_RATE);
+    std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, biquad_t<double>, NUM_BINS>(filter, SAMPLE_RATE);
 
     //expected values computed in octave using freqz function to evaluate filter response based on coefficients
     std::array<double, NUM_BINS> expected_response = {

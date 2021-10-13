@@ -74,7 +74,7 @@ TEST_P(STKBlitSquareFixture, SpectraConformsToKnownSpectra){
     
     std::tie(osc, sawtoothTimeseries) = process<double, 2*FREQ_BINS>(osc);
 
-    const std::array<double, FREQ_BINS> actualSpectra = compute_whole_spectrum_magnitude<double, FREQ_BINS>(sawtoothTimeseries, SAMPLE_RATE);
+    const std::array<double, FREQ_BINS> actualSpectra = compute_whole_spectrum_magnitude_in_db<double, FREQ_BINS>(sawtoothTimeseries, SAMPLE_RATE);
 
     const double epsilonInDB = 3;
 

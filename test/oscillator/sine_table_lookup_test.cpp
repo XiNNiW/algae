@@ -112,7 +112,7 @@ TEST_P(SineOscFixture, SpectraConformsToKnownSpectra){
     double phi = compute_phase_increment(expectedBaseFreq,SAMPLE_RATE);
     const auto [finalPhase, sineTimeseries] = sineOsc<double, 1024, 2*FREQ_BINS>::process(0,phi);
 
-    const std::array<double, FREQ_BINS> actualSpectra = compute_whole_spectrum_magnitude<double, FREQ_BINS>(sineTimeseries, SAMPLE_RATE);
+    const std::array<double, FREQ_BINS> actualSpectra = compute_whole_spectrum_magnitude_in_db<double, FREQ_BINS>(sineTimeseries, SAMPLE_RATE);
 
     const double quietInDB = -27;
 
