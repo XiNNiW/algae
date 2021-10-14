@@ -2,6 +2,8 @@
 #include <tuple>
 #include <math.h>
 #include "../constants.h"
+#include "../audio_block.h"
+
 namespace algae::dsp::core::filter{
      template<typename sample_t>
     struct reson_bp_t{

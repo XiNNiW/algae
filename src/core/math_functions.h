@@ -15,7 +15,7 @@ namespace algae::dsp::core::math{
         return output;
     }
 
-    template<typename sample_t, size_t BLOCKSIZE, const sample_t (* fn)(const sample_t &)>
+    template<typename sample_t, size_t BLOCKSIZE, const sample_t (* fn)(const sample_t &, const sample_t &)>
     const inline AudioBlock<sample_t, BLOCKSIZE> binary_block_op(const AudioBlock<sample_t,BLOCKSIZE>& x,const AudioBlock<sample_t,BLOCKSIZE>& y)
     {
         AudioBlock<sample_t,BLOCKSIZE> output;
@@ -25,7 +25,7 @@ namespace algae::dsp::core::math{
         return output;
     }
 
-    template<typename sample_t, size_t BLOCKSIZE, const sample_t (* fn)(const sample_t &)>
+    template<typename sample_t, size_t BLOCKSIZE, const sample_t (* fn)(const sample_t &, const sample_t &)>
     const inline AudioBlock<sample_t, BLOCKSIZE> binary_block_op(const AudioBlock<sample_t,BLOCKSIZE>& x, const sample_t& y)
     {
         AudioBlock<sample_t,BLOCKSIZE> output;
@@ -88,14 +88,14 @@ namespace algae::dsp::core::math{
         return (x>1)?1:(x<-1)?-1:x;
     }
 
-    template<typename sample_t, size_t BLOCKSIZE>
-    const inline AudioBlock<sample_t, BLOCKSIZE> atan(const AudioBlock<sample_t,BLOCKSIZE>& x) {
-        return unary_block_op<sample_t,BLOCKSIZE,clip<sample_t>>(x);
-    };
-
     template<typename sample_t>
     const inline sample_t atan(const sample_t& x){
         return std::atan(x);
+    }
+
+    template<typename sample_t, size_t BLOCKSIZE>
+    const inline AudioBlock<sample_t, BLOCKSIZE> atan(const AudioBlock<sample_t,BLOCKSIZE>& x) {
+        return unary_block_op<sample_t,BLOCKSIZE,atan<sample_t>>(x);
     }
 
     template<typename sample_t, size_t BLOCKSIZE>
@@ -103,7 +103,7 @@ namespace algae::dsp::core::math{
         return unary_block_op<sample_t,BLOCKSIZE,clip<sample_t>>(x);
     };
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const sample_t sin(const sample_t& phase){
         return std::sin(phase);
     }
@@ -113,7 +113,7 @@ namespace algae::dsp::core::math{
         return unary_block_op<sample_t,BLOCKSIZE,sin<sample_t>>(x);
     };
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const sample_t cos(const sample_t& phase){
         return std::cos(phase);
     }
@@ -123,7 +123,7 @@ namespace algae::dsp::core::math{
         return unary_block_op<sample_t,BLOCKSIZE,cos<sample_t>>(x);
     };
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const sample_t tan(const sample_t& phase){
         return std::tan(phase);
     }
@@ -143,7 +143,7 @@ namespace algae::dsp::core::math{
         return unary_block_op<sample_t,BLOCKSIZE,tanh<sample_t>>(x);
     };
 
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const sample_t sqrt(const sample_t& phase){
         return std::sqrt(phase);
     }
@@ -179,21 +179,15 @@ namespace algae::dsp::core::math{
     }
 
     template<typename sample_t, size_t BLOCKSIZE>
-    const inline AudioBlock<sample_t, BLOCKSIZE> clamp(const AudioBlock<sample_t,BLOCKSIZE>& x, const AudioBlock<sample_t,BLOCKSIZE>& y) {
-        return binary_block_op<sample_t,BLOCKSIZE,clamp<sample_t>>(x,y);
+    const inline AudioBlock<sample_t, BLOCKSIZE> clamp(const AudioBlock<sample_t,BLOCKSIZE>& input, const AudioBlock<sample_t,BLOCKSIZE>& low, const AudioBlock<sample_t,BLOCKSIZE>& high) {
+        AudioBlock<sample_t, BLOCKSIZE> output;
+        for(size_t idx=0; idx<BLOCKSIZE; idx++){
+            output[idx] = clamp<sample_t>(input[idx],low[idx],high[idx]);
+        }
+        return output;
     };
 
-    template<typename sample_t, size_t BLOCKSIZE>
-    const inline AudioBlock<sample_t, BLOCKSIZE> clamp(const AudioBlock<sample_t,BLOCKSIZE>& x, const sample_t& y) {
-        return binary_block_op<sample_t,BLOCKSIZE,clamp<sample_t>>(x,y);
-    };
-
-    template<typename sample_t, size_t BLOCKSIZE>
-    const inline AudioBlock<sample_t, BLOCKSIZE> clamp( const sample_t& x, const AudioBlock<sample_t,BLOCKSIZE>& y) {
-        return binary_block_op<sample_t,BLOCKSIZE,clamp<sample_t>>(x,y);
-    };
-
-    template<typename sample_t, typename frequency_t>
+    template<typename sample_t>
     const sample_t wrapto(const sample_t& x, const sample_t& y){
         return wrap(x)*y;
     }
@@ -247,9 +241,14 @@ namespace algae::dsp::core::math{
     }
 
     template<typename sample_t>
-    const sample_t power(const sample_t& lhs,const sample_t& rhs){
-        return pow(lhs,rhs);
+    const sample_t pow(const sample_t& lhs,const sample_t& rhs){
+        return std::pow(lhs,rhs);
     }
+
+    template<typename sample_t, size_t BLOCKSIZE>
+    const inline AudioBlock<sample_t, BLOCKSIZE> pow(const AudioBlock<sample_t,BLOCKSIZE>& x, const AudioBlock<sample_t,BLOCKSIZE>& y) {
+        return binary_block_op<sample_t,BLOCKSIZE,pow<sample_t>>(x,y);
+    };
 
     template<typename sample_t>
     const inline sample_t lerp(sample_t origin, sample_t dest, sample_t amt){

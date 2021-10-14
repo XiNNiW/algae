@@ -28,7 +28,7 @@ TEST(DSP_Test, NoiseSpectraContainsAllFrequencies){
 
     const std::array<double, FREQ_BINS> actualSpectra = compute_whole_spectrum_magnitude_in_db<double, FREQ_BINS>(noiseTimeseries, SAMPLE_RATE);
 
-    const double epsilonInDB = 30;
+    const double epsilonInDB = 40;
 
     for(size_t bin=0; bin < FREQ_BINS; bin++){
         EXPECT_NEAR(0, actualSpectra[bin], epsilonInDB);

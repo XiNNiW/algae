@@ -98,7 +98,7 @@ namespace algae::dsp::shell::math {
     using subtraction_op = binary_op<sample_t,frequency_t,algae::dsp::core::math::subtract<sample_t>>;
 
     template<typename sample_t, typename frequency_t>
-    using power_op = binary_op<sample_t, frequency_t,algae::dsp::core::math::power<sample_t>>;
+    using power_op = binary_op<sample_t, frequency_t,algae::dsp::core::math::pow<sample_t>>;
 
 
 }

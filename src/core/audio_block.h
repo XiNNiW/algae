@@ -241,6 +241,14 @@ namespace algae::dsp::core{
             }
     };
 
+    template<typename sample_t, size_t BLOCKSIZE>
+    const inline AudioBlock<sample_t, BLOCKSIZE> makeBlock(const std::array<sample_t,BLOCKSIZE>& samples){
+        AudioBlock<sample_t, BLOCKSIZE> block;
+        for(size_t idx=0; idx<BLOCKSIZE;idx++){
+            block[idx] = samples[idx];
+        }
+        return block;
+    }
     template<typename sample_t, size_t BLOCK_SIZE>
     using StereoBlock = std::array<AudioBlock<sample_t,BLOCK_SIZE>,2>;
 }

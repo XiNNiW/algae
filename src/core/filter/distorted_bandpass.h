@@ -2,6 +2,7 @@
 #include <math.h>
 #include "resonant_bandpass.h"
 #include "../audio_block.h"
+
 namespace algae::dsp::core::filter {
      template<typename sample_t>
     struct chaotic_resonator_t {

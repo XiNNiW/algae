@@ -1,4 +1,5 @@
 #pragma once
+#include "../audio_block.h"
 
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
 namespace algae::dsp::core::filter {

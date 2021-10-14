@@ -517,7 +517,7 @@ namespace algae::dsp::core::experimental{
     }
 
     using algae::dsp::core::filter::dc_block_t;
-    using algae::dsp::core::filter::process_dc_blocker;
+    using algae::dsp::core::filter::process;
 
     using algae::dsp::core::filter::leaky_integrator_t;
     using algae::dsp::core::filter::leaky_integrator;
