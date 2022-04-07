@@ -5,7 +5,6 @@ using algae::dsp::core::AudioBlock;
 
 TEST(DSP_Test, Core_block_empty) { 
     
-   constexpr auto SR = 48000.0;
    constexpr auto BLOCKSIZE = 64;
 
    AudioBlock<float,BLOCKSIZE> x = AudioBlock<float, BLOCKSIZE>::empty();
@@ -18,7 +17,6 @@ TEST(DSP_Test, Core_block_empty) {
 
 TEST(DSP_Test, Core_block_multiply) { 
     
-   constexpr auto SR = 48000.0;
    constexpr auto BLOCKSIZE = 64;
 
    AudioBlock<float,BLOCKSIZE> x;
@@ -58,7 +56,6 @@ TEST(DSP_Test, Core_block_multiply) {
 
 TEST(DSP_Test, Core_block_divide) { 
     
-   constexpr auto SR = 48000.0;
    constexpr auto BLOCKSIZE = 64;
 
    AudioBlock<float,BLOCKSIZE> x;
@@ -87,7 +84,6 @@ TEST(DSP_Test, Core_block_divide) {
 
 TEST(DSP_Test, Core_block_add) { 
     
-   constexpr auto SR = 48000.0;
    constexpr auto BLOCKSIZE = 64;
 
    AudioBlock<float,BLOCKSIZE> x;
@@ -116,7 +112,6 @@ TEST(DSP_Test, Core_block_add) {
 
 TEST(DSP_Test, Core_block_subtract) { 
     
-   constexpr auto SR = 48000.0;
    constexpr auto BLOCKSIZE = 64;
 
    AudioBlock<float,BLOCKSIZE> x;

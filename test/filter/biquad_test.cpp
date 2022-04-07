@@ -34,6 +34,27 @@ TEST(DSP_Test, CORE_biquad_lowpass_does_not_explode) {
     
 }
 
+TEST(DSP_Test, CORE_biquad_lowpass_does_not_explode_FLOAT) { 
+    constexpr size_t BLOCKSIZE = 64;
+    biquad_t<float> filter;
+    AudioBlock<float,BLOCKSIZE> input;
+    AudioBlock<float,BLOCKSIZE> output;
+
+    filter = lowpass<float,float>(filter,220,0.5,48000);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        input[i] = noise<float>();
+    }
+
+    std::tie(filter,output) = process<float>(filter,input);
+
+    for(int i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-1.0001);
+        EXPECT_LT(output[i],1.0001);
+    }
+    
+}
+
 TEST(DSP_Test, CORE_biquad_lowpass_coefficients) {
     /*
     https://www.earlevel.com/main/2010/12/20/biquad-calculator/
@@ -108,9 +129,8 @@ TEST(DSP_Test, CORE_biquad_lowpass_amplitude_response) {
 
 using algae::dsp::core::filter::highpass;
 
-TEST(DSP_Test, CORE_biquad_highpass) { 
-    // what is a compelling way to test these? i should probably just sit down and do the math
-    // in the mean time i just want some verification that they don't blow up when you hook them up
+TEST(DSP_Test, CORE_biquad_highpass_does_not_explode) { 
+
     constexpr size_t BLOCKSIZE = 64;
     biquad_t<double> filter;
     AudioBlock<double,BLOCKSIZE> input;
@@ -183,9 +203,8 @@ TEST(DSP_Test, CORE_biquad_highpass_amplitude_response) {
 
 using algae::dsp::core::filter::bandpass;
 
-TEST(DSP_Test, CORE_biquad_bandpass) { 
-    // what is a compelling way to test these? i should probably just sit down and do the math
-    // in the mean time i just want some verification that they don't blow up when you hook them up
+TEST(DSP_Test, CORE_biquad_bandpass_does_not_explode) { 
+
     constexpr size_t BLOCKSIZE = 64;
     biquad_t<double> filter;
     AudioBlock<double,BLOCKSIZE> input;
@@ -215,7 +234,7 @@ TEST(DSP_Test, CORE_biquad_bandpass_amplitude_response) {
     
     std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, biquad_t<double>, NUM_BINS>(filter, SAMPLE_RATE);
 
-    //expected values computed in octave using freqz function to evaluate filter response based on coefficients
+    //expected values computed in octave using octave freqz function to evaluate filter response based on coefficients
     std::array<double, NUM_BINS> expected_response = {
         0,
         0.230753381267204,

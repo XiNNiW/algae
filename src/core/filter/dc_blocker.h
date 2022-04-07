@@ -39,7 +39,7 @@ namespace algae::dsp::core::filter{
             output[idx] = state.y1;
         }
 
-        return std::pair(state,output);
+        return std::pair<dc_block_t<sample_t>, AudioBlock<sample_t, BLOCK_SIZE>>(state,output);
     }
 
 }
