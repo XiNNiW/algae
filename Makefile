@@ -3,6 +3,7 @@
 #project name
 TARGET      = libalgae.a
 TEST_TARGET = algae_test
+INSTALL_DIR = /usr/local/lib/
 
 #directories
 BIN  	= bin
@@ -16,7 +17,8 @@ TEST_OBJ = $(BIN)
 CODE_EXT = cpp
 
 #dependencies
-#TEST_FRAMEWORK = gtest
+TEST_DEPENDENCIES_COMPILE = -Lgtest/lib -lfftw3
+TEST_DEPENDENCIES_LINK = -Lgtest/lib -lgtest_main -lgtest -lfftw3
 
 #files
 SOURCES  := $(wildcard $(SRC)/*.$(CODE_EXT))
@@ -29,14 +31,15 @@ TEST_OBJECTS := $(TEST_SOURCES:$(TEST_SRC)/%.$(CODE_EXT)=$(TEST_OBJ)/%.o)
 
 #compiler and settings
 CC  = g++
+CC_VERSION = c++17
 
-CFLAGS = -std=c++17 -Wall -I. -I$(INCLUDE)
-CFLAGS_TEST = -std=c++17 -Wall -I. -lm -Lgtest/lib -lfftw3 -I$(TEST_INCLUDES) -L./$(BIN) -lalgae
+CFLAGS = -std=$(CC_VERSION) -Wall -I. -I$(INCLUDE)
+CFLAGS_TEST = -std=$(CC_VERSION) -Wall -I. -lm $(TEST_DEPENDENCIES_COMPILE) -I$(TEST_INCLUDES) -L./$(BIN) -lalgae
 
 #linker and settings
 LINKER = g++
 # LFLAGS = -Wall -I. -lm -lc -I$(INCLUDES)
-TEST_LFLAGS = -Wall -I. -lm -Lgtest/lib -lgtest_main -lgtest -lfftw3 -I$(TEST_INCLUDES) -L./$(BIN) -lalgae
+TEST_LFLAGS = -Wall -I. -lm $(TEST_DEPENDENCIES_LINK) -I$(TEST_INCLUDES) -L./$(BIN) -lalgae
 
 #archiver and settings
 AR  = ar
@@ -49,6 +52,9 @@ all:	$(BIN)/$(TARGET)
 
 test:   clean all $(BIN)/$(TEST_TARGET)
 		./$(BIN)/$(TEST_TARGET)
+
+install: 
+	cp $(BIN)/$(TARGET) $(INSTALL_DIR)
 
 .PHONY: clean
 clean:
