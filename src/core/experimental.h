@@ -2,7 +2,6 @@
 #include "filter.h"
 #include <math.h>
 namespace algae::dsp::core::filter{
-    
 
     template<typename sample_t>
     struct integrator_t{
@@ -126,6 +125,7 @@ namespace algae::dsp::core::filter{
 
 }
 namespace algae::dsp::core::experimental{
+    using algae::dsp::core::filter::biquad_t;
     template<typename sample_t, typename frequency_t>
     const inline biquad_t<sample_t> notch(
         biquad_t<sample_t> state,
@@ -166,6 +166,8 @@ namespace algae::dsp::core::experimental{
     }
        using algae::dsp::core::math::tanh_approx_pade;
 
+    using algae::dsp::core::filter::moog_t;
+    
     template<typename sample_t, typename frequency_t, size_t BLOCK_SIZE>
     const inline std::pair<moog_t<sample_t,frequency_t>, AudioBlock<sample_t,BLOCK_SIZE>> process(
         moog_t<sample_t,frequency_t> state,
