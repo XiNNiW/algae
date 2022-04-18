@@ -9,7 +9,7 @@ using algae::dsp::core::oscillator::makeCosTable;
 const std::array<double, 4> sine_4 = makeCosTable<double, 4>(); 
 const std::array<double, 4> expected_sine_4 = { 1, 0, -1, 0}; 
 //sine wavetable
-TEST(DSP_Test, CORE_makeCosWave) {
+TEST(Osc_Test, CORE_makeCosWave) {
 
     size_t idx=0;
     double error = 0.0001;
@@ -41,7 +41,7 @@ TEST(DSP_Test, CORE_makeCosWave) {
 using algae::dsp::core::oscillator::table_lookup_lin_interp;
 using algae::dsp::core::oscillator::update_phase;
 
-TEST(DSP_Test, CORE_lookup_cos_linear_interp) {
+TEST(Osc_Test, CORE_lookup_cos_linear_interp) {
     constexpr size_t TABLE_SIZE = 1024;
     const std::array<double, TABLE_SIZE> table = makeCosTable<double, TABLE_SIZE>(); 
 
@@ -60,7 +60,7 @@ TEST(DSP_Test, CORE_lookup_cos_linear_interp) {
 
 using algae::dsp::core::oscillator::cos_t;
 
-TEST(DSP_Test, CORE_cos_t) {
+TEST(Osc_Test, CORE_cos_t) {
     size_t idx=0;
     double val;
     double expected;
@@ -70,7 +70,7 @@ TEST(DSP_Test, CORE_cos_t) {
 
 }
 
-TEST(DSP_Test, CORE_cos_t_template_specialized) {
+TEST(Osc_Test, CORE_cos_t_template_specialized) {
     size_t idx=0;
     double val;
     double expected;

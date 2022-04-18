@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../../src/core/control.h"
+#include "algae.h"
 #include <iostream>
 
 using algae::dsp::core::control::ramp_t;

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../src/core/audio_block.h"
+#include "algae.h"
 
 using algae::dsp::core::AudioBlock;
 
@@ -9,7 +9,7 @@ TEST(DSP_Test, Core_block_empty) {
 
    AudioBlock<float,BLOCKSIZE> x = AudioBlock<float, BLOCKSIZE>::empty();
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        ASSERT_EQ(x[idx],0);
    }
 
@@ -19,10 +19,10 @@ TEST(DSP_Test, Core_block_multiply) {
     
    constexpr auto BLOCKSIZE = 64;
 
-   AudioBlock<float,BLOCKSIZE> x;
-   AudioBlock<float,BLOCKSIZE> y;
+   AudioBlock<float, BLOCKSIZE> x;
+   AudioBlock<float, BLOCKSIZE> y;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        x[idx] = 2;
        y[idx] = 3;
    }
@@ -30,25 +30,25 @@ TEST(DSP_Test, Core_block_multiply) {
     AudioBlock<float,BLOCKSIZE> output = x*y;
 
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(6, output[idx]);
    }
 
    output *= x;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(12, output[idx]);
    }
 
    output = x * 3;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(6, output[idx]);
    }
    
     output *= 2;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(12, output[idx]);
    }
 
@@ -61,7 +61,7 @@ TEST(DSP_Test, Core_block_divide) {
    AudioBlock<float,BLOCKSIZE> x;
    AudioBlock<float,BLOCKSIZE> y;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        x[idx] = 9;
        y[idx] = 3;
    }
@@ -69,13 +69,13 @@ TEST(DSP_Test, Core_block_divide) {
     AudioBlock<float,BLOCKSIZE> output = x/y;
 
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(3, output[idx]);
    }
 
    output /= y;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(1, output[idx]);
    }
 
@@ -89,7 +89,7 @@ TEST(DSP_Test, Core_block_add) {
    AudioBlock<float,BLOCKSIZE> x;
    AudioBlock<float,BLOCKSIZE> y;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        x[idx] = 9;
        y[idx] = 3;
    }
@@ -97,13 +97,13 @@ TEST(DSP_Test, Core_block_add) {
     AudioBlock<float,BLOCKSIZE> output = x+y;
 
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(12, output[idx]);
    }
 
    output += y;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(15, output[idx]);
    }
 
@@ -117,7 +117,7 @@ TEST(DSP_Test, Core_block_subtract) {
    AudioBlock<float,BLOCKSIZE> x;
    AudioBlock<float,BLOCKSIZE> y;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        x[idx] = 9;
        y[idx] = 3;
    }
@@ -125,13 +125,13 @@ TEST(DSP_Test, Core_block_subtract) {
     AudioBlock<float,BLOCKSIZE> output = x-y;
 
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(6, output[idx]);
    }
 
    output -= y;
 
-   for(size_t idx;idx<BLOCKSIZE;idx++){
+   for(size_t idx=0;idx<BLOCKSIZE;idx++){
        EXPECT_FLOAT_EQ(3, output[idx]);
    }
 

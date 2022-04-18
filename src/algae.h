@@ -1,9 +1,11 @@
 #pragma once
+#include "core/math_tools.h"
 #include "core/control.h"
 #include "core/filter.h"
-#include "core/math_functions.h"
+#include "core/math_tools.h"
 #include "core/oscillator.h"
 #include "core/units.h"
+#include "core/linear_predictive_coding.h"
 // #include "core/experimental.h"
 
 #include "shell/control.h"

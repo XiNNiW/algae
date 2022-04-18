@@ -1,6 +1,6 @@
 #pragma once
 #include <math.h>
-#include "audio_block.h"
+#include "../audio_block.h"
 
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive
 namespace algae::dsp::core::math{

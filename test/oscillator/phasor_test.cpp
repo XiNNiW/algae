@@ -8,7 +8,7 @@ using algae::dsp::core::AudioBlock;
 
 
 using algae::dsp::core::oscillator::compute_phase_increment;
-TEST(DSP_Test, CORE_compute_phase_increment) {
+TEST(Osc_Test, CORE_compute_phase_increment) {
     float sample_rate = 48000;
     float epsilon = 0.00000001;
     EXPECT_NEAR(0.000020833 ,compute_phase_increment<float>(1,sample_rate),epsilon);
@@ -17,7 +17,7 @@ TEST(DSP_Test, CORE_compute_phase_increment) {
 }
 
 using algae::dsp::core::oscillator::update_phase;
-TEST(DSP_Test, CORE_update_phasor) {
+TEST(Osc_Test, CORE_update_phasor) {
     float sample_rate = 48000;
     float period = algae::dsp::core::TWO_PI;
     float phi = compute_phase_increment<float>(4800,sample_rate);

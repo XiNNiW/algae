@@ -1,5 +1,5 @@
 #pragma once
-#include "../core/math_functions.h"
+#include "../core/math_tools.h"
 #include "../core/units.h"
 #include "dsp_graph.h"
 #include <iostream>

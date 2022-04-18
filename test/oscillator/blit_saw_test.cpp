@@ -12,9 +12,7 @@ using algae::dsp::core::AudioBlock;
 
 
 using algae::dsp::core::oscillator::stk_blit_saw_t;
-TEST(DSP_Test, CORE_stk_blit_struct_has_defaults) {
-    const size_t BLOCKSIZE = 64;
-    const double SR = 48000;
+TEST(Osc_Test, CORE_stk_blit_struct_has_defaults) {
 
     stk_blit_saw_t<double> osc;
     
@@ -29,8 +27,7 @@ TEST(DSP_Test, CORE_stk_blit_struct_has_defaults) {
 }
 
 using algae::dsp::core::oscillator::stk_blit_saw;
-TEST(DSP_Test, CORE_stk_blit_initializes_with_correct_values) {
-    const size_t BLOCKSIZE = 64;
+TEST(Osc_Test, CORE_stk_blit_initializes_with_correct_values) {
     const double SR = 48000;
 
     stk_blit_saw_t<double> osc = stk_blit_saw<double,double>(480,SR);
@@ -46,7 +43,7 @@ TEST(DSP_Test, CORE_stk_blit_initializes_with_correct_values) {
 }
 
 using algae::dsp::core::oscillator::process;
-TEST(DSP_Test, CORE_stk_blit_saw_process_is_not_too_loud) {
+TEST(Osc_Test, CORE_stk_blit_saw_process_is_not_too_loud) {
     const size_t BLOCKSIZE = 64;
     const float SR = 48000;
 
@@ -55,7 +52,7 @@ TEST(DSP_Test, CORE_stk_blit_saw_process_is_not_too_loud) {
 
     std::tie(osc, output) = process<float, BLOCKSIZE>(osc);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);
         EXPECT_LT(output[i],1.0001);
     }

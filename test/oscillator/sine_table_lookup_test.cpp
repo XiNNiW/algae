@@ -95,7 +95,7 @@ TEST(DSP_Test, CORE_sine_t_process) {
 
     std::tie(phase,output) = sineOsc<float, 1024, BLOCKSIZE>::process(phase, phi);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);
         EXPECT_LT(output[i],1.0001);
     }

@@ -33,7 +33,7 @@ const std::array<sample_t, NUM_BINS> compute_amplitude_response(filter_t filter,
 
     // for(size_t idx=0; idx<NUM_BINS; idx++)
     //     amplitude_response[idx] = sqrt(out[idx][RE]*out[idx][RE] + out[idx][IM]*out[idx][IM]); 
-    sample_t max_magnitude=0;   
+    // sample_t max_magnitude=0;   
     for(size_t idx=0; idx<NUM_BINS; idx++){
         amplitude_response[idx] = (sqrt(out[idx][RE]*out[idx][RE] + out[idx][IM]*out[idx][IM]));    
         // if(amplitude_response[idx]>max_magnitude){

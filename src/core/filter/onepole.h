@@ -1,6 +1,6 @@
 #pragma once
 #include "../audio_block.h"
-#include "../math_functions.h"
+#include "../math_tools.h"
 #include "../constants.h"
 
 // Heavily inspired by CLiVE by Claude Heiland-Allen https://code.mathr.co.uk/clive

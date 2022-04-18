@@ -13,8 +13,8 @@ namespace algae::dsp::core::filter{
     };
 
     template<typename sample_t>
-    const inline dc_block_t<sample_t> process(dc_block_t<sample_t> i, const sample_t input){
-        const sample_t xn = input;
+    const inline dc_block_t<sample_t> process(dc_block_t<sample_t> filter, const sample_t input){
+        // const sample_t xn = input;
         // // this was causing the kind of DC errors that the authors were associating with fixed point math but i was using doubles?!!!
         // const sample_t p = 0.995;
         // // const sample_t f = i.frac;
@@ -22,9 +22,9 @@ namespace algae::dsp::core::filter{
         // const sample_t frac = pyn1-floor(pyn1); // noise shaping as suggested by authors for resolving fixed point quantization errors??
         // const sample_t yn = xn - i.x1 + pyn1 - frac; 
         // return dc_block_t<sample_t>{yn,xn};
-        i.y1 = input - i.x1 + 0.995*i.y1;
-        i.x1 = input;
-        return i;
+        filter.y1 = input - filter.x1 + 0.995*filter.y1;
+        filter.x1 = input;
+        return filter;
     }
 
     template<typename sample_t, size_t BLOCK_SIZE>

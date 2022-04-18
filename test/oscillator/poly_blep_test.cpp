@@ -7,7 +7,7 @@
 
 using algae::dsp::core::AudioBlock;
 using algae::dsp::core::oscillator::blep;
-TEST(DSP_Test, CORE_blep) {
+TEST(Osc_Test, CORE_blep) {
     auto epsilon = 0.001;
     EXPECT_NEAR(-0.25,blep(1.0,2.0),epsilon);
     EXPECT_NEAR(-0.5708,blep(1.1,4.5),epsilon);
@@ -19,7 +19,7 @@ TEST(DSP_Test, CORE_blep) {
 
 using algae::dsp::core::AudioBlock;
 using algae::dsp::core::oscillator::blamp;
-TEST(DSP_Test, CORE_blamp) {
+TEST(Osc_Test, CORE_blamp) {
     auto epsilon = 0.001;
     EXPECT_NEAR(0.041666,blamp(1.0,2.0),epsilon);
     EXPECT_NEAR(0.143773,blamp(1.1,4.5),epsilon);

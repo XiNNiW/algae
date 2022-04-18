@@ -9,8 +9,7 @@ using algae::dsp::core::filter::process;
 using algae::dsp::core::oscillator::noise;
 
 using algae::dsp::core::filter::onepole_t;
-TEST(DSP_Test, CORE_onepole_lop_defaults) { 
-    const size_t BLOCKSIZE = 64;
+TEST(Filter_Test, CORE_onepole_lop_defaults) { 
     onepole_t<double> filter;
     EXPECT_EQ(0, filter.a0);
     EXPECT_EQ(0, filter.y1);
@@ -19,7 +18,7 @@ TEST(DSP_Test, CORE_onepole_lop_defaults) {
 }
 using algae::dsp::core::filter::lop;
 
-TEST(DSP_Test, CORE_onepole_lop_initializes_coefficients) { 
+TEST(Filter_Test, CORE_onepole_lop_initializes_coefficients) { 
     onepole_t<double> filter;
 
     filter = lop<double,double>(filter, 880.0, 48000.0);
@@ -29,7 +28,7 @@ TEST(DSP_Test, CORE_onepole_lop_initializes_coefficients) {
 }
 
 
-TEST(DSP_Test, CORE_onepole_lop_does_not_explode) { 
+TEST(Filter_Test, CORE_onepole_lop_does_not_explode) { 
     const size_t BLOCKSIZE = 64;
     onepole_t<double> filter;
     AudioBlock<double,BLOCKSIZE> input;
@@ -37,20 +36,20 @@ TEST(DSP_Test, CORE_onepole_lop_does_not_explode) {
 
     filter = lop<double,double>(filter, 220.0, 48000.0);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = noise<double>();
     }
 
     std::tie(filter,output) = process<double>(filter, input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);
         EXPECT_LT(output[i],1.0001);
     }
     
 }
 
-TEST(DSP_Test, CORE_onepole_lop_amplitude_response) { 
+TEST(Filter_Test, CORE_onepole_lop_amplitude_response) { 
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 
@@ -105,7 +104,7 @@ TEST(DSP_Test, CORE_onepole_lop_amplitude_response) {
 
 using algae::dsp::core::filter::hip;
 
-TEST(DSP_Test, CORE_onepole_hip_initializes_coefficients) { 
+TEST(Filter_Test, CORE_onepole_hip_initializes_coefficients) { 
     onepole_t<double> filter;
 
     filter = hip<double,double>(filter, 880.0, 48000.0);
@@ -114,7 +113,7 @@ TEST(DSP_Test, CORE_onepole_hip_initializes_coefficients) {
     EXPECT_FALSE(filter.mode);
 }
 
-TEST(DSP_Test, CORE_onepole_hip_does_not_explode) { 
+TEST(Filter_Test, CORE_onepole_hip_does_not_explode) { 
     const size_t BLOCKSIZE = 64;
     onepole_t<double> filter;
     AudioBlock<double,BLOCKSIZE> input;
@@ -122,20 +121,20 @@ TEST(DSP_Test, CORE_onepole_hip_does_not_explode) {
 
     filter = hip<double,double>(filter, 220.0, 48000.0);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = noise<double>();
     }
 
     std::tie(filter,output) = process<double>(filter, input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);
         EXPECT_LT(output[i],1.0001);
     }
     
 }
 
-TEST(DSP_Test, CORE_onepole_hip_amplitude_response) { 
+TEST(Filter_Test, CORE_onepole_hip_amplitude_response) { 
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 
@@ -189,8 +188,7 @@ TEST(DSP_Test, CORE_onepole_hip_amplitude_response) {
 }
 
 using algae::dsp::core::filter::onepole_onezero_t;
-TEST(DSP_Test, CORE_onepole_onezero_hip_defaults) { 
-    const size_t BLOCKSIZE = 64;
+TEST(Filter_Test, CORE_onepole_onezero_hip_defaults) { 
     onepole_onezero_t<double> filter;
     EXPECT_EQ(0, filter.a1);
     EXPECT_EQ(0, filter.b0);
@@ -201,11 +199,8 @@ TEST(DSP_Test, CORE_onepole_onezero_hip_defaults) {
 
 using algae::dsp::core::filter::hip;
 
-TEST(DSP_Test, CORE_onepole_onezero_hip_initializes_coefficients) { 
-    const size_t BLOCKSIZE = 64;
+TEST(Filter_Test, CORE_onepole_onezero_hip_initializes_coefficients) { 
     onepole_onezero_t<double> filter;
-    AudioBlock<double,BLOCKSIZE> input;
-    AudioBlock<double,BLOCKSIZE> output;
 
     filter = hip<double,double>(filter, 440.0, 48000.0);
 
@@ -213,7 +208,7 @@ TEST(DSP_Test, CORE_onepole_onezero_hip_initializes_coefficients) {
     EXPECT_NEAR(0.972001,filter.b0, 0.001);
 }
 
-TEST(DSP_Test, CORE_onepole_onezero_hip_does_not_explode) { 
+TEST(Filter_Test, CORE_onepole_onezero_hip_does_not_explode) { 
     const size_t BLOCKSIZE = 64;
     onepole_onezero_t<double> filter;
     AudioBlock<double,BLOCKSIZE> input;
@@ -221,21 +216,21 @@ TEST(DSP_Test, CORE_onepole_onezero_hip_does_not_explode) {
 
     filter = hip<double,double>(filter, 220.0, 48000.0);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = noise<double>();
     }
 
     std::tie(filter,output) = process<double>(filter, input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
-        EXPECT_GT(output[i],-1.0001);
-        EXPECT_LT(output[i],1.0001);
+    for(size_t i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-2);
+        EXPECT_LT(output[i],2);
     }
     
 }
 
 
-TEST(DSP_Test, CORE_onepole_onezero_hip_amplitude_response) { 
+TEST(Filter_Test, CORE_onepole_onezero_hip_amplitude_response) { 
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 

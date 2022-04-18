@@ -6,3 +6,4 @@
 #include "control/accumulator.h"
 #include "control/ad_envelope.h"
 #include "control/adsr_envelope.h"
+#include "control/window.h"

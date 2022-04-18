@@ -27,7 +27,7 @@ TEST(DSP_Test, block_tanh_approximation_clamps_signal) {
     input *= 4;
     AudioBlock<float,BLOCKSIZE> output = tanh_approx_pade<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_GT( output[idx],-1.01);
         EXPECT_LT( output[idx],1.01);
     }
@@ -60,7 +60,7 @@ TEST(DSP_Test, block_sin_op) {
     }
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::sin<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -92,7 +92,7 @@ TEST(DSP_Test, block_atan_op) {
     }
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::atan<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -128,7 +128,7 @@ TEST(DSP_Test, block_sqrt_op) {
     }
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::sqrt<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -162,7 +162,7 @@ TEST(DSP_Test, block_pow_op) {
     }
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::pow<float, BLOCKSIZE>(x,y);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -191,7 +191,7 @@ TEST(DSP_Test, block_wrap_op) {
 
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::wrap<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -225,7 +225,7 @@ TEST(DSP_Test, block_wrapto_op) {
 
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::wrapto<float, BLOCKSIZE>(input, wrapPoint);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 

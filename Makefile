@@ -25,9 +25,11 @@ SOURCES  := $(wildcard $(SRC)/*.$(CODE_EXT))
 INCLUDES := $(wildcard $(SRC))
 OBJECTS  := $(SOURCES:$(SRC)/%.$(CODE_EXT)=$(OBJ)/%.o)
 
-TEST_SOURCES := $(wildcard $(TEST_SRC)/*.$(CODE_EXT))
+TEST_SOURCES := $(wildcard $(TEST_SRC)/**/*.$(CODE_EXT))
+TEST_DIRS := $(sort $(dir $(TEST_SOURCES) $(TEST_SRC)))
 TEST_INCLUDES := $(INCLUDES) -Igtest/include
 TEST_OBJECTS := $(TEST_SOURCES:$(TEST_SRC)/%.$(CODE_EXT)=$(TEST_OBJ)/%.o)
+TEST_DIRS := $(TEST_SOURCES:$(TEST_SRC)/%.$(CODE_EXT)=$(TEST_OBJ)/%/../)
 
 #compiler and settings
 CC  = g++
@@ -50,16 +52,19 @@ AR_OPTS = rvs
 .PHONY: all
 all:	$(BIN)/$(TARGET)
 
-test:   clean all $(BIN)/$(TEST_TARGET)
+test:   clean all test_directories $(BIN)/$(TEST_TARGET)
 		./$(BIN)/$(TEST_TARGET)
+		
+test_directories:
+	$(shell mkdir -p $(TEST_DIRS))
 
 install: 
 	cp $(BIN)/$(TARGET) $(INSTALL_DIR)
 
 .PHONY: clean
 clean:
-	rm -f $(OBJECTS) $(BIN)/$(TARGET) $(BIN)/$(TEST_TARGET) $(TEST_OBJECTS) 
-	echo "Workspace clean!"
+	rm -rf $(OBJECTS) $(BIN)/$(TARGET) $(BIN)/$(TEST_TARGET) $(TEST_OBJECTS)
+	@echo "Workspace clean!"
 
 $(BIN)/$(TARGET): $(OBJECTS)
 	$(AR) $(AR_OPTS) $@ $^

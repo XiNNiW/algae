@@ -17,7 +17,7 @@ using algae::dsp::core::filter::update_coefficients;
 // using algae::dsp::core::filter::process_chaos;
 using algae::dsp::core::oscillator::cos_t;
 
-TEST(DSP_Test, CORE_chaotic_cos_bandpass) { 
+TEST(Filter_Test, CORE_chaotic_cos_bandpass) { 
     // what is a compelling way to test these? i should probably just sit down and do the math
     // in the mean time i just want some verification that they don't blow up when you hook them up
     constexpr size_t BLOCKSIZE = 64;
@@ -32,13 +32,13 @@ TEST(DSP_Test, CORE_chaotic_cos_bandpass) {
     filter.chaos_gain = 0.5;
     filter.feedback_amt = 1.0;
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = 0.125*noise<double>();
     }
 
     std::tie(filter,output) = process<double,cos_t<double,0>::lookup,BLOCKSIZE>(filter, input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);
         EXPECT_LT(output[i],1.0001);
     }
@@ -46,10 +46,8 @@ TEST(DSP_Test, CORE_chaotic_cos_bandpass) {
 }
 
 using algae::dsp::core::filter::reson_bp;
-TEST(DSP_Test, CORE_chaotic_bandpass_amplitude_response_low_feedback) { 
-    constexpr size_t FRAME_SIZE = 128;
+TEST(Filter_Test, CORE_chaotic_bandpass_amplitude_response_low_feedback) { 
     constexpr size_t NUM_BINS = 32;
-    constexpr double SAMPLE_RATE = 48000;
     chaotic_resonator_t<double> filter;
 
     filter.feedback_amt = 0;
@@ -129,10 +127,8 @@ TEST(DSP_Test, CORE_chaotic_bandpass_amplitude_response_low_feedback) {
 
 
 using algae::dsp::core::filter::reson_bp;
-TEST(DSP_Test, CORE_chaotic_bandpass_is_noisy_high_feedback) { 
-    constexpr size_t FRAME_SIZE = 128;
+TEST(Filter_Test, CORE_chaotic_bandpass_is_noisy_high_feedback) { 
     constexpr size_t NUM_BINS = 32;
-    constexpr double SAMPLE_RATE = 48000;
     chaotic_resonator_t<double> filter;
 
     filter.feedback_amt = 10000;

@@ -13,7 +13,7 @@ using algae::dsp::core::filter::biquad_t;
 using algae::dsp::core::filter::lowpass;
 using algae::dsp::core::filter::highpass;
 
-TEST(DSP_Test, CORE_biquad_lowpass_does_not_explode) { 
+TEST(Filter_Test, CORE_biquad_lowpass_does_not_explode) { 
     constexpr size_t BLOCKSIZE = 64;
     biquad_t<double> filter;
     AudioBlock<double,BLOCKSIZE> input;
@@ -21,20 +21,20 @@ TEST(DSP_Test, CORE_biquad_lowpass_does_not_explode) {
 
     filter = lowpass<double,double>(filter,220,0.5,48000);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = noise<double>();
     }
 
     std::tie(filter,output) = process<double>(filter,input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
-        EXPECT_GT(output[i],-1.0001);
-        EXPECT_LT(output[i],1.0001);
+    for(size_t i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-2);
+        EXPECT_LT(output[i],2);
     }
     
 }
 
-TEST(DSP_Test, CORE_biquad_lowpass_does_not_explode_FLOAT) { 
+TEST(Filter_Test, CORE_biquad_lowpass_does_not_explode_FLOAT) { 
     constexpr size_t BLOCKSIZE = 64;
     biquad_t<float> filter;
     AudioBlock<float,BLOCKSIZE> input;
@@ -42,20 +42,20 @@ TEST(DSP_Test, CORE_biquad_lowpass_does_not_explode_FLOAT) {
 
     filter = lowpass<float,float>(filter,220,0.5,48000);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = noise<float>();
     }
 
     std::tie(filter,output) = process<float>(filter,input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
-        EXPECT_GT(output[i],-1.0001);
-        EXPECT_LT(output[i],1.0001);
+    for(size_t i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-2);
+        EXPECT_LT(output[i],2);
     }
     
 }
 
-TEST(DSP_Test, CORE_biquad_lowpass_coefficients) {
+TEST(Filter_Test, CORE_biquad_lowpass_coefficients) {
     /*
     https://www.earlevel.com/main/2010/12/20/biquad-calculator/
     EXPECTED FOR: cutoff = 220, q=0.5
@@ -75,7 +75,7 @@ TEST(DSP_Test, CORE_biquad_lowpass_coefficients) {
     EXPECT_NEAR( 0.00020151353208571057 , filter.b2,  epsilon);
 }
 
-TEST(DSP_Test, CORE_biquad_lowpass_amplitude_response) { 
+TEST(Filter_Test, CORE_biquad_lowpass_amplitude_response) { 
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 
@@ -129,7 +129,7 @@ TEST(DSP_Test, CORE_biquad_lowpass_amplitude_response) {
 
 using algae::dsp::core::filter::highpass;
 
-TEST(DSP_Test, CORE_biquad_highpass_does_not_explode) { 
+TEST(Filter_Test, CORE_biquad_highpass_does_not_explode) { 
 
     constexpr size_t BLOCKSIZE = 64;
     biquad_t<double> filter;
@@ -138,20 +138,20 @@ TEST(DSP_Test, CORE_biquad_highpass_does_not_explode) {
 
     filter = highpass<double,double>(filter,220,0.5,48000);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = noise<double>();
     }
 
     std::tie(filter,output) = process<double>(filter,input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
-        EXPECT_GT(output[i],-1.0001);
-        EXPECT_LT(output[i],1.0001);
+    for(size_t i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-2);
+        EXPECT_LT(output[i],2);
     }
     
 }
 
-TEST(DSP_Test, CORE_biquad_highpass_amplitude_response) { 
+TEST(Filter_Test, CORE_biquad_highpass_amplitude_response) { 
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 
@@ -203,7 +203,7 @@ TEST(DSP_Test, CORE_biquad_highpass_amplitude_response) {
 
 using algae::dsp::core::filter::bandpass;
 
-TEST(DSP_Test, CORE_biquad_bandpass_does_not_explode) { 
+TEST(Filter_Test, CORE_biquad_bandpass_does_not_explode) { 
 
     constexpr size_t BLOCKSIZE = 64;
     biquad_t<double> filter;
@@ -212,20 +212,20 @@ TEST(DSP_Test, CORE_biquad_bandpass_does_not_explode) {
 
     filter = bandpass<double,double>(filter,220,0.5,48000);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = noise<double>();
     }
 
     std::tie(filter,output) = process<double>(filter,input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
-        EXPECT_GT(output[i],-1.0001);
-        EXPECT_LT(output[i],1.0001);
+    for(size_t i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(output[i],-2);
+        EXPECT_LT(output[i],2);
     }
     
 }
 
-TEST(DSP_Test, CORE_biquad_bandpass_amplitude_response) { 
+TEST(Filter_Test, CORE_biquad_bandpass_amplitude_response) { 
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 

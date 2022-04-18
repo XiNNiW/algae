@@ -9,9 +9,7 @@
 using algae::dsp::core::AudioBlock;
 
 using algae::dsp::core::oscillator::stk_blit_square_t;
-TEST(DSP_Test, CORE_stk_blit_square_struct_has_defaults) {
-    const size_t BLOCKSIZE = 64;
-    const double SR = 48000;
+TEST(Osc_Test, CORE_stk_blit_square_struct_has_defaults) {
 
     stk_blit_square_t<double> osc;
     
@@ -26,8 +24,7 @@ TEST(DSP_Test, CORE_stk_blit_square_struct_has_defaults) {
 }
 
 using algae::dsp::core::oscillator::stk_blit_square;
-TEST(DSP_Test, CORE_stk_blit_square_initializes_with_correct_values) {
-    const size_t BLOCKSIZE = 64;
+TEST(Osc_Test, CORE_stk_blit_square_initializes_with_correct_values) {
     const double SR = 48000;
 
     stk_blit_square_t<double> osc = stk_blit_square<double,double>(480,SR);
@@ -42,7 +39,7 @@ TEST(DSP_Test, CORE_stk_blit_square_initializes_with_correct_values) {
     EXPECT_EQ(0,osc.state);
 }
 using algae::dsp::core::oscillator::process;
-TEST(DSP_Test, CORE_stk_blit_square_process) {
+TEST(Osc_Test, CORE_stk_blit_square_process) {
  // what is a compelling way to test these? i should probably just sit down and do the math
     // in the mean time i just want some verification that they don't blow up when you hook them up
     constexpr size_t BLOCKSIZE = 64;
@@ -55,7 +52,7 @@ TEST(DSP_Test, CORE_stk_blit_square_process) {
 
     std::tie(osc, output) = process<float, BLOCKSIZE>(osc);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-10.1);
         EXPECT_LT(output[i],10.1);
     }

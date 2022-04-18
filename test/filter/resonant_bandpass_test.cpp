@@ -12,7 +12,7 @@ using algae::dsp::core::filter::process;
 using algae::dsp::core::oscillator::noise;
 using algae::dsp::core::AudioBlock;
 
-TEST(DSP_Test, CORE_reson_bandpass) { 
+TEST(Filter_Test, CORE_reson_bandpass) { 
     // what is a compelling way to test these? i should probably just sit down and do the math
     // in the mean time i just want some verification that they don't blow up when you hook them up
     constexpr size_t BLOCKSIZE = 64;
@@ -25,13 +25,13 @@ TEST(DSP_Test, CORE_reson_bandpass) {
     //some filter designs divide out the gain introduced by the peak... however... sometimes you want a boost
     filter = update_coefficients<double,double>(filter, 220.0, 0.5, 0.25, 48000.0);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         input[i] = 0.125*noise<double>();
     }
 
     std::tie(filter,output) = process<double>(filter, input);
 
-    for(int i = 0; i<BLOCKSIZE; i++){
+    for(size_t i = 0; i<BLOCKSIZE; i++){
         EXPECT_GT(output[i],-1.0001);
         EXPECT_LT(output[i],1.0001);
     }
@@ -39,8 +39,7 @@ TEST(DSP_Test, CORE_reson_bandpass) {
 }
 
 using algae::dsp::core::filter::reson_bp;
-TEST(DSP_Test, CORE_resonant_bandpass_amplitude_response) { 
-    constexpr size_t FRAME_SIZE = 128;
+TEST(Filter_Test, CORE_resonant_bandpass_amplitude_response) { 
     constexpr size_t NUM_BINS = 32;
     constexpr double SAMPLE_RATE = 48000;
 
