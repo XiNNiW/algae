@@ -2,23 +2,10 @@
 #include <math.h>
 #include <utility>
 #include "audio_block.h"
-#include "math_tools.h"
 #include "oscillator.h"
 #include "constants.h"
 
-using  algae::dsp::core::math::moore_penrose_pseudoinverse;
-using  algae::dsp::core::math::matrix_mult;
-using  algae::dsp::core::math::transpose;
-using  algae::dsp::core::math::toeplitz_matrix_create;
-using  algae::dsp::core::math::autocorrelation;
-
 namespace algae::dsp::core::analysis {
-    using  algae::dsp::core::math::moore_penrose_pseudoinverse;
-    using  algae::dsp::core::math::matrix_mult;
-    using  algae::dsp::core::math::transpose;
-    using  algae::dsp::core::math::toeplitz_matrix_create;
-    using  algae::dsp::core::math::autocorrelation;
-    using  algae::dsp::core::math::inverse;
 
 
     template<typename sample_t>
