@@ -110,7 +110,7 @@ namespace algae::dsp::core::analysis {
             R[n] = lpc_biased_autocorrelation<sample_t>(x, x_length, n);
         }
 
-        a[0] = 1.0;
+        a[0] = 1.0000;
         sample_t alpha_m = R[1];
         sample_t e_m = R[0];
         k[0] = -alpha_m/e_m;

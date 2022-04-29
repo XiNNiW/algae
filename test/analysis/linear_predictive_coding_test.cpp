@@ -45,23 +45,19 @@ TEST(Analysis_Test, lpc_matrix_create) {
 using algae::dsp::core::analysis::lpc_analyze;
 using algae::dsp::core::analysis::lpc_levinson;
 TEST(Analysis_Test, lpc_predict) {
-//      acdata = acorr(blk, order)
-//   coeffs = pinv(toeplitz(acdata[:-1])) * -matrix(acdata[1:]).T
-//   coeffs = coeffs.T.tolist()[0]
+
     constexpr size_t ORDER = 7;
     constexpr size_t BUFFERSIZE = 23;
 
     std::array<double, BUFFERSIZE> signal = {0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.4,0,-0.4,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0};
-    std::array<double, ORDER> expected = {1.0, -1.52256187, 0.57588716, -0.06477903,  0.61648217, -0.77942572, 0.35634188};
+    std::array<double, ORDER> expected = {1 , -1.52387, 0.563304, -0.0530413, 0.601311, -0.735489, 0.312263};
 
     double actual[ORDER];
     double k[ORDER];
     double e;
     lpc_levinson<double>(signal.data(), signal.size(), ORDER, actual, k, &e);
-    // std::array<double, ORDER> actual;
-    // double gain;
-    // std::tie(actual, gain) = lpc_analyze<double, BUFFERSIZE, ORDER>(signal);
+
 
     for(size_t idx=0; idx<ORDER; idx++)
-        EXPECT_FLOAT_EQ(expected[idx], actual[idx]);
+        EXPECT_NEAR(expected[idx], actual[idx],0.0001);
 } 
