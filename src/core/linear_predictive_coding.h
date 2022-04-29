@@ -20,71 +20,6 @@ namespace algae::dsp::core::analysis {
     using  algae::dsp::core::math::autocorrelation;
     using  algae::dsp::core::math::inverse;
 
-    template<typename sample_t, size_t N>
-    const inline sample_t biased_autocorrelation(const std::array<sample_t, N>& x, const size_t &l){
-
-        if(l>=N) return 0;
-
-        sample_t a = 0;
-        for(size_t n=0; n<N-l; n++){
-            a += x[n]*x[n+l];
-        }
-        return a;
-
-    }
-
-    template<typename sample_t, size_t N>
-    const inline std::array<sample_t, N> reverse(const std::array<sample_t, N>& x){
-
-        std::array<sample_t, N> xr;
-        for(size_t i=0; i<N; i++)\
-            xr[N-1-i] = x[i];
-        return xr;
-    }
-
-    
-    template<typename sample_t, size_t SAMPLES, size_t ORDER>
-    std::array<sample_t, SAMPLES*ORDER> autocorrelation_matrix_create(const std::array<sample_t, SAMPLES> &x){
-        std::array<sample_t, SAMPLES*ORDER> A;
-        for(int i = 0; i<static_cast<int>(SAMPLES); i++){
-            for(int p = 0; p<static_cast<int>(ORDER); p++){
-                A[i*ORDER + p] = biased_autocorrelation<sample_t, SAMPLES>(x, abs(i-p));
-            }
-        }
-        return A;
-    }
-
-    template<typename sample_t, size_t SAMPLES, size_t ORDER>
-    inline std::pair<std::array<sample_t, ORDER>, sample_t >lpc_durbin(const std::array<sample_t, SAMPLES*ORDER> &r){
-        std::array<sample_t, ORDER+1> a, at;
-        std::array<sample_t, ORDER> k;
-        auto e = r[0];
-        for (int i=0; i<=static_cast<int>(ORDER); i++) a[i] = at[i] = 0.0;
-
-        for(int i=1; i<=static_cast<int>(ORDER); i++) {
-            k[i] = -r[i];
-
-            for(int j=1; j<i; j++) {
-            at[j] = a[j];
-            k[i] -= a[j] * r[i-j];
-            }
-
-            if (fabs(e) < 1.0e-20f) {
-                e = 0.0;  break;
-            }
-
-            k[i] /= e;
-
-            a[i] = k[i];
-            for(int j=1; j<i; j++) a[j] = at[j] + k[i] * at[i-j];
-
-            e *= 1.0 - k[i] * k[i];
-        }
-
-        if(e < 1.0e-20f) e = 0.0f;
-
-        return std::pair(k,sqrt(e));
-    }
 
     template<typename sample_t>
     const inline sample_t lpc_biased_autocorrelation(const sample_t* x, const size_t &x_length, const int &l){
@@ -141,74 +76,7 @@ namespace algae::dsp::core::analysis {
         
     }
 
-    template<typename sample_t, size_t SAMPLES, size_t ORDER>
-    const inline std::pair<std::array<sample_t, ORDER>, sample_t> lpc_analyze(const std::array<sample_t, SAMPLES> &x){
-        auto R = autocorrelation_matrix_create<sample_t, SAMPLES, ORDER>(x);
-        R[0] *= 1.001;  /* stability fix */
-
-        sample_t min = 0.00001;
-        if(R[0] < min) { 
-            std::array<sample_t, ORDER> a;
-            sample_t G = 0.0;
-            for(size_t i=0; i<ORDER; i++) a[i] = 0.0; 
-            return std::pair(a, G); 
-        }
-
-        return lpc_durbin<sample_t, SAMPLES, ORDER>(R);
-
-    }
-
-    template<typename sample_t, size_t ORDER, size_t SAMPLES>
-    std::array<sample_t, SAMPLES*ORDER> lpc_matrix_create(const std::array<sample_t, SAMPLES> &x){
-        std::array<sample_t, SAMPLES*ORDER> A;
-        for(int i = 0; i<static_cast<int>(SAMPLES); i++){
-            for(int p = 0; p<static_cast<int>(ORDER); p++){
-                size_t signal_idx = i+p;
-                // A[i*ORDER + p] = x[signal_idx%SAMPLES];
-               A[i*ORDER + p] = signal_idx<SAMPLES?x[signal_idx]:0;
-            // toeplitz[i*N + j] = in[abs(static_cast<int>(i)-static_cast<int>(j))];
-
-            //    A[i*ORDER + p] = x[abs(static_cast<int>(i)-static_cast<int>(p))];
-            }
-        }
-        return A;
-    }
-
-    template<typename sample_t, size_t TO>
-    std::array<sample_t, TO> truncate(const sample_t* x){
-        std::array<sample_t, TO> to;
-        for(size_t i = 0; i<TO; i++){
-            to[i] = x[i];
-        }
-        return to;
-    }
-
-    template<typename sample_t, size_t LEN>
-    const inline std::array<sample_t, LEN+1> append(const std::array<sample_t, LEN> &A, sample_t value){
-        std::array<sample_t, LEN+1> appended;
-        for(size_t idx=0; idx<LEN; idx++)
-            appended[idx] = A[idx];
-
-        appended[LEN+1] = value;
-        return appended;
-    }
-
-
-    
-
-    template<typename sample_t, size_t ORDER, size_t SAMPLES>
-    const inline std::array<sample_t, ORDER> lpc_predict(const std::array<sample_t, SAMPLES> &x){
-      
-        std::array<sample_t, ORDER*SAMPLES> At = moore_penrose_pseudoinverse<sample_t, ORDER, SAMPLES>(
-            lpc_matrix_create<sample_t, ORDER, SAMPLES>(x)
-        );
-        return matrix_mult<sample_t, ORDER, SAMPLES, 1>(At, x);
-        // auto result = matrix_mult<sample_t, ORDER, SAMPLES, 1>(At, x);
-        // for(size_t idx=0; idx<ORDER; idx++)
-        //     result[idx] = result[idx]/result[0];
-        // return result;
-
-    }
+   
 
 
 }
