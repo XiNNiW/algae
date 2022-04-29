@@ -33,9 +33,9 @@ namespace algae::dsp::core::analysis {
     }
 
     template<typename sample_t>
-    void lpc_levinson(
+    sample_t lpc_levinson(
         const sample_t* x, const size_t &x_length, const size_t &order,
-        /*=>*/  sample_t* a, sample_t* k, sample_t* e
+        /*=>*/  sample_t* a, sample_t* k
     ){
         //https://authors.library.caltech.edu/25063/1/S00086ED1V01Y200712SPR003.pdf
 
@@ -73,6 +73,8 @@ namespace algae::dsp::core::analysis {
             e_m = (1 - k[n]*k[n])*e_m;
         }
         
+
+        return e_m;
         
     }
 
