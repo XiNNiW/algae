@@ -118,7 +118,7 @@ namespace algae::dsp::core::analysis {
         for(size_t n=1; n<order; n++){
             
             alpha_m = R[n];
-            // a[n]=0;
+            a[n]=0;
 
             for(size_t m=1; m<n; m++)
             {
