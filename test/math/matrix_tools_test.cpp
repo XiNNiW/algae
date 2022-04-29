@@ -246,3 +246,55 @@ TEST(MatrixTools_Test, moore_penrose_inverse_2) {
     }
 
 }
+
+
+using algae::dsp::core::math::toeplitz_matrix_create;
+TEST(MatrixTools_Test, toeplitz_matrix_create) {
+    constexpr size_t N = 5;
+    constexpr size_t SIZE = 2*N-1;
+
+    std::array<double, SIZE> signal = {1,2,3,4,5,6,7,8,9};
+    std::array<double, N*N> expected = {
+        1,2,3,4,5,
+        2,1,2,3,4,
+        3,2,1,2,3,
+        4,3,2,1,2,
+        5,4,3,2,1,
+    };
+    std::array<double, N*N> actual = toeplitz_matrix_create<double, N>(signal);
+
+    for(size_t idx=0; idx<N*N; idx++){
+       
+       EXPECT_FLOAT_EQ(expected[idx], actual[idx]);
+    }
+        
+} 
+
+TEST(MatrixTools_Test, toeplitz_matrix_create_2) {
+    constexpr size_t N = 6;
+    constexpr size_t SIZE = 2*N-1;
+
+    std::array<double, SIZE> signal = {1,2,3,4,5,6,7,8,9,10,11};
+    std::array<double, N*N> expected = {
+        1,2,3,4,5,6,
+        2,1,2,3,4,5,
+        3,2,1,2,3,4,
+        4,3,2,1,2,3,
+        5,4,3,2,1,2,
+        6,5,4,3,2,1,
+    };
+    std::array<double, N*N> actual = toeplitz_matrix_create<double, N>(signal);
+
+    for(size_t idx=0; idx<N*N; idx++)
+        EXPECT_FLOAT_EQ(expected[idx], actual[idx]);
+} 
+
+using algae::dsp::core::math::autocorrelation;
+TEST(MatrixTools_Test, autocorrelation){
+    std::array<double, 7> seq = {1, 2, 3, 4, 3, 4, 2};
+    std::array<double, 7> expected = {59, 52, 42, 30, 17, 8, 2};
+    std::array<double, 7> actual  = autocorrelation<double,7,6>(seq);
+
+    for(size_t idx=0; idx<7; idx++)
+        EXPECT_FLOAT_EQ(expected[idx],actual[idx]);
+}

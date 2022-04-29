@@ -173,37 +173,7 @@ const inline std::array<sample_t, N*N> inverse(const std::array<sample_t, N*N> &
 
 template<typename sample_t, size_t N, size_t M>
 const inline std::array<sample_t, M*N> moore_penrose_pseudoinverse(const std::array<sample_t, N*M> &A){
-    
 
-    // for(size_t n=0; n<N; n++){
-    //     std::cout << "\n";
-    //     for(size_t m=0; m<M; m++)
-    //         std::cout << A[n*M + m] << ","; 
-    // }
-    // std::cout << "\n";
-
-    // for(size_t n=0; n<N; n++){
-    //     std::cout << "\n";
-    //     for(size_t m=0; m<M; m++)
-    //         std::cout << Atrans[n*M + m] << ","; 
-    // }
-    // std::cout << "\n";
-
-    // for(size_t n=0; n<M; n++){
-    //     std::cout << "\n";
-    //     for(size_t m=0; m<M; m++)
-    //         std::cout << matrix_mult<sample_t,M,N,M>(Atrans, A)[n*M + m] << ","; 
-    // }
-    // std::cout << "\n";
-
-    //  for(size_t n=0; n<M; n++){
-    //     std::cout << "\n";
-    //     for(size_t m=0; m<M; m++)
-    //         std::cout << inverse<sample_t,M>(
-    //         matrix_mult<sample_t,M,N,M>(Atrans, A)
-    //     )[n*M + m] << ","; 
-    // }
-    // std::cout << "\n";
     std::array<sample_t, M*N> Atrans = transpose<sample_t, N, M>(A);
 
         
@@ -227,6 +197,34 @@ const inline std::array<sample_t, M*N> moore_penrose_pseudoinverse(const std::ar
         return At;
     }
     
+}
+
+template<typename sample_t, size_t N>
+const inline std::array<sample_t,N*N> toeplitz_matrix_create(const std::array<sample_t,2*N-1>& in){
+    //   return [[vect[abs(i-j)] for i in xrange(len(vect))]
+    //                       for j in xrange(len(vect))]
+    std::array<sample_t,N*N> toeplitz;
+    for(size_t i=0; i<N; i++){
+        for(size_t j=0; j<N; j++){
+            toeplitz[i*N + j] = in[abs(static_cast<int>(i)-static_cast<int>(j))];
+        }
+    }
+    return toeplitz;
+}
+
+template<typename sample_t, size_t SIZE_IN, size_t LAG, size_t SIZE_OUT = LAG+1>
+const inline std::array<sample_t, SIZE_OUT> autocorrelation(const std::array<sample_t, SIZE_IN>& x){
+
+    std::array<sample_t, SIZE_OUT> a;
+    for(size_t tau=0; tau<SIZE_OUT; tau++){
+        a[tau] = 0;
+        for(size_t n=0; n<SIZE_IN-tau; n++){
+            a[tau] += x[n]*x[n+tau];
+        }
+
+    }
+    return a;
+
 }
  
 }

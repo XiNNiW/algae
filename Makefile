@@ -63,11 +63,11 @@ install:
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJECTS) $(BIN)/$(TARGET) $(BIN)/$(TEST_TARGET) $(TEST_OBJECTS)
-	@echo "Workspace clean!"
+	@rm -rf $(OBJECTS) $(BIN)/$(TARGET) $(BIN)/$(TEST_TARGET) $(TEST_OBJECTS)
+	@ echo "Workspace clean!"
 
 $(BIN)/$(TARGET): $(OBJECTS)
-	$(AR) $(AR_OPTS) $@ $^
+	@$(AR) $(AR_OPTS) $@ $^
 	@echo "created archive!"
 
 # $(BIN)/$(TARGET): $(OBJECTS)
@@ -75,14 +75,17 @@ $(BIN)/$(TARGET): $(OBJECTS)
 # 	@echo "Linking complete!"
 
 $(BIN)/$(TEST_TARGET): $(TEST_OBJECTS)
-	$(LINKER) $(TEST_OBJECTS) $(TEST_LFLAGS) -o $@
-	@echo "Test linking complete!"
+	@$(LINKER) $(TEST_OBJECTS) $(TEST_LFLAGS) -o $@
+	
+# @echo "Test linking complete!"
 
 $(OBJECTS): $(OBJ)/%.o : $(SRC)/%.$(CODE_EXT)
-	$(CC) $(CFLAGS) -c $< -o $@
-	@echo "Compiled sucessfully!"
+	@$(CC) $(CFLAGS) -c $< -o $@
+	
+# @echo "Compiled sucessfully!"
 
 $(TEST_OBJECTS): $(TEST_OBJ)/%.o : $(TEST_SRC)/%.$(CODE_EXT)
-	$(CC) $(CFLAGS_TEST) -c $< -o $@
-	@echo "Tests compiled sucessfully!"
+	@$(CC) $(CFLAGS_TEST) -c $< -o $@
+	
+# echo "Tests compiled sucessfully!"
 
