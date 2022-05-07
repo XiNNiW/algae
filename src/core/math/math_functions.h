@@ -83,10 +83,18 @@ namespace algae::dsp::core::math{
         return unary_block_op<sample_t,BLOCKSIZE,lowered_bell<sample_t>>(x);
     };
 
+
+    template<typename sample_t>
+    const inline sample_t clip(const sample_t& x, const sample_t& lowerBound, const sample_t& upperBound){
+        return (x>upperBound)?upperBound:(x<lowerBound)?lowerBound:x;
+    }
+
     template<typename sample_t>
     const inline sample_t clip(const sample_t& x){
-        return (x>1)?1:(x<-1)?-1:x;
+        return clip<sample_t>(x, -1, 1);
+        // return (x>1)?1:(x<-1)?-1:x;
     }
+
 
     template<typename sample_t>
     const inline sample_t atan(const sample_t& x){

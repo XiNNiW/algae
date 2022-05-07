@@ -14,7 +14,7 @@ using algae::dsp::core::filter::process;
 TEST(Filter_Test, CORE_allpole_construction) { 
     constexpr size_t ORDER = 4;
     allpole_t<double,ORDER> filter;
-    double as[ORDER] = {2,2, 4, 6};
+    std::array<double, ORDER> as = {2,2, 4, 6};
 
     filter = allpole<double,ORDER>(as);
 
@@ -34,7 +34,7 @@ TEST(Filter_Test, CORE_allpole_does_not_explode_provides_stable_poles) {
     double a1 = -1.25825;
     double a2 = 0.395798;
 
-    double as[ORDER] = {a0,a1,a2};
+    std::array<double, ORDER> as = {a0,a1,a2};
 
     filter = allpole<double,ORDER>(as);
 
@@ -63,9 +63,9 @@ TEST(Filter_Test, CORE_allpole_amplitude_response) {
     double a1 = -1.25825;
     double a2 = 0.395798;
 
-    double as[ORDER] = {a0,a1,a2};
+    std::array<double, ORDER> as = {a0,a1,a2};
     
-    allpole_t<double,ORDER> filter =  allpole<double,ORDER>(as);
+    allpole_t<double, ORDER> filter =  allpole<double,ORDER>(as);
     
     std::array<double, NUM_BINS> amp_response = compute_amplitude_response<double, allpole_t<double,ORDER>, NUM_BINS>(filter, SAMPLE_RATE);
 

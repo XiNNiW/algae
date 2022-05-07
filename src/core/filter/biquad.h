@@ -120,6 +120,7 @@ namespace algae::dsp::core::filter {
         const frequency_t& sampleRate
     ){
         sample_t q = quality>0?quality:0.01;
+        //sample_t freq = cutoff>0?cutoff:0.01;
         frequency_t w0 = cutoff * TWO_PI / sampleRate;
         frequency_t a = fabs(sin(w0) / (2 * q));
         frequency_t c = cos(w0);

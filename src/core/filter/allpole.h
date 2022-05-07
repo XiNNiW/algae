@@ -6,12 +6,12 @@ namespace algae::dsp::core::filter {
     template<typename sample_t, size_t ORDER, size_t SIZE = ORDER-1>
     struct allpole_t {
         sample_t input_gain = 1;
-        sample_t as[SIZE];
-        sample_t ys[SIZE];
+        std::array<sample_t, ORDER> as;
+        std::array<sample_t, ORDER> ys;
     };
 
     template<typename sample_t, size_t ORDER, size_t SIZE = ORDER-1>
-    const inline allpole_t<sample_t, ORDER> allpole(const sample_t as[ORDER]){
+    const inline allpole_t<sample_t, ORDER> allpole(const std::array<sample_t, ORDER> as){
         allpole_t<sample_t, ORDER> filter;
         for(size_t idx=0; idx<SIZE; idx++){
             filter.ys[idx]=0;

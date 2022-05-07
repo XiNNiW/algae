@@ -1,11 +1,66 @@
 #pragma once
 #include <array>
 
+#define UNUSED(x) (void)(x)
+
 namespace algae::dsp::core{
+    
+    template<typename sample_t>
+    block_mult(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]*rhs[idx];
+    }
+    template<typename sample_t>
+    block_mult(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]*rhs;
+    }
+    template<typename sample_t>
+    block_div(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]/rhs[idx];
+    }
+    template<typename sample_t>
+    block_div(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]/rhs;
+    }
+    template<typename sample_t>
+    block_div(const sample_t& lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]+rhs;
+    }
+    template<typename sample_t>
+    block_add(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]+rhs[idx];
+    }
+    template<typename sample_t>
+    block_add(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]+rhs;
+    }
+    template<typename sample_t>
+    block_sub(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]-rhs[idx];
+    }
+    template<typename sample_t>
+    block_sub(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs[idx]-rhs;
+    }
+    template<typename sample_t>
+    block_sub(const sample_t& lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+        for(size_t idx=0; idx<block_size; idx++)
+            out[idx] = lhs-rhs[idx];
+    }
+
     template<typename sample_t, size_t BLOCK_SIZE>
     class alignas(16) AudioBlock{
         private:
-            std::array<sample_t,BLOCK_SIZE> samples;
+            //std::array<sample_t,BLOCK_SIZE> samples;
+            sample_t samples[BLOCK_SIZE];
 
         public:
             static inline const AudioBlock<sample_t,BLOCK_SIZE> empty() {
@@ -30,11 +85,9 @@ namespace algae::dsp::core{
                 return output;
             }
             inline const AudioBlock& operator*=(const AudioBlock& rhs){
-                AudioBlock output;
                 for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                    output[idx] = samples[idx] * rhs[idx];
+                    this->samples[idx] = samples[idx] * rhs[idx];
                 }
-                this->samples = output.samples;
                 return *(this);
             }
             inline const AudioBlock operator*(const sample_t& rhs) const {
@@ -45,11 +98,9 @@ namespace algae::dsp::core{
                 return output;
             }
             inline const AudioBlock& operator*=(const sample_t& rhs){
-                AudioBlock output;
                 for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                    output[idx] = samples[idx] * rhs;
+                    this->samples[idx] = samples[idx] * rhs;
                 }
-                this->samples = output.samples;
                 return *(this);
             }
             inline const AudioBlock operator/(const AudioBlock& rhs) const {
@@ -60,11 +111,9 @@ namespace algae::dsp::core{
                 return output;
             }
             inline const AudioBlock& operator/=(const AudioBlock& rhs){
-                AudioBlock output;
                 for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                    output[idx] = samples[idx] / rhs[idx];
+                    this->samples[idx] = samples[idx] / rhs[idx];
                 }
-                this->samples = output.samples;
                 return *(this);
             }
             inline const AudioBlock operator/(const sample_t& rhs) const {
@@ -75,11 +124,9 @@ namespace algae::dsp::core{
                 return output;
             }
             inline const AudioBlock& operator/=(const sample_t& rhs){
-                AudioBlock output;
                 for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                    output[idx] = samples[idx] / rhs;
+                    this->samples[idx] = samples[idx] / rhs;
                 }
-                this->samples = output.samples;
                 return *(this);
             }
             inline const AudioBlock operator+(const AudioBlock& rhs) const {
@@ -90,11 +137,9 @@ namespace algae::dsp::core{
                 return output;
             }
             inline const AudioBlock& operator+=(const AudioBlock& rhs){
-                AudioBlock output;
                 for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                    output[idx] = samples[idx] + rhs[idx];
+                    this->samples[idx] = samples[idx] + rhs[idx];
                 }
-                this->samples = output.samples;
                 return *(this);
             }
             inline const AudioBlock operator+(const sample_t& rhs) const {
@@ -105,11 +150,9 @@ namespace algae::dsp::core{
                 return output;
             }
             inline const AudioBlock& operator+=(const sample_t& rhs){
-                AudioBlock output;
                 for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                    output[idx] = samples[idx] + rhs;
+                    this->samples[idx] = samples[idx] + rhs;
                 }
-                this->samples = output.samples;
                 return *(this);
             }
             inline const AudioBlock operator-(const AudioBlock& rhs) const {
@@ -120,11 +163,9 @@ namespace algae::dsp::core{
                 return output;
             }
             inline const AudioBlock& operator-=(const AudioBlock& rhs){
-                AudioBlock output;
                 for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                    output[idx] = samples[idx] - rhs[idx];
+                    this->samples[idx] = samples[idx] - rhs[idx];
                 }
-                this->samples = output.samples;
                 return *(this);
             }
             inline const AudioBlock operator-(const sample_t& rhs) const {
@@ -135,11 +176,9 @@ namespace algae::dsp::core{
                 return output;
             }
             inline const AudioBlock& operator-=(const sample_t& rhs){
-                AudioBlock output;
                 for(size_t idx=0; idx<BLOCK_SIZE; idx++){
-                    output[idx] = samples[idx] - rhs;
+                    this->samples[idx] = samples[idx] - rhs;
                 }
-                this->samples = output.samples;
                 return *(this);
             }
     };
@@ -152,15 +191,23 @@ namespace algae::dsp::core{
         public:
 
             inline sample_t& operator[](const size_t& index){
+                UNUSED(index);
                 return sample;
             }
 
             inline const sample_t& operator[](const size_t& index) const{
+                UNUSED(index);
                 return sample;
             }
             static inline const AudioBlock<sample_t,1> empty() {
                 AudioBlock<sample_t,1> block;
                 block*=0;
+                return block;
+            }
+
+            static inline const AudioBlock<sample_t,1> of(sample_t s) {
+                AudioBlock<sample_t,1> block;
+                block.sample=s;
                 return block;
             }
 
@@ -243,6 +290,14 @@ namespace algae::dsp::core{
 
     template<typename sample_t, size_t BLOCKSIZE>
     const inline AudioBlock<sample_t, BLOCKSIZE> makeBlock(const std::array<sample_t,BLOCKSIZE>& samples){
+        AudioBlock<sample_t, BLOCKSIZE> block;
+        for(size_t idx=0; idx<BLOCKSIZE;idx++){
+            block[idx] = samples[idx];
+        }
+        return block;
+    }
+    template<typename sample_t, size_t BLOCKSIZE>
+    const inline AudioBlock<sample_t, BLOCKSIZE> makeBlock(const sample_t* samples){
         AudioBlock<sample_t, BLOCKSIZE> block;
         for(size_t idx=0; idx<BLOCKSIZE;idx++){
             block[idx] = samples[idx];

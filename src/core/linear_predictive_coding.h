@@ -3,6 +3,7 @@
 #include <utility>
 #include "audio_block.h"
 #include "oscillator.h"
+#include "control.h"
 #include "constants.h"
 
 namespace algae::dsp::core::analysis {
@@ -15,7 +16,7 @@ namespace algae::dsp::core::analysis {
     };
 
     template<typename sample_t, size_t BLOCK_SIZE>
-    const inline sample_t biased_autocorrelation(const std::array<sample_t, BLOCK_SIZE> &x, const int &l){
+    const inline sample_t biased_autocorrelation(const AudioBlock<sample_t, BLOCK_SIZE> &x, const int &l){
         sample_t r = 0;
         for(int n=0; n<static_cast<int>(BLOCK_SIZE)-l; n++){
             r+=x[n]*x[n+l];
@@ -27,7 +28,7 @@ namespace algae::dsp::core::analysis {
 
     template<typename sample_t, size_t ORDER, size_t BLOCK_SIZE>
     lpc_t<sample_t, ORDER> lpc_analyze(
-        const std::array<sample_t, BLOCK_SIZE> &x
+        const AudioBlock<sample_t, BLOCK_SIZE> &x
     ){
         //https://authors.library.caltech.edu/25063/1/S00086ED1V01Y200712SPR003.pdf
         std::array<sample_t, ORDER> a;
@@ -73,6 +74,23 @@ namespace algae::dsp::core::analysis {
         result.error = e_m;
 
         return result;
+        
+    }
+
+    using algae::dsp::core::control::hann;
+    using algae::dsp::core::control::apply_window; 
+    using algae::dsp::core::filter::allpole_t;
+    using algae::dsp::core::filter::allpole;
+    using algae::dsp::core::filter::process;
+
+    template<typename sample_t, size_t ORDER, size_t BLOCKSIZE>
+    inline const AudioBlock<sample_t, BLOCKSIZE> lpc(AudioBlock<sample_t, BLOCKSIZE> x, const AudioBlock<sample_t, BLOCKSIZE> &carrier){
+        x = apply_window<sample_t, BLOCKSIZE, hann>(x);
+        lpc_t analysis = lpc_analyze<sample_t, ORDER, BLOCKSIZE>(x);
+        allpole_t<sample_t, ORDER> filter = allpole(analysis.filter_coefficients); 
+        AudioBlock<sample_t, BLOCKSIZE> output;
+        std::tie(filter,output) = process(filter, carrier*analysis.error);
+        return output;
         
     }
 

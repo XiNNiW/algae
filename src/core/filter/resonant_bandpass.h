@@ -21,12 +21,13 @@ namespace algae::dsp::core::filter{
     template<typename sample_t, typename frequency_t>
     const inline reson_bp_t<sample_t> update_coefficients(
         reson_bp_t<sample_t> filter, 
-        const frequency_t& freq, 
+        frequency_t freq, 
         sample_t q, 
         const sample_t& gain, 
         const frequency_t& sampleRate=44100
     ){
         q = q>0?q:0.01;
+        freq = freq>0?freq:0.01;
         sample_t w = TWO_PI*freq;
         sample_t a1 = 1.0/q;
         sample_t a0 = 1.0;

@@ -4,7 +4,7 @@
 
 namespace algae::dsp::core::oscillator {
     template<typename frequency_t>
-    frequency_t compute_phase_increment(frequency_t frequency, frequency_t sample_rate){
+    const inline frequency_t compute_phase_increment(const frequency_t& frequency, const frequency_t& sample_rate){
         return frequency/sample_rate;
     }
 
