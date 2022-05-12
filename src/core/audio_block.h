@@ -6,52 +6,52 @@
 namespace algae::dsp::core{
     
     template<typename sample_t>
-    block_mult(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+    void block_mult(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]*rhs[idx];
     }
     template<typename sample_t>
-    block_mult(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
+    void block_mult(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]*rhs;
     }
     template<typename sample_t>
-    block_div(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+    void block_div(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]/rhs[idx];
     }
     template<typename sample_t>
-    block_div(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
+    void block_div(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]/rhs;
     }
     template<typename sample_t>
-    block_div(const sample_t& lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+    void block_div(const sample_t& lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]+rhs;
     }
     template<typename sample_t>
-    block_add(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+    void block_add(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]+rhs[idx];
     }
     template<typename sample_t>
-    block_add(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
+    void block_add(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]+rhs;
     }
     template<typename sample_t>
-    block_sub(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+    void block_sub(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]-rhs[idx];
     }
     template<typename sample_t>
-    block_sub(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
+    void block_sub(const sample_t* lhs, const sample_t& rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs[idx]-rhs;
     }
     template<typename sample_t>
-    block_sub(const sample_t& lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
+    void block_sub(const sample_t& lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
             out[idx] = lhs-rhs[idx];
     }

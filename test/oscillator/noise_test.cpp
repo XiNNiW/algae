@@ -31,11 +31,41 @@ TEST(Osc_Test, NoiseSpectraContainsAllFrequencies){
 
     for(size_t bin=0; bin < FREQ_BINS; bin++){
         EXPECT_NEAR(0, actualSpectra[bin], epsilonInDB);
-        // std::cout << noiseTimeseries[bin] << "," << actualSpectra[bin] << std::endl;
-
     }
+    
+}
 
-    // EXPECT_EQ(1,0);
 
+TEST(Osc_Test, CORE_noise_is_not_too_loud_array_block) {
+    const size_t BLOCKSIZE = 64;
+    float nz[BLOCKSIZE];
+
+    noise<float>(BLOCKSIZE, nz);
+
+    for(size_t i = 0; i<BLOCKSIZE; i++){
+        EXPECT_GT(nz[i],-1.0001);
+        EXPECT_LT(nz[i],1.0001);
+    }
+}
+
+TEST(Osc_Test, NoiseSpectraContainsAllFrequencies_array_block){
+
+    const size_t FREQ_BINS = 2*4096;
+    const size_t SAMPLE_RATE = 48000;
+    const size_t BLOCKSIZE = 2*FREQ_BINS;
+
+    double nz[BLOCKSIZE];
+    
+    noise<double>(BLOCKSIZE, nz);
+
+    std::array<double, BLOCKSIZE> noiseTimeseries;
+    std::copy(std::begin(nz), std::end(nz), std::begin(noiseTimeseries));
+    const std::array<double, FREQ_BINS> actualSpectra = compute_whole_spectrum_magnitude_in_db<double, FREQ_BINS>(noiseTimeseries, SAMPLE_RATE);
+
+    const double epsilonInDB = 40;
+
+    for(size_t bin=0; bin < FREQ_BINS; bin++){
+        EXPECT_NEAR(0, actualSpectra[bin], epsilonInDB);
+    }
     
 }

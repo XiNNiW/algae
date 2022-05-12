@@ -6,6 +6,7 @@
 #include "core/oscillator.h"
 #include "core/units.h"
 #include "core/linear_predictive_coding.h"
+#include "core/spacialization.h"
 // #include "core/experimental.h"
 
 // #include "shell/control.h"
