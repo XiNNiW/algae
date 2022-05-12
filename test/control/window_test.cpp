@@ -44,7 +44,6 @@ TEST(Control_Test, CoreWindowTest_window_variable_block) {
     ASSERT_FLOAT_EQ(0.38589266,         block[idx++]);
     ASSERT_FLOAT_EQ(0.10301149,         block[idx++]);
     ASSERT_FLOAT_EQ(0.010982331,        block[idx++]);
-    ASSERT_FLOAT_EQ(0,                  block[idx++]);
     
 }
 

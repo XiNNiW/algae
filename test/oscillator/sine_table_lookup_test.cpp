@@ -53,7 +53,7 @@ TEST(DSP_Test, CORE_lookupSine_linear_interp) {
     double val;
     double expected;
     double phase = 0;
-    for(size_t i; i<48000; i++){
+    for(size_t i=0; i<48000; i++){
         val = table_lookup_lin_interp<double,TABLE_SIZE>(table, phase);
         expected = sin(2*M_PI*phase);
         EXPECT_NEAR(expected, val, error);

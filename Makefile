@@ -36,7 +36,7 @@ CC  = g++
 CC_VERSION = c++17
 
 CFLAGS = -std=$(CC_VERSION) -Wall -I. -I$(INCLUDE)
-CFLAGS_TEST = -std=$(CC_VERSION) -Wall -I. -lm $(TEST_DEPENDENCIES_COMPILE) -I$(TEST_INCLUDES) -L./$(BIN) -lalgae
+CFLAGS_TEST = -std=$(CC_VERSION) -Wall -I. -lm $(TEST_DEPENDENCIES_COMPILE) -I$(TEST_INCLUDES) -L./$(BIN) -lalgae -march=native -O3 -mavx
 
 #linker and settings
 LINKER = g++

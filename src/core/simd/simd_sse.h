@@ -10,17 +10,17 @@ class vector4fb;
 class vector2db;
 
 template <>
-struct simd_traits<float>
+struct simd_traits<float,4>
 {
     typedef vector4f type;
-    static const size_t size = 4;
+    // static const size_t size = 4;
 };
 
 template <>
-struct simd_traits<double>
+struct simd_traits<double,2>
 {
     typedef vector2d type;
-    static const size_t size = 2;
+    // static const size_t size = 2;
 };
 
 template <>
@@ -33,7 +33,7 @@ struct simd_vector_traits<vector4f>
 template <>
 struct simd_vector_traits<vector2d>
 {
-    typedef float value_type;
+    typedef double value_type;
     typedef vector2db vector_bool;
 };
 

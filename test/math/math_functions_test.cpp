@@ -44,7 +44,7 @@ TEST(DSP_Test, block_tanh_approximation) {
     }
     AudioBlock<float,BLOCKSIZE> actual = tanh_approx_pade<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.1);
     }
 
@@ -76,7 +76,7 @@ TEST(DSP_Test, block_cos_op) {
     }
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::cos<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -108,7 +108,7 @@ TEST(DSP_Test, block_tan_op) {
     }
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::tan<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -144,7 +144,7 @@ TEST(DSP_Test, block_abs_op) {
     }
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::abs<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -176,7 +176,7 @@ TEST(DSP_Test, block_clip_op) {
 
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::clip<float, BLOCKSIZE>(input);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
@@ -209,7 +209,7 @@ TEST(DSP_Test, block_clamp_op) {
 
     AudioBlock<float,BLOCKSIZE> actual = algae::dsp::core::math::clamp<float, BLOCKSIZE>(input, low, high);
     
-    for(size_t idx; idx<BLOCKSIZE; idx++){
+    for(size_t idx=0; idx<BLOCKSIZE; idx++){
         EXPECT_NEAR(expected[idx],actual[idx],0.001);
     }
 
