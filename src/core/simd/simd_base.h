@@ -1,3 +1,6 @@
+/* 
+The SIMD types implementation is heavily based on ___'s implementation published here: https://johanmabille.github.io/blog/2014/10/09/writing-c-plus-plus-wrappers-for-simd-intrinsics-1/
+*/
 #pragma once
 #include "simd_traits.h"
 
@@ -181,16 +184,16 @@ inline simd_vector<X> operator/(const typename simd_vector_traits<X>::value_type
 // Same for operator-, operator*, operator/
 // ...
 
-// template <class X>
-// inline typename simd_vector_traits<X>::vector_bool
-// operator>(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
-// {
-//     return rhs() <= lhs();
-// }
+template <class X>
+inline typename simd_vector_traits<X>::vector_bool
+operator>(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
+{
+    return rhs() <= lhs();
+}
 
-// template <class X>
-// inline typename simd_vector_traits<X>::vector_bool
-// operator>=(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
-// {
-//     return rhs() < lhs();
-// }
+template <class X>
+inline typename simd_vector_traits<X>::vector_bool
+operator>=(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
+{
+    return rhs() < lhs();
+}
