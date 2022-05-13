@@ -1,9 +1,6 @@
 #include <gtest/gtest.h>
-#include "../../src/core/simd.h"
+#include "../../src/core/simd/simd.h"
 #include <cmath>
-
-using algae::dsp::core::simd::vector4f;
-using algae::dsp::core::simd::vector4fb;
 
 TEST(SIMD_Test, vector4f_add) {
     float a[4]         = {13.2 , 15.7, 19.5, 1.5  };

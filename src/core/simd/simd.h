@@ -3,19 +3,13 @@ The SIMD types implementation is heavily based on johan mabille's implementation
 */
 #pragma once
 
-
-#include "simd/simd_config.h"
+#include "simd_config.h"
 #if SSE_INSTR_SET > 6
-    #include "simd/simd_avx.h"
+    #include "simd_avx.h"
 #endif
 #if SSE_INSTR_SET > 0
-    #include "simd/simd_sse.h"
+    #include "simd_sse.h"
 #endif
-
-
-namespace algae::dsp::core::simd{
-
-
 
 #ifdef USE_SSE
 template <>
@@ -106,5 +100,3 @@ store_a(T* dst, const typename simd_traits<T>::type& src)
 template <class T> inline void
 store_u(T* dst, const typename simd_traits<T>::type& src)
 { simd_functions_invoker<T,typename simd_traits<T>::type>::store_u(dst, src); }
-
-}

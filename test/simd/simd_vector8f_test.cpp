@@ -2,11 +2,8 @@
 #if SSE_INSTR_SET>6
 #include <gtest/gtest.h>
 
-#include "../../src/core/simd.h"
+#include "../../src/core/simd/simd.h"
 #include <cmath>
-
-using algae::dsp::core::simd::vector8f;
-using algae::dsp::core::simd::vector8fb;
 
 TEST(SIMD_Test, vector8f_add) {
     float a[8]         = {13.2 , 15.7, 19.5, 1.5, 23.34, 23.1, 54.5, 88882.1};

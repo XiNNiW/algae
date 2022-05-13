@@ -2,27 +2,22 @@
 
 #include "simd_base.h"
 
-namespace algae::dsp::core::simd{
-
-
 class vector8f;
 class vector4d;
-class vector8fb;
-class vector4db;
 
 
 template <>
 struct simd_vector_traits<vector8f>
 {
     typedef float value_type;
-    typedef vector8fb vector_bool;
+    // typedef vector8fb vector_bool;
 };
 
 template <>
 struct simd_vector_traits<vector4d>
 {
     typedef double value_type;
-    typedef vector4db vector_bool;
+    // typedef vector4db vector_bool;
 };
 
 
@@ -230,15 +225,6 @@ inline vector8fb operator>=(const vector8f& lhs, const vector8f& rhs)
     return _mm256_cmp_ps(lhs,rhs,_CMP_GE_OQ);
 }
 
-inline vector8f select(const vector8fb& cond, const vector8f& a, const vector8f& b)
-{
-#if SSE_INSTR_SET >= 5 // SSE 4.1
-    return _mm256_blendv_ps(b,a,cond);
-#else
-    return _mm256_or_ps(_mm256_and_ps(cond,a),_mm256_andnot_ps(cond,b));
-#endif
-}
-
 //--------------------
 
 class vector4d : public simd_vector<vector4d>
@@ -441,15 +427,4 @@ inline vector4db operator<=(const vector4d& lhs, const vector4d& rhs)
 inline vector4db operator>=(const vector4d& lhs, const vector4d& rhs)
 {
     return _mm256_cmp_pd(lhs,rhs,_CMP_GE_OQ);
-}
-
-inline vector4d select(const vector4db& cond, const vector4d& a, const vector4d& b)
-{
-#if SSE_INSTR_SET >= 5 // SSE 4.1
-    return _mm256_blendv_pd(b,a,cond);
-#else
-    return _mm256_or_pd(_mm256_and_pd(cond,a),_mm256_andnot_pd(cond,b));
-#endif
-}
-
 }
