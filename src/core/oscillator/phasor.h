@@ -5,6 +5,7 @@
 
 namespace algae::dsp::core::oscillator {
     using algae::dsp::core::simd::simd_traits;
+    using algae::dsp::core::simd::simd_vector_traits;
     using algae::dsp::core::simd::select;
 
     template<typename frequency_t>
@@ -19,11 +20,13 @@ namespace algae::dsp::core::oscillator {
         return phase;
     }
 
-    template<typename sample_t>
-    const inline typename simd_traits<sample_t>::type update_phase(typename simd_traits<sample_t>::type phase, const typename simd_traits<sample_t>::type& increment, const typename simd_traits<sample_t>::type& period=1){
+
+    template<typename sample_t, typename vec_t= typename simd_traits<sample_t>::type>
+    const inline vec_t update_phase_vec(vec_t phase, const vec_t& increment, const vec_t& period=1){
+        typedef typename simd_vector_traits<vec_t>::vector_bool vec_bool_t;
         phase += period*increment;
-        auto reset_condition = phase >= period;
-        auto wrappedPhase = phase - period;
+        vec_bool_t reset_condition = phase >= period;
+        vec_t wrappedPhase = phase - period;
         return select(reset_condition, wrappedPhase, phase);
         
     }
