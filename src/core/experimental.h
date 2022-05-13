@@ -792,17 +792,17 @@ namespace algae::dsp::core::experimental{
 
 
 
-    template<typename sample_t, typename frequency_t>
-    lp_blit_square_t<sample_t, frequency_t> process(lp_blit_square_t<sample_t, frequency_t> blit, frequency_t sampleRate){
+    template<typename sample_t>
+    lp_blit_square_t<sample_t> process(lp_blit_square_t<sample_t> blit, frequency_t sampleRate){
         
         sample_t omega = sample_t(blit.num_harmonics)*TWO_PI*blit.frequency*(TWO_PI*blit.phase-M_PI)/sampleRate;
         sample_t xn = sin(M_PI*blit.phase)*blit.alpha*sin(omega)/sinh(blit.alpha*omega);
         // sample_t xi = sin(M_PI*blit.phase)*blit.alpha*sin(2*omega)/sinh(2*blit.alpha*omega);
-        sample_t phase = update_phase<sample_t, frequency_t>(blit.phase, blit.frequency, sampleRate);
+        sample_t phase = update_phase<sample_t>(blit.phase, blit.frequency, sampleRate);
         // xn = xn - xi;
         // lp_integrator_t<sample_t> i = process(blit.integrator,xn);
 
-        return lp_blit_square_t<sample_t, frequency_t>{
+        return lp_blit_square_t<sample_t>{
             phase,
             blit.frequency,
             blit.alpha,

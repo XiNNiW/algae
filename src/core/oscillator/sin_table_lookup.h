@@ -68,7 +68,7 @@ namespace algae::dsp::core::oscillator {
             AudioBlock<sample_t, BLOCK_SIZE> output;
             for(size_t idx=0; idx<BLOCK_SIZE; idx++){
                 output[idx] = sine_t<sample_t,TABLE_SIZE>::lookup(phase);
-                phase = update_phase<sample_t,sample_t>(phase, phi, 1.0);
+                phase = update_phase<sample_t>(phase, phi, 1.0);
             }
             return std::pair(phase, output);
         }
