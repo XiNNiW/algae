@@ -1,8 +1,8 @@
 #pragma once
 
-template <class T, size_t S=1>
+template <class T>
 struct simd_traits
 {
     typedef T type;
-    static const size_t size = S;
+    static const size_t size = 1;
 };

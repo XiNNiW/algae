@@ -5,20 +5,6 @@
 class vector8f;
 class vector4d;
 
-template <>
-struct simd_traits<float,8>
-{
-    typedef vector8f type;
-    // static const size_t size = 8;
-};
-
-template <>
-struct simd_traits<double,4>
-{
-    typedef vector4d type;
-    // static const size_t size = 4;
-};
-
 
 template <>
 struct simd_vector_traits<vector8f>

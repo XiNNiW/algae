@@ -1,5 +1,5 @@
 /* 
-The SIMD types implementation is heavily based on ___'s implementation published here: https://johanmabille.github.io/blog/2014/10/09/writing-c-plus-plus-wrappers-for-simd-intrinsics-1/
+The SIMD types implementation is heavily based on johan mabille's implementation published here: https://johanmabille.github.io/blog/2014/10/09/writing-c-plus-plus-wrappers-for-simd-intrinsics-1/
 */
 #pragma once
 
@@ -11,6 +11,35 @@ The SIMD types implementation is heavily based on ___'s implementation published
     #include "simd_sse.h"
 #endif
 
+#ifdef USE_SSE
+template <>
+    struct simd_traits<float>
+    {
+        typedef vector4f type;
+        static const size_t size = 4;
+    };
+
+template <>
+    struct simd_traits<double>
+    {
+        typedef vector2d type;
+        static const size_t size = 2;
+    };
+#elif USE_AVX
+template <>
+    struct simd_traits<float>
+    {
+        typedef vector8f type;
+        static const size_t size = 8;
+    };
+
+template <>
+    struct simd_traits<double>
+    {
+        typedef vector4d type;
+        static const size_t size = 4;
+    };
+#endif
 
 // Common implementation for types that support vectorization
 template <class T, class V>

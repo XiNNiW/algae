@@ -1,5 +1,5 @@
 /* 
-The SIMD types implementation is heavily based on ___'s implementation published here: https://johanmabille.github.io/blog/2014/10/09/writing-c-plus-plus-wrappers-for-simd-intrinsics-1/
+The SIMD types implementation is heavily based on johan mabille's implementation published here: https://johanmabille.github.io/blog/2014/10/09/writing-c-plus-plus-wrappers-for-simd-intrinsics-1/
 */
 #pragma once
 
@@ -9,19 +9,6 @@ class vector2d;
 class vector4fb;
 class vector2db;
 
-template <>
-struct simd_traits<float,4>
-{
-    typedef vector4f type;
-    // static const size_t size = 4;
-};
-
-template <>
-struct simd_traits<double,2>
-{
-    typedef vector2d type;
-    // static const size_t size = 2;
-};
 
 template <>
 struct simd_vector_traits<vector4f>
