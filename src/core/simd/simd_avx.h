@@ -112,6 +112,11 @@ inline vector8f pow(const vector8f& lhs, const vector8f& rhs)
     return _mm256_pow_ps(lhs, rhs);
 }
 
+inline vector8f sqrt(const vector8f& lhs)
+{
+    return _mm256_sqrt_ps(lhs);
+}
+
 
 class vector8fb : public simd_vector_bool<vector8fb>
 {
@@ -312,6 +317,11 @@ inline vector4d sin(const vector4d& lhs)
 inline vector4d pow(const vector4d& lhs, const vector4d& rhs)
 {
     return _mm256_pow_pd(lhs, rhs);
+}
+
+inline vector4d sqrt(const vector4d& lhs)
+{
+    return _mm256_sqrt_pd(lhs);
 }
 
 

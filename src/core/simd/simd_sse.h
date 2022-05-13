@@ -117,6 +117,11 @@ inline vector4f pow(const vector4f& lhs, const vector4f& rhs)
     return _mm_pow_ps(lhs, rhs);
 }
 
+inline vector4f sqrt(const vector4f& lhs)
+{
+    return _mm_sqrt_ps(lhs);
+}
+
 class vector4fb : public simd_vector_bool<vector4fb>
 {
 public:
@@ -306,6 +311,11 @@ inline vector2d sin(const vector2d& lhs)
 inline vector2d pow(const vector2d& lhs, const vector2d& rhs)
 {
     return _mm_pow_pd(lhs, rhs);
+}
+
+inline vector2d sqrt(const vector2d& lhs)
+{
+    return _mm_sqrt_pd(lhs);
 }
 
 
