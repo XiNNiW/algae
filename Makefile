@@ -25,7 +25,8 @@ SOURCES  := $(wildcard $(SRC)/*.$(CODE_EXT))
 INCLUDES := $(wildcard $(SRC))
 OBJECTS  := $(SOURCES:$(SRC)/%.$(CODE_EXT)=$(OBJ)/%.o)
 
-TEST_SOURCES := $(wildcard $(TEST_SRC)/**/*.$(CODE_EXT))
+TEST_PACKAGE :=**
+TEST_SOURCES := $(wildcard $(TEST_SRC)/$(TEST_PACKAGE)/*.$(CODE_EXT))
 TEST_DIRS := $(sort $(dir $(TEST_SOURCES) $(TEST_SRC)))
 TEST_INCLUDES := $(INCLUDES) -Igtest/include
 TEST_OBJECTS := $(TEST_SOURCES:$(TEST_SRC)/%.$(CODE_EXT)=$(TEST_OBJ)/%.o)
@@ -35,13 +36,13 @@ TEST_DIRS := $(TEST_SOURCES:$(TEST_SRC)/%.$(CODE_EXT)=$(TEST_OBJ)/%/../)
 CC  = g++
 CC_VERSION = c++17
 
-CFLAGS = -std=$(CC_VERSION) -Wall -I. -I$(INCLUDE)
-CFLAGS_TEST = -std=$(CC_VERSION) -Wall -I. -lm $(TEST_DEPENDENCIES_COMPILE) -I$(TEST_INCLUDES) -L./$(BIN) -lalgae -march=native -O3 -mavx
+CFLAGS = -std=$(CC_VERSION) -Wall -I. -I$(INCLUDE) -lm -march=native -O3
+CFLAGS_TEST = -std=$(CC_VERSION) -Wall -I. $(TEST_DEPENDENCIES_COMPILE) -I$(TEST_INCLUDES) -L./$(BIN) -lm -march=native -O3 -lalgae
 
 #linker and settings
 LINKER = g++
 # LFLAGS = -Wall -I. -lm -lc -I$(INCLUDES)
-TEST_LFLAGS = -Wall -I. -lm $(TEST_DEPENDENCIES_LINK) -I$(TEST_INCLUDES) -L./$(BIN) -lalgae
+TEST_LFLAGS = -Wall -I. $(TEST_DEPENDENCIES_LINK) -I$(TEST_INCLUDES) -L./$(BIN) -lm -march=native -O3 -lalgae 
 
 #archiver and settings
 AR  = ar

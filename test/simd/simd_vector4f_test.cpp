@@ -417,3 +417,63 @@ TEST(SIMD_Test, vector4f_neq_left_scalar) {
         EXPECT_EQ(expected[idx], actual[idx]);
 
 }
+
+//TRIG
+
+TEST(SIMD_Test, vector4f_sin) {
+    float a[4]         = {13.2 , 15.7, 19.5, 1.5  };
+    float expected[4]  = {0.59207351470722300,0.00796318378593734,0.60553986971960100,0.99749498660405500};
+    float actual[4];
+    vector4f av;
+    vector4f cv;
+    av.load_a(a);
+    cv = sin(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<4; idx++)
+        EXPECT_NEAR(expected[idx], actual[idx], 0.0001);
+
+}
+
+TEST(SIMD_Test, vector4f_cos) {
+    float a[4]         = {13.2, 15.7, 19.5, -1.5};
+    float expected[4]  = {0.80588395764045100, -0.99996829334934000, 0.79581496981394400, 0.07073720166770290};
+    float actual[4];
+    vector4f av;
+    vector4f cv;
+    av.load_a(a);
+    cv = cos(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<4; idx++)
+        EXPECT_NEAR(expected[idx], actual[idx], 0.0001);
+
+}
+
+TEST(SIMD_Test, vector4f_exp_matches_single_number_version) {
+    // significant precision loss for numbers greater than 60 or so....
+    float a[4]         = {13.2, 1.7, 1.9, -1.5};
+    // float expected[4]; // = {540364.93724669200000000, 6582992.58458373000000000, 294267566.04150900000000000, 0.22313016014843000, 13690938122.32320000000000000, 10769673371.15770000000000000, 466712318321364000000000.00000000000000000, 0.00000000000000000};
+    float actual[4];
+    vector4f av;
+    vector4f cv;
+    av.load_a(a);
+    cv = exp(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<4; idx++)
+        EXPECT_NEAR(exp(a[idx]), actual[idx],0.0001);
+
+}
+
+TEST(SIMD_Test, vector4f_log) {
+    float a[4]         = {13.2, 15.7, 19.5, 1.5};
+    // float expected[4]  = {1.12057393120585000, 1.19589965240923000, 1.29003461136252000, log(-1), 1.36810085170935000, 1.36361197989214000, 1.73639650227664000, log(-1.0)};
+    float actual[4];
+    vector4f av;
+    vector4f cv;
+    av.load_a(a);
+    cv = log(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<4; idx++)
+        EXPECT_NEAR(log(a[idx]), actual[idx],0.0001);
+
+}
+

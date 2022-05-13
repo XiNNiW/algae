@@ -87,6 +87,31 @@ inline vector8f operator/(const vector8f& lhs, const vector8f& rhs)
     return _mm256_div_ps(lhs,rhs);
 }
 
+inline vector8f cos(const vector8f& lhs)
+{
+    return _mm256_cos_ps(lhs);
+}
+
+inline vector8f exp(const vector8f& lhs)
+{
+    return _mm256_exp_ps(lhs);
+}
+
+inline vector8f log(const vector8f& lhs)
+{
+    return _mm256_log_ps(lhs);
+}
+
+inline vector8f sin(const vector8f& lhs)
+{
+    return _mm256_sin_ps(lhs);
+}
+
+inline vector8f pow(const vector8f& lhs, const vector8f& rhs)
+{
+    return _mm256_pow_ps(lhs, rhs);
+}
+
 
 class vector8fb : public simd_vector_bool<vector8fb>
 {
@@ -262,6 +287,33 @@ inline vector4d operator/(const vector4d& lhs, const vector4d& rhs)
 {
     return _mm256_div_pd(lhs,rhs);
 }
+
+
+inline vector4d cos(const vector4d& lhs)
+{
+    return _mm256_cos_pd(lhs);
+}
+
+inline vector4d exp(const vector4d& lhs)
+{
+    return _mm256_exp_pd(lhs);
+}
+
+inline vector4d log(const vector4d& lhs)
+{
+    return _mm256_log_pd(lhs);
+}
+
+inline vector4d sin(const vector4d& lhs)
+{
+    return _mm256_sin_pd(lhs);
+}
+
+inline vector4d pow(const vector4d& lhs, const vector4d& rhs)
+{
+    return _mm256_pow_pd(lhs, rhs);
+}
+
 
 
 class vector4db : public simd_vector_bool<vector4db>

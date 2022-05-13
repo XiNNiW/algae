@@ -415,3 +415,60 @@ TEST(SIMD_Test, vector2d_neq_left_scalar) {
         EXPECT_EQ(expected[idx], actual[idx]);
 
 }
+
+TEST(SIMD_Test, vector2d_sin) {
+    double a[2]         = {13.2 , 15.7};
+    double expected[2]  = {0.59207351470722300,0.00796318378593734};
+    double actual[2];
+    vector2d av;
+    vector2d cv;
+    av.load_a(a);
+    cv = sin(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<2; idx++)
+        EXPECT_NEAR(expected[idx], actual[idx], 0.0001);
+
+}
+
+TEST(SIMD_Test, vector2d_cos) {
+    double a[2]         = {13.2, 15.7};
+    double expected[2]  = {0.80588395764045100, -0.99996829334934000};
+    double actual[2];
+    vector2d av;
+    vector2d cv;
+    av.load_a(a);
+    cv = cos(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<2; idx++)
+        EXPECT_NEAR(expected[idx], actual[idx], 0.0001);
+
+}
+
+TEST(SIMD_Test, vector2d_exp_matches_single_number_version) {
+    // significant precision loss for numbers greater than 60 or so....
+    double a[2]         = {13.2, 15.7};
+    // double expected[2]; // = {540364.93724669200000000, 6582992.58458373000000000, 294267566.04150900000000000, 0.22313016014843000, 13690938122.32320000000000000, 10769673371.15770000000000000, 466712318321364000000000.00000000000000000, 0.00000000000000000};
+    double actual[2];
+    vector2d av;
+    vector2d cv;
+    av.load_a(a);
+    cv = exp(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<2; idx++)
+        EXPECT_NEAR(exp(a[idx]), actual[idx],0.0001);
+
+}
+
+TEST(SIMD_Test, vector2d_log) {
+    double a[2]         = {13.2, 15.7};
+    // double expected[2]  = {1.12057393120585000, 1.19589965240923000, 1.29003461136252000, log(-1), 1.36810085170935000, 1.36361197989214000, 1.73639650227664000, log(-1.0)};
+    double actual[2];
+    vector2d av;
+    vector2d cv;
+    av.load_a(a);
+    cv = log(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<2; idx++)
+        EXPECT_NEAR(log(a[idx]), actual[idx],0.0001);
+
+}

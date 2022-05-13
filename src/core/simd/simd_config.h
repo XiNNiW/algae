@@ -53,3 +53,5 @@
 #elif SSE_INSTR_SET == 1
     #include <xmmintrin.h>             // SSE
 #endif
+
+#include "simd_math.h"

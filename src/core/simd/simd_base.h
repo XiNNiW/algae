@@ -1,5 +1,5 @@
 /* 
-The SIMD types implementation is heavily based on ___'s implementation published here: https://johanmabille.github.io/blog/2014/10/09/writing-c-plus-plus-wrappers-for-simd-intrinsics-1/
+The SIMD types implementation is heavily based on johan mabille's implementation published here: https://johanmabille.github.io/blog/2014/10/09/writing-c-plus-plus-wrappers-for-simd-intrinsics-1/
 */
 #pragma once
 #include "simd_traits.h"

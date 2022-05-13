@@ -338,7 +338,7 @@ TEST(SIMD_Test, vector8f_lte_left_scalar) {
     cv = vector8f(1.11) <= av;
     cv.store(actual);
     for(size_t idx=0; idx<8; idx++){
-        EXPECT_EQ(expected[idx], actual[idx]); std::cout<<a[idx]<<"-"<<expected[idx]<<", "<<actual[idx]<<"\n";
+        EXPECT_EQ(expected[idx], actual[idx]);
     }
 
 }
@@ -423,6 +423,65 @@ TEST(SIMD_Test, vector8f_neq_left_scalar) {
     cv.store(actual);
     for(size_t idx=0; idx<8; idx++)
         EXPECT_EQ(expected[idx], actual[idx]);
+
+}
+
+// TRIG
+
+TEST(SIMD_Test, vector8f_sin) {
+    float a[8]         = {13.2, 15.7, 19.5, -1.5, 23.34, 23.1, 54.5, -88};
+    float expected[8]  = {0.59207351470722300, 0.00796318378593734, 0.60553986971960100, -0.99749498660405500, -0.97547116864901700, -0.89518736781968200, -0.88797583833766300, -0.03539830273366070};
+    float actual[8];
+    vector8f av;
+    vector8f cv;
+    av.load_a(a);
+    cv = sin(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<8; idx++)
+        EXPECT_NEAR(expected[idx], actual[idx],0.0001);
+
+}
+
+TEST(SIMD_Test, vector8f_cos) {
+    float a[8]         = {13.2, 15.7, 19.5, -1.5, 23.34, 23.1, 54.5, -88};
+    float expected[8]  = {0.80588395764045100, -0.99996829334934000, 0.79581496981394400, 0.07073720166770290, -0.22012723396826800, -0.44569000044433300, -0.45989010701310400, 0.99937328369512500};
+    float actual[8];
+    vector8f av;
+    vector8f cv;
+    av.load_a(a);
+    cv = cos(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<8; idx++)
+        EXPECT_NEAR(expected[idx], actual[idx], 0.0001);
+
+}
+
+TEST(SIMD_Test, vector8f_exp_matches_single_number_version) {
+    // significant precision loss for numbers greater than 60 or so....
+    float a[8]         = {13.2, 15.7, 1.9, -1.5, 13.2, 15.7, -1.9, 1.5};
+    // float expected[8]; // = {540364.93724669200000000, 6582992.58458373000000000, 294267566.04150900000000000, 0.22313016014843000, 13690938122.32320000000000000, 10769673371.15770000000000000, 466712318321364000000000.00000000000000000, 0.00000000000000000};
+    float actual[8];
+    vector8f av;
+    vector8f cv;
+    av.load_a(a);
+    cv = exp(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<8; idx++)
+        EXPECT_NEAR(exp(a[idx]), actual[idx],0.0001);
+
+}
+
+TEST(SIMD_Test, vector8f_log) {
+    float a[8]         = {13.2, 15.7, 19.5, 1.5, 23.34, 23.1, 54.5, 88};
+    // float expected[8]  = {1.12057393120585000, 1.19589965240923000, 1.29003461136252000, log(-1), 1.36810085170935000, 1.36361197989214000, 1.73639650227664000, log(-1.0)};
+    float actual[8];
+    vector8f av;
+    vector8f cv;
+    av.load_a(a);
+    cv = log(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<8; idx++)
+        EXPECT_NEAR(log(a[idx]), actual[idx],0.0001);
 
 }
 

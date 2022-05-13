@@ -91,6 +91,32 @@ inline vector4f operator/(const vector4f& lhs, const vector4f& rhs)
     return _mm_div_ps(lhs,rhs);
 }
 
+
+inline vector4f cos(const vector4f& lhs)
+{
+    return _mm_cos_ps(lhs);
+}
+
+inline vector4f exp(const vector4f& lhs)
+{
+    return _mm_exp_ps(lhs);
+}
+
+inline vector4f log(const vector4f& lhs)
+{
+    return _mm_log_ps(lhs);
+}
+
+inline vector4f sin(const vector4f& lhs)
+{
+    return _mm_sin_ps(lhs);
+}
+
+inline vector4f pow(const vector4f& lhs, const vector4f& rhs)
+{
+    return _mm_pow_ps(lhs, rhs);
+}
+
 class vector4fb : public simd_vector_bool<vector4fb>
 {
 public:
@@ -255,6 +281,31 @@ inline vector2d operator*(const vector2d& lhs, const vector2d& rhs)
 inline vector2d operator/(const vector2d& lhs, const vector2d& rhs)
 {
     return _mm_div_pd(lhs,rhs);
+}
+
+inline vector2d cos(const vector2d& lhs)
+{
+    return _mm_cos_pd(lhs);
+}
+
+inline vector2d exp(const vector2d& lhs)
+{
+    return _mm_exp_pd(lhs);
+}
+
+inline vector2d log(const vector2d& lhs)
+{
+    return _mm_log_pd(lhs);
+}
+
+inline vector2d sin(const vector2d& lhs)
+{
+    return _mm_sin_pd(lhs);
+}
+
+inline vector2d pow(const vector2d& lhs, const vector2d& rhs)
+{
+    return _mm_pow_pd(lhs, rhs);
 }
 
 
