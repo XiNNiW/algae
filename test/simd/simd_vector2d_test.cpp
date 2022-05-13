@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
-#include "../../src/core/simd/simd.h"
+#include "../../src/core/simd.h"
 #include <cmath>
+
+using algae::dsp::core::simd::vector2d;
+using algae::dsp::core::simd::vector2db;
 
 TEST(SIMD_Test, vector2d_add) {
     double a[2]         = {13.2 , 15.7};

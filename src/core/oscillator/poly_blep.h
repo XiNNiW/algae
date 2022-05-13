@@ -13,17 +13,7 @@ namespace algae::dsp::core::oscillator{
         } else {
             return 0;
         }
-        // if (t < dt) {
-        //     t /= dt;
-        //     return t+t - t*t - 1.0;
-        // }
-        // // -1 < t < 0
-        // else if (t > 1.0 - dt) {
-        //     t = (t - 1.0) / dt;
-        //     return t*t + t+t + 1.0;
-        // }
-        // // 0 otherwise
-        // else return 0.0;
+        
     }
 
     template<typename sample_t>
@@ -37,7 +27,23 @@ namespace algae::dsp::core::oscillator{
         } else {
             return 0;
         }
-    } 
+    }
+
+    template<typename sample_t>
+    const inline typename simd_traits<sample_t>::type blamp(
+        const typename simd_traits<sample_t>::type& t, const typename simd_traits<sample_t>::type& dt
+    ){
+        auto cond1 = (t < dt);
+        auto cond2 = (t > 1 - dt);
+     
+        auto x1 = t / dt - 1;
+        auto res1 = -1 / 3.0 * x1 * x1 * x1;
+
+        auto x2 = (t - 1) / dt + 1;
+        auto res2 = 1 / 3.0 * x2 * x2 * x2;
+
+        return select(cond1,res1,select(cond2,res2,0));
+    }
 
 
     template<typename sample_t>

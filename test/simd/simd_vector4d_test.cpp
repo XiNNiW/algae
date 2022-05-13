@@ -2,8 +2,11 @@
 #if SSE_INSTR_SET>6
 #include <gtest/gtest.h>
 
-#include "../../src/core/simd/simd.h"
+#include "../../src/core/simd.h"
 #include <cmath>
+
+using algae::dsp::core::simd::vector4d;
+using algae::dsp::core::simd::vector4db;
 
 TEST(SIMD_Test, vector4d_add) {
     double a[4]         = {13.2 , 15.7, 19.5, 1.5,  };

@@ -1,8 +1,10 @@
 #include "../../src/core/simd/simd_config.h"
 #if SSE_INSTR_SET>6
 #include <gtest/gtest.h>
-#include "../../src/core/simd/simd.h"
+#include "../../src/core/simd.h"
 #include <cmath>
+
+using algae::dsp::core::simd::vector4db;
 
 TEST(SIMD_Test, vector4db_and) {
     vector4db av, bv, cv;

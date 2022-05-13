@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
-#include "../../src/core/simd/simd.h"
+#include "../../src/core/simd.h"
 #include <cmath>
+
+using algae::dsp::core::simd::vector2db;
 
 TEST(SIMD_Test, vector2db_and) {
     vector2db av, bv, cv;

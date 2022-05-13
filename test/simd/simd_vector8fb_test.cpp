@@ -1,8 +1,11 @@
 #include "../../src/core/simd/simd_config.h"
 #if SSE_INSTR_SET>6
 #include <gtest/gtest.h>
-#include "../../src/core/simd/simd.h"
+#include "../../src/core/simd.h"
 #include <cmath>
+
+using algae::dsp::core::simd::vector8fb;
+
 
 TEST(SIMD_Test, vector8fb_and) {
     vector8fb av, bv, cv;
