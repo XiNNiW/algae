@@ -485,4 +485,18 @@ TEST(SIMD_Test, vector8f_log) {
 
 }
 
+TEST(SIMD_Test, vector8f_sqrt) {
+    float a[8]         = {13.2, 15.7, 19.5, 1.5, 23.34, 23.1, 54.5, 88};
+    // float expected[8]  = {1.12057393120585000, 1.19589965240923000, 1.29003461136252000, log(-1), 1.36810085170935000, 1.36361197989214000, 1.73639650227664000, log(-1.0)};
+    float actual[8];
+    vector8f av;
+    vector8f cv;
+    av.load_a(a);
+    cv = sqrt(av);
+    cv.store_a(actual);
+    for(size_t idx=0; idx<8; idx++)
+        EXPECT_NEAR(sqrt(a[idx]), actual[idx],0.0001);
+
+}
+
 #endif
