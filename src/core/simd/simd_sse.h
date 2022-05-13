@@ -4,6 +4,9 @@ The SIMD types implementation is heavily based on johan mabille's implementation
 #pragma once
 
 #include "simd_base.h"
+
+namespace algae::dsp::core::simd{
+
 class vector4f;
 class vector2d;
 class vector4fb;
@@ -225,6 +228,17 @@ inline vector4fb operator>=(const vector4f& lhs, const vector4f& rhs)
     return _mm_cmpge_ps(lhs,rhs);
 }
 
+inline vector4f select(const vector4fb& cond, const vector4f& a, const vector4f& b)
+{
+#if SSE_INSTR_SET >= 5 // SSE 4.1
+    return _mm_blendv_ps(b,a,cond);
+#else
+    return _mm_or_ps(_mm_and_ps(cond,a),_mm_andnot_ps(cond,b));
+#endif
+}
+
+
+
 class vector2d : public simd_vector<vector2d>
 {
 public:
@@ -419,4 +433,15 @@ inline vector2db operator>(const vector2d& lhs, const vector2d& rhs)
 inline vector2db operator>=(const vector2d& lhs, const vector2d& rhs)
 {
     return _mm_cmpge_pd(lhs,rhs);
+}
+
+inline vector2d select(const vector2db& cond, const vector2d& a, const vector2d& b)
+{
+#if SSE_INSTR_SET >= 5 // SSE 4.1
+    return _mm_blendv_pd(b,a,cond);
+#else
+    return _mm_or_pd(_mm_and_pd(cond,a),_mm_andnot_pd(cond,b));
+#endif
+}
+
 }

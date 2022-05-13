@@ -4,6 +4,9 @@ The SIMD types implementation is heavily based on johan mabille's implementation
 #pragma once
 #include "simd_traits.h"
 
+namespace algae::dsp::core::simd{
+
+
 template <class X>
 struct simd_vector_traits;
 
@@ -196,4 +199,6 @@ inline typename simd_vector_traits<X>::vector_bool
 operator>=(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
 {
     return rhs() < lhs();
+}
+
 }

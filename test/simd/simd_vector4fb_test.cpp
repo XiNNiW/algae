@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
-#include "../../src/core/simd/simd.h"
+#include "../../src/core/simd.h"
 #include <cmath>
+
+using algae::dsp::core::simd::vector4fb;
 
 TEST(SIMD_Test, vector4fb_and) {
     vector4fb av, bv, cv;
