@@ -19,32 +19,32 @@ namespace algae::dsp::core::simd{
 
 #ifdef USE_SSE
 template <>
-    struct simd_traits<float>
-    {
-        typedef vector4f type;
-        static const size_t size = 4;
-    };
+struct simd_traits<float>
+{
+    typedef vector4f type;
+    static const size_t size = 4;
+};
 
 template <>
-    struct simd_traits<double>
-    {
-        typedef vector2d type;
-        static const size_t size = 2;
-    };
+struct simd_traits<double>
+{
+    typedef vector2d type;
+    static const size_t size = 2;
+};
 #elif USE_AVX
 template <>
-    struct simd_traits<float>
-    {
-        typedef vector8f type;
-        static const size_t size = 8;
-    };
+struct simd_traits<float>
+{
+    typedef vector8f type;
+    static const size_t size = 8;
+};
 
 template <>
-    struct simd_traits<double>
-    {
-        typedef vector4d type;
-        static const size_t size = 4;
-    };
+struct simd_traits<double>
+{
+    typedef vector4d type;
+    static const size_t size = 4;
+};
 #endif
 
 // Common implementation for types that support vectorization

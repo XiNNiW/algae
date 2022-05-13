@@ -54,4 +54,10 @@
     #include <xmmintrin.h>             // SSE
 #endif
 
+#if SSE_INSTR_SET > 6
+    #define USE_AVX 1
+#elif SSE_INSTR_SET >0
+    #define USE_SSE 1
+#endif
+
 #include "simd_math.h"

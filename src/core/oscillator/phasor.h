@@ -21,13 +21,13 @@ namespace algae::dsp::core::oscillator {
     }
 
 
-    template<typename sample_t, typename vec_t= typename simd_traits<sample_t>::type>
-    const inline vec_t update_phase_vec(vec_t phase, const vec_t& increment, const vec_t& period=1){
-        typedef typename simd_vector_traits<vec_t>::vector_bool vec_bool_t;
-        phase += period*increment;
-        vec_bool_t reset_condition = phase >= period;
-        vec_t wrappedPhase = phase - period;
-        return select(reset_condition, wrappedPhase, phase);
+    // template<typename sample_t, typename vec_t = typename simd_traits<sample_t>::type>
+    // const inline vec_t update_phase_vec(vec_t phase, const vec_t& increment, const vec_t& period=1){
+    //     typedef typename simd_vector_traits<vec_t>::vector_bool vec_bool_t;
+    //     phase += period*increment;
+    //     vec_bool_t reset_condition = phase >= period;
+    //     vec_t wrappedPhase = phase - period;
+    //     return select(reset_condition, wrappedPhase, phase);
         
-    }
+    // }
 }

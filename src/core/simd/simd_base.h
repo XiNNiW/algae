@@ -96,6 +96,42 @@ public:
         return (*this)();
     }
 
+    inline X& operator-=(const X& rhs)
+    {
+        (*this)() = (*this)() - rhs;
+        return (*this)();
+    }
+
+    inline X& operator-=(const value_type& rhs)
+    {
+        (*this)() = (*this)() - X(rhs);
+        return (*this)();
+    }
+
+    inline X& operator*=(const X& rhs)
+    {
+        (*this)() = (*this)() * rhs;
+        return (*this)();
+    }
+
+    inline X& operator*=(const value_type& rhs)
+    {
+        (*this)() = (*this)() * X(rhs);
+        return (*this)();
+    }
+
+    inline X& operator/=(const X& rhs)
+    {
+        (*this)() = (*this)() / rhs;
+        return (*this)();
+    }
+
+    inline X& operator/=(const value_type& rhs)
+    {
+        (*this)() = (*this)() / X(rhs);
+        return (*this)();
+    }
+
     // Same for operator-=, operator*=, operator/= ...
     // ...
 
@@ -111,6 +147,13 @@ public:
     {
         (*this)() += value_type(1);
         return (*this)();
+    }
+
+
+    inline X operator-()
+    {   X tmp = (*this)();
+        tmp *= X(-1);
+        return tmp;
     }
 
     // Similar decrement operators
@@ -154,6 +197,8 @@ inline simd_vector<X> operator-(const typename simd_vector_traits<X>::value_type
 {
     return X(lhs) - rhs();
 }
+
+
 
 template <class X>
 inline simd_vector<X> operator*(const simd_vector<X>& lhs,
