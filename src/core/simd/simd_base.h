@@ -7,11 +7,7 @@ The SIMD types implementation is heavily based on johan mabille's implementation
 namespace algae::dsp::core::simd{
 
 
-template <class X>
-struct simd_vector_traits{
-    typedef X value_type;
-    typedef bool vector_bool;
-};
+
 
 template <class X>
 class simd_vector_bool
@@ -162,6 +158,13 @@ public:
     // Similar decrement operators
     // ...
 
+    inline const value_type operator[](const size_t& index) const
+    {
+        constexpr size_t size = simd_traits<value_type>::size;
+        value_type v[size];
+        (*this)().store_u(v);
+        return v[index];
+    }
 protected:
 
     // Ensure only inheriting classes can instantiate / copy / assign simd_vector.
