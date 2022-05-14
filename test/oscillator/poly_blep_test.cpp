@@ -46,7 +46,7 @@ TEST(Osc_Test, CORE_blep__simd_float) {
     for(size_t idx=0; idx<num_cases/vec_size; idx++){
         sample_vec tv  = load_a(&t[idx*vec_size] );
         sample_vec dtv = load_a(&dt[idx*vec_size]);
-        auto next = blep<float>(tv,dtv);
+        auto next = blep<sample_vec>(tv,dtv);
         store_a(&actual[idx*vec_size], next);
     }
 

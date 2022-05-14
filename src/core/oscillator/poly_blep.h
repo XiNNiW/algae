@@ -3,33 +3,46 @@
 #include "../simd.h"
 
 namespace algae::dsp::core::oscillator{
-    template<typename sample_t, typename vec_t= sample_t>
-    const inline sample_t blep(const sample_t& t, const sample_t& dt){
-        if (t < dt) {
-            auto x = (t / dt - 1);
-            return -x*x;
-        } else if (t > 1 - dt) {
-            auto x = (t - 1) / dt + 1;
-            return x*x;
-        } else {
-            return 0;
-        }
-        
-    }
-
     using algae::dsp::core::simd::simd_traits;
     using algae::dsp::core::simd::select;
-    template<typename sample_t, typename vec_t = typename simd_traits<sample_t>::type>
-    const inline vec_t blep(const vec_t& t, const vec_t& dt){
-        auto cond1 = (t < dt);
-        auto x1 = (t / dt - vec_t(1));
-        auto res1 = -x1*x1;
-        auto cond2 = (t > vec_t(1) - dt);
-        auto x2 = (t - vec_t(1)) / dt + vec_t(1);
-        auto res2 = x2*x2;
+    template <class sample_t, class vec_t>
+    struct poly_blep_invoker
+    {
+        static const inline vec_t blep(const vec_t& t, const vec_t& dt){
+            auto cond1 = (t < dt);
+            auto x1 = (t / dt - vec_t(1));
+            auto res1 = -x1*x1;
+            auto cond2 = (t > vec_t(1) - dt);
+            auto x2 = (t - vec_t(1)) / dt + vec_t(1);
+            auto res2 = x2*x2;
 
-        return select(cond1,res1,select(cond2,res2,0));
-     
+            return select(cond1,res1,select(cond2,res2,0));
+
+        }
+    };
+
+    template <class sample_t>
+    struct poly_blep_invoker<sample_t, sample_t>
+    {
+
+        static const inline sample_t blep(const sample_t& t, const sample_t& dt){
+            if (t < dt) {
+                auto x = (t / dt - 1);
+                return -x*x;
+            } else if (t > 1 - dt) {
+                auto x = (t - 1) / dt + 1;
+                return x*x;
+            } else {
+                return 0;
+            }
+
+        }
+    };
+
+    template<typename sample_t>
+    const inline sample_t blep(const sample_t& t, const sample_t& dt){
+ 
+        return poly_blep_invoker<typename simd_vector_traits<sample_t>::value_type,sample_t>::blep(t,dt);
         
     }
 

@@ -8,7 +8,10 @@ namespace algae::dsp::core::simd{
 
 
 template <class X>
-struct simd_vector_traits;
+struct simd_vector_traits{
+    typedef X value_type;
+    typedef bool vector_bool;
+};
 
 template <class X>
 class simd_vector_bool
