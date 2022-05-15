@@ -66,15 +66,6 @@ public:
         _mm256_storeu_ps(dst,m_value);
     }
 
-    // inline const float operator[](const size_t& index) const
-    // {
-    //     constexpr size_t size = 8;//simd_traits<float>::size;
-    //     float v[size];
-    //     store_u(v);
-    //     return v[index];
-    //     // return v[index & (size-1)];
-    // }
-
 
 private:
 

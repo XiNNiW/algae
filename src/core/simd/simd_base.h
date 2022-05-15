@@ -35,6 +35,14 @@ public:
         return (*this)();
     }
 
+    inline bool operator[](const size_t& index) const
+    {
+        constexpr size_t size = simd_traits<bool>::size;
+        bool v[size];
+        (*this)().store(v);
+        return v[index];
+    }
+
 protected:
 
     inline simd_vector_bool() {}
@@ -54,6 +62,11 @@ template <class X>
 inline X operator&&(const simd_vector_bool<X>& lhs, bool rhs)
 {
     return lhs() & rhs;
+}
+template <class X>
+inline X operator||(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs)
+{
+    return lhs() | rhs();
 }
 
 template <class X>
