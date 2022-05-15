@@ -14,12 +14,6 @@ namespace algae::dsp::core::oscillator {
     using algae::dsp::core::simd::load_a;
     using algae::dsp::core::simd::load_u;
 
-    template <class sample_t>
-    static const inline sample_t _update_phase(sample_t phase, const sample_t& increment, const sample_t& period=1){
-            phase += period*increment;
-            if ( phase >= period ) phase -= period;
-            return phase;
-    }
     template <class sample_t, class vec_t>
     struct phasor_invoker
     {
@@ -31,24 +25,24 @@ namespace algae::dsp::core::oscillator {
             alignas(vec_size) sample_t next_phase[vec_size];
             for(size_t idx=0; idx<vec_size; idx++){
                 phase += period_times_increment[idx];
-                if ( phase >= period[idx] ) phase -= period[idx];
                 next_phase[idx] = phase;
             }
+            vec_t next_phase_vec = load_a(next_phase);
+            auto reset_condition = next_phase_vec >= period;
+            next_phase_vec = select(reset_condition, next_phase_vec-period, next_phase_vec);
 
 
-            return load_a(next_phase);
+            return next_phase_vec;
         }
     };
 
     template <class sample_t>
     struct phasor_invoker<sample_t, sample_t>
     {
-
         static const inline sample_t update_phase(sample_t phase, const sample_t& increment, const sample_t& period=1){
             phase += period*increment;
             if ( phase >= period ) phase -= period;
             return phase;
-            // return  _update_phase(phase, increment, period);
         }
     };
 

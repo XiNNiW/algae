@@ -85,7 +85,8 @@ namespace algae::dsp::core::oscillator{
 
     template<typename sample_t, typename frequency_t>
     const inline std::pair<blep_saw_t<sample_t>, sample_t> process(blep_saw_t<sample_t> saw, const sample_t& phase_increment){
-        sample_t out = 2*saw.phase - 1;
+        const sample_t one = 1;
+        sample_t out = sample_t(2)*saw.phase - one;
         out -= blep<sample_t>(saw.phase, phase_increment);
         saw.phase = update_phase<sample_t, frequency_t>(saw.phase, phase_increment);
         return std::pair<blep_saw_t<sample_t>, sample_t>(saw, out);
@@ -98,9 +99,10 @@ namespace algae::dsp::core::oscillator{
 
     template<typename sample_t, typename frequency_t>
     const inline std::pair<blep_square_t<sample_t>, sample_t> process(blep_square_t<sample_t> square, const sample_t& phase_increment, const sample_t pwidth=0.5){
-        sample_t out = square.phase<pwidth?1:-1;
+        const sample_t one = 1;
+        sample_t out = square.phase<pwidth?one:-one;
         out += blep<sample_t>(square.phase, phase_increment);
-        out -= blep<sample_t>(fmod(square.phase + (1-pwidth), 1.0), phase_increment);
+        out -= blep<sample_t>(fmod(square.phase + (one-pwidth), one), phase_increment);
         square.phase = update_phase<sample_t, frequency_t>(square.phase, phase_increment);
         return std::pair<blep_square_t<sample_t>, sample_t>(square, out);
     }
@@ -113,11 +115,12 @@ namespace algae::dsp::core::oscillator{
 
     template<typename sample_t, typename frequency_t>
     const inline std::pair<blep_tri_t<sample_t>, sample_t> process(blep_tri_t<sample_t> tri, const sample_t& phase_increment){
+        const sample_t one = 1;
         const sample_t pwidth = 0.5;
-        sample_t out = tri.phase<pwidth?1:-1;
+        sample_t out = tri.phase<pwidth?one:-one;
         out += blep<sample_t>(tri.phase, phase_increment);
-        out -= blep<sample_t>(fmod(tri.phase + (1-pwidth), 1.0), phase_increment);
-        out = phase_increment * out + (1 - phase_increment) * tri.y1;
+        out -= blep<sample_t>(fmod(tri.phase + (one-pwidth), one), phase_increment);
+        out = phase_increment * out + (one - phase_increment) * tri.y1;
         tri.y1 = out;
         tri.phase = update_phase<sample_t, frequency_t>(tri.phase, phase_increment);
         return std::pair<blep_tri_t<sample_t>, sample_t>(tri, out);
