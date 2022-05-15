@@ -88,7 +88,7 @@ namespace algae::dsp::core::oscillator{
         const sample_t one = 1;
         sample_t out = sample_t(2)*saw.phase - one;
         out -= blep<sample_t>(saw.phase, phase_increment);
-        saw.phase = update_phase<sample_t, frequency_t>(saw.phase, phase_increment);
+        saw.phase = update_phase<sample_t>(saw.phase, phase_increment);
         return std::pair<blep_saw_t<sample_t>, sample_t>(saw, out);
     }
 
@@ -103,7 +103,7 @@ namespace algae::dsp::core::oscillator{
         sample_t out = square.phase<pwidth?one:-one;
         out += blep<sample_t>(square.phase, phase_increment);
         out -= blep<sample_t>(fmod(square.phase + (one-pwidth), one), phase_increment);
-        square.phase = update_phase<sample_t, frequency_t>(square.phase, phase_increment);
+        square.phase = update_phase<sample_t>(square.phase, phase_increment);
         return std::pair<blep_square_t<sample_t>, sample_t>(square, out);
     }
 
@@ -122,7 +122,7 @@ namespace algae::dsp::core::oscillator{
         out -= blep<sample_t>(fmod(tri.phase + (one-pwidth), one), phase_increment);
         out = phase_increment * out + (one - phase_increment) * tri.y1;
         tri.y1 = out;
-        tri.phase = update_phase<sample_t, frequency_t>(tri.phase, phase_increment);
+        tri.phase = update_phase<sample_t>(tri.phase, phase_increment);
         return std::pair<blep_tri_t<sample_t>, sample_t>(tri, out);
     }
 }
