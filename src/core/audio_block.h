@@ -28,7 +28,7 @@ namespace algae::dsp::core{
     template<typename sample_t>
     void block_div(const sample_t& lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){
         for(size_t idx=0; idx<block_size; idx++)
-            out[idx] = lhs[idx]+rhs;
+            out[idx] = lhs/rhs[idx];
     }
     template<typename sample_t>
     void block_add(const sample_t* lhs, const sample_t* rhs, const size_t& block_size, sample_t* out){

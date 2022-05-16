@@ -442,7 +442,7 @@ namespace algae::dsp::core::experimental{
     template<typename sample_t>
     sample_t sincM(int m_number_of_harmonics, sample_t theta){
         sample_t m = m_number_of_harmonics;
-        return sin(M_PI*theta)/(m*sin(m*M_PI*theta));
+        return sin(M_PI*theta)/(m*sin(M_PI*theta/m));
     }
 
     // Stilson & Smith, Alias-Free Digital Synthesis of Classic Analog Waveforms, https://ccrma.stanford.edu/~stilti/papers/blit.pdf
@@ -463,7 +463,7 @@ namespace algae::dsp::core::experimental{
         sample_t theta_pi = theta/M_PI;
         int m = floor(theta_pi);
 
-        return (theta_pi-double(m)) > 0 
+        return (theta_pi-sample_t(m)) > 0 
                     ? (sin(sample_t(n)*theta*.5)/sin(theta*.5))
                     : isOdd(n)
                     ? n 

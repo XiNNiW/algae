@@ -27,14 +27,15 @@ namespace algae::dsp::core::oscillator {
     };
 
     template<typename sample_t>
-    const atari_noise_t atari(
-        atari_noise_t nz, const int& downsample_amount,
+    const atari_noise_t process(
+        atari_noise_t nz, const sample_t* downsample_amount,
         const size_t& blocksize,
         sample_t* out
     ){
         for(size_t idx=0; idx<blocksize; idx++){
-            if(nz.phase<downsample_amount){
+            if(nz.phase<int(downsample_amount[idx])){
                 nz.phase++;
+                out[idx]=0;
             } else {
                 out[idx] = noise<sample_t>();
                 nz.phase=0;
@@ -43,6 +44,5 @@ namespace algae::dsp::core::oscillator {
 
         return nz;
             
-        
     }
 }

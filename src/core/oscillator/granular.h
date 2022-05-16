@@ -36,6 +36,42 @@ namespace algae::dsp::core::oscillator {
     }
 
     template<typename sample_t>
+    void random_pulses(
+        const sample_t* prob, const size_t& blocksize, 
+        //-->
+        sample_t* triggers
+    ){
+        
+        for(size_t idx=0; idx<blocksize; idx++){
+           triggers[idx] = prob[idx]>( static_cast<sample_t>(rand()) /  static_cast<sample_t>(RAND_MAX))?1:0;
+        }
+    }
+
+    template<typename sample_t>
+    struct pulse_train_t{
+        sample_t last_phase;
+    };
+
+    template<typename sample_t>
+    const inline pulse_train_t<sample_t> process(
+        pulse_train_t<sample_t> train,
+        const sample_t* phase,
+        const size_t& num_samples,
+        //-->
+        sample_t* out
+    ){
+        for(size_t idx=0; idx<num_samples; idx++){
+            sample_t prev = idx==0?train.last_phase:phase[idx-1];
+            out[idx] = (phase[idx]-prev)<0?1:0;
+            // train.last_phase = phase[idx];
+        }
+
+        train.last_phase = phase[num_samples-1];
+          
+        return train;
+    }
+
+    template<typename sample_t>
     void random_triggers(
         const sample_t* prob, const size_t& blocksize, 
         const sample_t* noise,
@@ -60,13 +96,7 @@ namespace algae::dsp::core::oscillator {
         sample_t* out_left,
         sample_t* out_right
     ){   
-        // auto gfreq      = grainFreq[0]>0?grainFreq[0]:0.01;
-        // auto cfreq      = carrier_freq[0];
-        // auto mfreq      = mod_freq[0];
-        // auto fmindex    = index[0];
-        // auto fb         = feedback[0];
-        // auto position   = pan_position[0];
-        
+
         for(size_t idx=0; idx<blocksize; idx++){
             bool active = grain.grain_phase < 1;
             if (triggers[idx] || active){
@@ -79,18 +109,20 @@ namespace algae::dsp::core::oscillator {
                     grain.feedback          = feedback[idx];
                     grain.pan_position      = pan_position[idx];
                     grain.grain_phase       = 0;
-                    // grain.carrier_phase = 0;
-                    // grain.modulator_phase = 0;
+                    grain.carrier_phase = 0;
+                    grain.modulator_phase = 0;
                     // grain.osc.y1 = 0;
                 }
 
                 sample_t out;
+                // std::tie(grain.osc, out) = process<sample_t>(grain.osc, grain.carrier_phase, grain.modulator_phase, index[idx], feedback[idx]);
                 std::tie(grain.osc, out) = process<sample_t>(grain.osc, grain.carrier_phase, grain.modulator_phase, grain.fm_index, grain.feedback);
                 out *= window_fn(grain.grain_phase);
+                // std::tie(out_left[idx], out_right[idx]) = pan<sample_t, 1024>(out, pan_position[idx]);
                 std::tie(out_left[idx], out_right[idx]) = pan<sample_t, 1024>(out, grain.pan_position);
                
                 grain.grain_phase       += compute_phase_increment<sample_t>(grain.grain_freq, sample_rate);
-                grain.carrier_phase     =  update_phase<sample_t>(grain.carrier_phase,   compute_phase_increment<sample_t>(grain.carrier_freq,sample_rate));
+                grain.carrier_phase     =  update_phase<sample_t>( grain.carrier_phase,  compute_phase_increment<sample_t>(grain.carrier_freq,sample_rate));
                 grain.modulator_phase   =  update_phase<sample_t>(grain.modulator_phase, compute_phase_increment<sample_t>(grain.mod_freq,sample_rate));
             
             }else{

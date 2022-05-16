@@ -8,6 +8,7 @@
 #include "oscillator/cos_table_lookup.h"
 #include "oscillator/noise.h"
 #include "oscillator/poly_blep.h"
+#include "oscillator/blit.h"
 #include "oscillator/blit_saw.h"
 #include "oscillator/blit_square.h"
 #include "oscillator/fm.h"
