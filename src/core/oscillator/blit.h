@@ -5,7 +5,7 @@
 
 namespace algae::dsp::core::oscillator{
 
-
+    // the following is heavily inspired by STK: https://ccrma.stanford.edu/software/stk/information.html
     template<typename sample_t>
     static inline size_t max_number_of_harmonics(const sample_t& period_in_samples){
 
