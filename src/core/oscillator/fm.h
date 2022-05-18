@@ -16,13 +16,14 @@ namespace algae::dsp::core::oscillator {
     const inline std::pair<fbfm_t<sample_t>, sample_t> process(
         fbfm_t<sample_t> osc, const sample_t& carrier_phase, const sample_t& modulator_phase, const sample_t& index, const sample_t& feedback_amt
     ){
-        const sample_t output = osc.y1 = sin(
+        const sample_t output = sin(
             TWO_PI*carrier_phase 
             + 
             index*sin(
                 TWO_PI*modulator_phase + feedback_amt*osc.y1
             )
         );
+       osc.y1 = output;
         return std::pair(osc, output);
     }
 
@@ -38,13 +39,14 @@ namespace algae::dsp::core::oscillator {
         sample_t modulator[block_size];
         block_mult(modulator_phase,TWO_PI,block_size, modulator);
         for(size_t idx=0; idx<block_size; idx++) {
-            out[idx] = osc.y1 = sin(
+            out[idx] = sin(
                 TWO_PI*carrier_phase 
                 + 
                 index*sin(
                     TWO_PI*modulator_phase + feedback_amt*osc.y1
                 )
             );
+            osc.y1 = out[idx]; 
         }
 
         return osc;

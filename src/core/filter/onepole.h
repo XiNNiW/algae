@@ -69,6 +69,35 @@ namespace algae::dsp::core::filter {
         return std::pair(state,output);
     }
 
+    template<typename sample_t>
+    struct hip_t {
+        sample_t a0=0;
+        sample_t y1=0;
+    };
+
+    template<typename sample_t,typename frequency_t>
+    const inline hip_t<sample_t> hip(
+        hip_t<sample_t> state, 
+        const sample_t& cutoff, 
+        const frequency_t& sampleRate
+    ){
+        sample_t w = M_PI*clamp<sample_t>(fabs(-cutoff/sampleRate),0,1);
+        state.a0 = sin(w);
+        return state;
+    }
+
+    template<typename sample_t>
+    const inline std::pair<hip_t<sample_t>, sample_t> process(
+        hip_t<sample_t> f, 
+        const sample_t& input
+    ){
+        const sample_t xn = input;
+        const sample_t a0 = f.a0;
+        
+        f.y1 = a0*(xn + f.y1) - f.y1;
+        return std::pair(f, f.y1);
+    }
+
 
     template<typename sample_t>
     struct onepole_onezero_t {
