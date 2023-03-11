@@ -72,6 +72,6 @@ namespace algae::dsp::core::oscillator {
             output[idx] = sq.state;
         }
         
-        return std::pair(sq,output);
+        return std::pair<stk_blit_square_t<sample_t>,AudioBlock<sample_t,BLOCKSIZE>>(sq,output);
     }
 }

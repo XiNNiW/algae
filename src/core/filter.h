@@ -7,3 +7,4 @@
 #include "filter/resonant_bandpass.h"
 #include "filter/distorted_bandpass.h"
 #include "filter/allpole.h"
+#include "filter/allpass.h"

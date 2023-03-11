@@ -39,7 +39,7 @@ namespace algae::dsp::core::oscillator{
         
         train.phase = update_phase_<sample_t>(train.phase, phi, sample_t(M_PI));
 
-        return std::pair(train, pulse);
+        return std::pair<blit_train_t<sample_t>,sample_t>(train, pulse);
 
     }
 
@@ -64,7 +64,7 @@ namespace algae::dsp::core::oscillator{
             click.phase = phase;
         }
 
-        return std::pair(click, out);
+        return std::pair<click_t<sample_t>, sample_t>(click, out);
     }
     
 

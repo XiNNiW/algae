@@ -70,7 +70,7 @@ namespace algae::dsp::core::oscillator {
                 output[idx] = sine_t<sample_t,TABLE_SIZE>::lookup(phase);
                 phase = update_phase<sample_t>(phase, phi, 1.0);
             }
-            return std::pair(phase, output);
+            return std::pair<sample_t, AudioBlock<sample_t,BLOCK_SIZE>>(phase, output);
         }
     };
 

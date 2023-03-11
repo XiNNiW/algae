@@ -7,3 +7,4 @@
 #include "control/ad_envelope.h"
 #include "control/adsr_envelope.h"
 #include "control/window.h"
+#include "control/triggers.h"

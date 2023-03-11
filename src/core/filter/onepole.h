@@ -66,7 +66,7 @@ namespace algae::dsp::core::filter {
             output[idx] = state.y1;
         }
 
-        return std::pair(state,output);
+        return std::pair<onepole_t<sample_t>, AudioBlock<sample_t,BLOCK_SIZE>>(state,output);
     }
 
     template<typename sample_t>
@@ -95,7 +95,7 @@ namespace algae::dsp::core::filter {
         const sample_t a0 = f.a0;
         
         f.y1 = a0*(xn + f.y1) - f.y1;
-        return std::pair(f, f.y1);
+        return std::pair<hip_t<sample_t>, sample_t>(f, f.y1);
     }
 
 
@@ -152,7 +152,7 @@ namespace algae::dsp::core::filter {
             output[idx] = state.y1;
         }
 
-        return std::pair(state,output);
+        return std::pair<onepole_onezero_t<sample_t>, AudioBlock<sample_t,BLOCK_SIZE>>(state,output);
     }
 
 }

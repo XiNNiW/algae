@@ -49,7 +49,7 @@ namespace algae::dsp::core::filter {
             output[idx] = filter.ys[0];
         }
         
-        return std::pair(filter,output);
+        return std::pair<allpole_t<sample_t, ORDER>, AudioBlock<sample_t, BLOCK_SIZE>>(filter,output);
     }
 
 

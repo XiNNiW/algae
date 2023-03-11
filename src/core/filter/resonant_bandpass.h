@@ -83,7 +83,24 @@ namespace algae::dsp::core::filter{
             output[idx] = r.y1;
         }
         
-        return std::pair(r,output);
+        return std::pair<reson_bp_t<sample_t>, AudioBlock<sample_t,BLOCK_SIZE>>(r,output);
+    }
+
+    template<typename sample_t>
+    inline void process(const size_t& blocksize, reson_bp_t<sample_t>* r, const sample_t* input, sample_t* output){
+
+        for(size_t idx=0; idx<blocksize; idx++){
+            sample_t xn = input[idx];
+            sample_t yn = r->b0d*xn + r->b1d*r->x1 + r->b2d*r->x2 - r->a1d*r->y1 - r->a2d*r->y2;
+
+            r->y2 = r->y1;
+            r->y1 = yn;
+            r->x2 = r->x1;
+            r->x1 = xn;
+    
+            output[idx] = r->y1;
+        }
+ 
     }
 
 }

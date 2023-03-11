@@ -29,7 +29,7 @@ namespace algae::dsp::core::filter {
             block[idx] = r.resonator.y1;
         }
 
-        return std::pair(r, block);
+        return std::pair<chaotic_resonator_t<sample_t>, AudioBlock<sample_t,BLOCKSIZE>>(r, block);
     }
 
     template<typename sample_t, const sample_t (* fn)(const sample_t &)>
@@ -65,7 +65,7 @@ namespace algae::dsp::core::filter {
         r.resonator = process<sample_t>(r.resonator, fb_signal);
         const sample_t out = r.resonator.y1;
 
-        return std::pair(r, out);
+        return std::pair<chaotic_resonator_t<sample_t>, sample_t>(r, out);
     }
 
     template<typename sample_t>
@@ -85,10 +85,10 @@ namespace algae::dsp::core::filter {
         AudioBlock<sample_t, BLOCKSIZE> block;
         for(size_t idx=0; idx<BLOCKSIZE; idx++){
  
-            std::pair(r, block[idx]) = process<sample_t, fn>(r, in[idx]);
+            std::pair<chaotic_biquad_t<sample_t>, AudioBlock<sample_t,BLOCKSIZE>>(r, block[idx]) = process<sample_t, fn>(r, in[idx]);
         }
 
-        return std::pair(r, block);
+        return std::pair<chaotic_biquad_t<sample_t>, AudioBlock<sample_t,BLOCKSIZE>>(r, block);
     }
 
     template<typename sample_t, const sample_t (* fn)(const sample_t &)>
@@ -102,7 +102,22 @@ namespace algae::dsp::core::filter {
         r.resonator = process<sample_t>(r.resonator, fb_signal);
         const sample_t out = r.resonator.y1;
 
-        return std::pair(r, out);
+        return std::pair<chaotic_biquad_t<sample_t>, sample_t>(r, out);
+    }
+
+    template<typename sample_t, const sample_t (* fn)(const sample_t &)>
+    inline void process(const size_t& blocksize, chaotic_biquad_t<sample_t>* r, const sample_t* in, sample_t* out) {
+        for(size_t idx=0; idx<blocksize; idx++){
+            const sample_t fb = r->feedback_amt;
+            const sample_t g  = r->chaos_gain;
+            sample_t fb_signal = fn(fb*r->resonator.y1);
+                
+            fb_signal = in[idx] + g*fb_signal;
+            fb_signal *= 0.5;
+            r->resonator = process<sample_t>(r->resonator, fb_signal);
+            out[idx] = r.resonator.y1;
+        }
+
     }
  
 }

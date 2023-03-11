@@ -67,7 +67,7 @@ namespace algae::dsp::core::oscillator {
             output[idx] = saw.state;
         }
         
-        return std::pair(saw,output);
+        return std::pair<stk_blit_saw_t<sample_t>,AudioBlock<sample_t,BLOCKSIZE>>(saw,output);
     }
 
 }

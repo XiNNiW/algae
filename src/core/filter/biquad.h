@@ -72,7 +72,7 @@ namespace algae::dsp::core::filter {
         }
         
 
-        return std::pair(state,output);
+        return std::pair<biquad_t<sample_t>, AudioBlock<sample_t, BLOCK_SIZE>>(state,output);
     }
 
     // template<typename sample_t, typename frequency_t, size_t MAX_UNISON, size_t BLOCK_SIZE>

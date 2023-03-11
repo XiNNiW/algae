@@ -86,7 +86,7 @@ namespace algae::dsp::core::analysis {
     template<typename sample_t, size_t ORDER, size_t BLOCKSIZE>
     inline const AudioBlock<sample_t, BLOCKSIZE> lpc(AudioBlock<sample_t, BLOCKSIZE> x, const AudioBlock<sample_t, BLOCKSIZE> &carrier){
         x = apply_window<sample_t, BLOCKSIZE, hann>(x);
-        lpc_t analysis = lpc_analyze<sample_t, ORDER, BLOCKSIZE>(x);
+        lpc_t<sample_t, ORDER> analysis = lpc_analyze<sample_t, ORDER, BLOCKSIZE>(x);
         allpole_t<sample_t, ORDER> filter = allpole(analysis.filter_coefficients); 
         AudioBlock<sample_t, BLOCKSIZE> output;
         std::tie(filter,output) = process(filter, carrier*analysis.error);
