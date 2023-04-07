@@ -3,6 +3,10 @@ bin/**/*
 build
 build/**/*
 
+.cache
+.cache/**/*
+*.idx
+
 CMakeFiles/
 Testing/
 
