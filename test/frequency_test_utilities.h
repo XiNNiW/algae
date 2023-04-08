@@ -5,7 +5,7 @@
 
 template <typename sample_t, typename filter_t, size_t NUM_BINS>
 const std::array<sample_t, NUM_BINS>
-compute_amplitude_response(filter_t filter, const sample_t &sample_rate) {
+compute_amplitude_response(filter_t filter, const sample_t sample_rate) {
   std::array<sample_t, NUM_BINS> amplitude_response = {};
 
   enum complex { RE, IM };

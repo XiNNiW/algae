@@ -341,7 +341,7 @@ static inline void sub(const sample_t *lhs, const sample_t rhs,
 namespace filter {
 template <typename sample_t, typename frequency_t> struct Biquad {
 
-  sample_t b0, b1, b2, a1, a2;
+  sample_t b0 = 0, b1 = 0, b2 = 0, a1 = 0, a2 = 0;
   sample_t y1 = 0;
   sample_t y2 = 0;
   sample_t x1 = 0;
@@ -355,15 +355,25 @@ template <typename sample_t, typename frequency_t> struct Biquad {
     this->a1 = a1;
     this->a2 = a2;
   };
-  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
 
+  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
     for (size_t i = 0; i < blocksize; i++) {
+      const sample_t b0 = this->b0;
+      const sample_t b1 = this->b1;
+      const sample_t b2 = this->b2;
+      const sample_t a1 = this->a1;
+      const sample_t a2 = this->a2;
       const sample_t x0 = in[i];
+      const sample_t x1 = this->x1;
+      const sample_t x2 = this->x2;
+      const sample_t y1 = this->y1;
+      const sample_t y2 = this->y2;
       const sample_t y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
-      y1 = y0;
-      y2 = y1;
-      x1 = x0;
-      x2 = x1;
+      this->y1 = y0;
+      this->y2 = y1;
+      this->x1 = x0;
+      this->x2 = x1;
+
       out[i] = y0;
     }
   };
@@ -371,8 +381,8 @@ template <typename sample_t, typename frequency_t> struct Biquad {
   void lowpass(const frequency_t cutoff, const frequency_t quality,
                const frequency_t samplerate) {
 
-    const frequency_t _q = quality <= 0 ? 0.01 : quality;
-    const frequency_t _w0 = cutoff * math::TwoPi<sample_t>() / samplerate;
+    const frequency_t _q = quality <= 0 ? 0.001 : quality;
+    const frequency_t _w0 = cutoff * 2 * M_PI / samplerate;
     const frequency_t _a = fabs(sin(_w0) / (2 * _q));
     const frequency_t _c = cos(_w0);
     const frequency_t _b0 = (1 - _c) / 2, _b1 = 1 - _c, _b2 = (1 - _c) / 2;
@@ -385,9 +395,10 @@ template <typename sample_t, typename frequency_t> struct Biquad {
     this->a2 = _a2 / _a0;
   };
 
-  void highpass(const frequency_t cutoff, const frequency_t q,
+  void highpass(const frequency_t cutoff, const frequency_t quality,
                 const frequency_t samplerate) {
 
+    const frequency_t q = quality <= 0 ? 0.001 : quality;
     frequency_t w0 = cutoff * math::TwoPi<frequency_t>() / samplerate;
     frequency_t a = fabs(sin(w0) / (2 * q));
     frequency_t c = cos(w0);
@@ -408,7 +419,7 @@ template <typename sample_t, typename frequency_t> struct Biquad {
   void bandpass(const frequency_t cutoff, const frequency_t quality,
                 const frequency_t samplerate) {
 
-    sample_t q = quality > 0 ? quality : 0.01;
+    const frequency_t q = quality <= 0 ? 0.001 : quality;
     frequency_t w0 = cutoff * math::TwoPi<frequency_t>() / samplerate;
     frequency_t a = fabs(sin(w0) / (2 * q));
     frequency_t c = cos(w0);
