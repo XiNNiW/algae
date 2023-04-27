@@ -1,0 +1,4 @@
+gcc++
+%cxx -std=c++17
+%cxx -stdlib=libc++
+%cxx -I/usr/local/include
