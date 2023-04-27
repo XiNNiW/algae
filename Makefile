@@ -33,7 +33,8 @@ TEST_OBJECTS := $(TEST_SOURCES:$(TEST_SRC)/%.$(CODE_EXT)=$(TEST_OBJ)/%.o)
 TEST_DIRS := $(TEST_SOURCES:$(TEST_SRC)/%.$(CODE_EXT)=$(TEST_OBJ)/%/../)
 
 #compiler and settings
-CC  = g++
+#CC  = g++
+CC = clang
 CC_VERSION = c++17
 
 CFLAGS = -std=$(CC_VERSION) -Wall -I. -I$(INCLUDE) -lm -march=native -O2
@@ -61,6 +62,7 @@ test_directories:
 
 install:
 	cp $(BIN)/$(TARGET) $(INSTALL_DIR)
+	cp $(SRC)/algae.h /usr/local/include
 
 .PHONY: clean
 clean:

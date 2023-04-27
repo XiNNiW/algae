@@ -1,10 +1,43 @@
 #pragma once
-#include "math.h"
 #include <array>
+#include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <utility>
+
 namespace algae::dsp {
+template <typename sample_t, typename DerivedT> struct Filter {
+  inline void process(const sample_t *in, const size_t blocksize,
+                      sample_t *out) {
+    for (size_t i = 0; i < blocksize; i++)
+      out[i] = static_cast<DerivedT *>(this)->computeNextSample(in[i]);
+  }
+  inline const sample_t next(const sample_t in) {
+    return static_cast<DerivedT *>(this)->computeNextSample(in);
+  }
+};
+template <typename sample_t, typename DerivedT> struct StereoFilter {
+  inline void process(const sample_t *inL, const sample_t *inR,
+                      const size_t blocksize, sample_t *outL, sample_t *outR) {
+    for (size_t i = 0; i < blocksize; i++)
+      static_cast<DerivedT *>(this)->computeNextSample(inL[i], inR[i], outL[i],
+                                                       outR[i]);
+  }
+  inline const void next(const sample_t inL, const sample_t inR, sample_t &outL,
+                         sample_t &outR) {
+    static_cast<DerivedT *>(this)->computeNextSample(inL, inR, outL, outR);
+  }
+};
+template <typename sample_t, typename DerivedT> struct Generator {
+  inline void process(const size_t blocksize, sample_t *out) {
+    for (size_t i = 0; i < blocksize; i++)
+      out[i] = static_cast<DerivedT *>(this)->computeNextSample();
+  }
+  inline const sample_t next() {
+    return static_cast<DerivedT *>(this)->computeNextSample();
+  }
+};
 namespace math {
 // CONSTANTS
 #define LOGTEN 2.302585092994046
@@ -23,8 +56,14 @@ template <typename sample_t> constexpr sample_t Pi() {
 }
 
 // FUNCTIONS
+
 constexpr size_t nextPowerOf2(const size_t &x) {
-  return pow(2, ceil(log(x) / log(2)));
+  int next = 1;
+  while (next < x) {
+    next = next << 1;
+  }
+  return next;
+  // return static_cast<size_t>(pow(2, ceil(log(x) / log(2))));
 };
 
 template <typename sample_t, unsigned int x> struct factorial_t {
@@ -129,6 +168,11 @@ static inline void atan(const sample_t *x, const size_t blocksize,
 };
 
 template <typename sample_t>
+static inline const sample_t tanh(const sample_t x) {
+  return std::tanh(x);
+}
+
+template <typename sample_t>
 static inline sample_t tanh_approx_pade(const sample_t x) {
   if (x < -3)
     return -1;
@@ -181,6 +225,13 @@ inline const sample_t beatsToSamples(sample_t n, sample_t bpm,
   return (n / bpm) * SECONDS_PER_MINUTE * sampleRate;
 };
 
+template <typename sample_t>
+inline const sample_t beatsToMillis(sample_t n, sample_t bpm) {
+  const sample_t SECONDS_PER_MINUTE = 60;
+  const sample_t MILLIS_PER_SEC = 1000.0;
+  return (n / bpm) * SECONDS_PER_MINUTE * MILLIS_PER_SEC;
+};
+
 // implementation borrowed from Miller Puckette's Pure Data project
 template <typename sample_t> const inline sample_t dbtopow(sample_t db) {
   if (db <= 0)
@@ -229,6 +280,39 @@ template <typename sample_t> const inline sample_t rmstodb(sample_t rms) {
 } // namespace math
 namespace block {
 // SAMPLE BLOCK OPERATIONS
+template <typename sample_t, const sample_t (*fn)(const sample_t)>
+static inline void unaryOp(const sample_t *in, const size_t blocksize,
+                           sample_t *out) {
+  for (size_t i = 0; i < blocksize; i++) {
+    out[i] = fn(in[i]);
+  }
+}
+
+template <typename sample_t,
+          const sample_t (*fn)(const sample_t, const sample_t)>
+static inline void binaryOp(const sample_t *lhs, const sample_t *rhs,
+                            const size_t blocksize, sample_t *out) {
+  for (size_t i = 0; i < blocksize; i++) {
+    out[i] = fn(lhs[i], rhs[i]);
+  }
+}
+template <typename sample_t,
+          const sample_t (*fn)(const sample_t, const sample_t)>
+static inline void binaryOp(const sample_t lhs, const sample_t *rhs,
+                            const size_t blocksize, sample_t *out) {
+  for (size_t i = 0; i < blocksize; i++) {
+    out[i] = fn(lhs, rhs[i]);
+  }
+}
+template <typename sample_t,
+          const sample_t (*fn)(const sample_t, const sample_t)>
+static inline void binaryOp(const sample_t *lhs, const sample_t rhs,
+                            const size_t blocksize, sample_t *out) {
+  for (size_t i = 0; i < blocksize; i++) {
+    out[i] = fn(lhs[i], rhs);
+  }
+}
+
 template <typename sample_t>
 static inline void fill(sample_t value, const size_t blocksize, sample_t *out) {
   for (size_t i = 0; i < blocksize; i++) {
@@ -339,7 +423,72 @@ static inline void sub(const sample_t *lhs, const sample_t rhs,
 
 } // namespace block
 namespace filter {
-template <typename sample_t, typename frequency_t> struct Biquad {
+
+template <typename sample_t, size_t MAX_DELAY_SAMPS,
+          const sample_t (*interp)(const sample_t, const sample_t,
+                                   const sample_t) =
+              algae::dsp::math::lerp<sample_t>>
+struct InterpolatedDelay
+    : Filter<sample_t, InterpolatedDelay<sample_t, MAX_DELAY_SAMPS, interp>> {
+  static const size_t BUFFER_SIZE =
+      algae::dsp::math::nextPowerOf2(MAX_DELAY_SAMPS);
+  static constexpr int INDEX_MASK = int(BUFFER_SIZE - 1);
+  sample_t buffer[BUFFER_SIZE];
+  int writePosition = 0;
+  sample_t delayTimeSamples = BUFFER_SIZE / 2;
+
+  InterpolatedDelay() { algae::dsp::block::empty(BUFFER_SIZE, buffer); }
+  void setDelayTimeMillis(sample_t delayTimeMillis, sample_t samplerate) {
+    delayTimeSamples = (delayTimeMillis * samplerate) / 1000.0;
+  }
+
+  inline const sample_t tap(int pos) {
+    return buffer[(writePosition - pos) & INDEX_MASK];
+  }
+
+  inline const sample_t computeNextSample(const sample_t in) {
+    int dtWhole = floor(delayTimeSamples);
+    sample_t dtMantissa = delayTimeSamples - dtWhole;
+    int r1 = (writePosition - dtWhole) & INDEX_MASK;
+    int r2 = (r1 + 1) & INDEX_MASK;
+    sample_t out = interp(buffer[r1], buffer[r2], dtMantissa);
+    buffer[writePosition] = in;
+    writePosition++;
+    writePosition &= INDEX_MASK;
+    return out;
+  }
+};
+
+// inspired by CParamSmooth from moc.liamg@earixela at musicdsp.org
+template <typename sample_t>
+struct SmoothParameter : Filter<sample_t, SmoothParameter<sample_t>> {
+  sample_t a = 0.99f, b = 1.f - a, z = 0;
+
+  SmoothParameter() {}
+  SmoothParameter(sample_t smoothingTimeMillis, sample_t samplerate) {
+    set(smoothingTimeMillis, samplerate);
+  }
+  void set(sample_t smoothingTimeMillis, sample_t samplerate) {
+
+    a = exp(-math::TwoPi<sample_t>() /
+            (smoothingTimeMillis * 0.001 * samplerate));
+    b = 1.0 - a;
+    // z = 0.0;
+  }
+
+  inline const sample_t computeNextSample(const sample_t in) {
+    z = (in * b) + (z * a);
+    return z;
+  }
+
+  void process(const sample_t in, const size_t blocksize, sample_t *out) {
+    for (size_t i = 0; i < blocksize; i++) {
+      out[i] = computeNextSample(in);
+    }
+  }
+};
+template <typename sample_t, typename frequency_t>
+struct Biquad : Filter<sample_t, Biquad<sample_t, frequency_t>> {
 
   sample_t b0 = 0, b1 = 0, b2 = 0, a1 = 0, a2 = 0;
   sample_t y1 = 0;
@@ -356,27 +505,24 @@ template <typename sample_t, typename frequency_t> struct Biquad {
     this->a2 = a2;
   };
 
-  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
-    for (size_t i = 0; i < blocksize; i++) {
-      const sample_t b0 = this->b0;
-      const sample_t b1 = this->b1;
-      const sample_t b2 = this->b2;
-      const sample_t a1 = this->a1;
-      const sample_t a2 = this->a2;
-      const sample_t x0 = in[i];
-      const sample_t x1 = this->x1;
-      const sample_t x2 = this->x2;
-      const sample_t y1 = this->y1;
-      const sample_t y2 = this->y2;
-      const sample_t y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
-      this->y1 = y0;
-      this->y2 = y1;
-      this->x1 = x0;
-      this->x2 = x1;
-
-      out[i] = y0;
-    }
-  };
+  const sample_t computeNextSample(const sample_t in) {
+    const sample_t b0 = this->b0;
+    const sample_t b1 = this->b1;
+    const sample_t b2 = this->b2;
+    const sample_t a1 = this->a1;
+    const sample_t a2 = this->a2;
+    const sample_t x0 = in;
+    const sample_t x1 = this->x1;
+    const sample_t x2 = this->x2;
+    const sample_t y1 = this->y1;
+    const sample_t y2 = this->y2;
+    const sample_t y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+    this->y1 = y0;
+    this->y2 = y1;
+    this->x1 = x0;
+    this->x2 = x1;
+    return y0;
+  }
 
   void lowpass(const frequency_t cutoff, const frequency_t quality,
                const frequency_t samplerate) {
@@ -437,21 +583,19 @@ template <typename sample_t, typename frequency_t> struct Biquad {
   };
 };
 
-template <typename sample_t, typename frequency_t> struct Onepole {
+template <typename sample_t, typename frequency_t>
+struct Onepole : Filter<sample_t, Onepole<sample_t, frequency_t>> {
 
   sample_t a0 = 0;
   sample_t type_coefficient = 1;
   sample_t y1 = 0;
 
   void setCoefficients(const sample_t a0) { this->a0 = a0; };
-  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
-
-    for (size_t i = 0; i < blocksize; i++) {
-      const sample_t _y1 = type_coefficient * y1;
-      y1 = a0 * (in[i] - _y1) + _y1;
-      out[i] = y1;
-    }
-  };
+  inline const sample_t computeNextSample(const sample_t in) {
+    const sample_t _y1 = type_coefficient * y1;
+    y1 = a0 * (in - _y1) + _y1;
+    return y1;
+  }
 
   void lowpass(const frequency_t cutoff, const frequency_t samplerate) {
 
@@ -468,7 +612,9 @@ template <typename sample_t, typename frequency_t> struct Onepole {
   };
 };
 
-template <typename sample_t, typename frequency_t> struct OnepoleOnezero {
+template <typename sample_t, typename frequency_t>
+struct OnepoleOnezero
+    : Filter<sample_t, OnepoleOnezero<sample_t, frequency_t>> {
   sample_t a1 = 0, b0 = 0;
   sample_t x1 = 0, y1 = 0;
   void highpass(const frequency_t cutoff, const frequency_t samplerate) {
@@ -482,72 +628,111 @@ template <typename sample_t, typename frequency_t> struct OnepoleOnezero {
     a1 = a;
     b0 = b;
   };
-  void process(const sample_t *in, const size_t BLOCKSIZE, sample_t *out) {
 
-    for (size_t i = 0; i < BLOCKSIZE; i++) {
-      const sample_t a1 = this->a1;
-      const sample_t b0 = this->b0;
-      const sample_t x0 = in[i];
-      const sample_t x1 = this->x1;
-      const sample_t y1 = this->y1;
-      const sample_t y = b0 * (x0 - x1) + a1 * y1;
-      this->y1 = y;
-      this->x1 = x0;
-      out[i] = y;
-    }
-  };
+  inline const sample_t computeNextSample(const sample_t in) {
+    const sample_t a1 = this->a1;
+    const sample_t b0 = this->b0;
+    const sample_t x0 = in;
+    const sample_t x1 = this->x1;
+    const sample_t y1 = this->y1;
+    const sample_t y = b0 * (x0 - x1) + a1 * y1;
+    this->y1 = y;
+    this->x1 = x0;
+    return y;
+  }
 };
 
-template <typename sample_t> struct Allpass1stOrderIIR {
+template <typename sample_t, size_t MAX_DELAY_SAMPS = 48000>
+struct Allpass : Filter<sample_t, Allpass<sample_t>> {
+  static const size_t BUFFER_SIZE =
+      algae::dsp::math::nextPowerOf2(MAX_DELAY_SAMPS);
+  static constexpr int INDEX_MASK = int(BUFFER_SIZE - 1);
+  sample_t bufferX[BUFFER_SIZE];
+  sample_t bufferY[BUFFER_SIZE];
+  int writeIndex = 0;
+  sample_t g = 0;
+  int delayTimeSamples = MAX_DELAY_SAMPS / 2.0;
+
+  Allpass() {
+    algae::dsp::block::empty(BUFFER_SIZE, bufferX);
+    algae::dsp::block::empty(BUFFER_SIZE, bufferY);
+  }
+  void setDelayTimeMillis(sample_t delayTimeMillis, sample_t samplerate) {
+    delayTimeSamples = (delayTimeMillis * samplerate) / 1000.0;
+  }
+
+  inline const sample_t tap(int pos) {
+    return bufferY[(writeIndex - pos) & INDEX_MASK];
+  }
+  inline const sample_t computeNextSample(const sample_t in) {
+    const int r1 = (writeIndex - delayTimeSamples) & INDEX_MASK;
+    const sample_t out = -g * in + bufferX[r1] + g * bufferY[r1];
+    bufferX[writeIndex] = in;
+    bufferY[writeIndex] = out;
+    writeIndex++;
+    writeIndex &= INDEX_MASK;
+    return out;
+  }
+};
+
+template <typename sample_t>
+struct Allpass1stOrderIIR : Filter<sample_t, Allpass1stOrderIIR<sample_t>> {
   sample_t y1 = 0;
   sample_t x1 = 0;
   sample_t g1 = 0;
 
   void setCoefficients(const sample_t g) { this->g = g; };
-  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
+  const inline sample_t computeNextSample(const sample_t in) {
+    sample_t yn = g1 * in + x1 - g1 * y1;
 
-    for (size_t i = 0; i < blocksize; i++) {
-      sample_t yn = g1 * in[i] + x1 - g1 * y1;
-
-      y1 = yn;
-      x1 = in[i];
-      out[i] = yn;
-    }
-  };
+    y1 = yn;
+    x1 = in;
+    return yn;
+  }
 };
 
-template <typename sample_t, size_t MAX_DELAY_SAMPS> struct Allpass2Comb {
-  static const size_t SIZE = math::nextPowerOf2(MAX_DELAY_SAMPS);
+template <typename sample_t, size_t MAX_DELAY_SAMPS>
+struct Allpass2Comb
+    : Filter<sample_t, Allpass2Comb<sample_t, MAX_DELAY_SAMPS>> {
+  static const size_t SIZE = algae::dsp::math::nextPowerOf2(MAX_DELAY_SAMPS);
+  static constexpr int INDEX_MASK = int(SIZE - 1);
   sample_t yn[SIZE];
   sample_t xn[SIZE];
-  int write_index = 0;
-  sample_t delay_time_samps = 1;
+  int writeIndex = 0;
+  sample_t delayTimeSamples = 1;
   sample_t g = 0.5;
   Allpass2Comb() {
     block::empty(SIZE, yn);
     block::empty(SIZE, xn);
   }
   void set(sample_t delayTimeSamps, sample_t g) {
-    this->delay_time_samps = delayTimeSamps;
+    this->delayTimeSamples = delayTimeSamps;
     this->g = g;
-  };
-  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
-    for (size_t i = 0; i < blocksize; i++) {
-      int read_index = (this->write_index - this->delay_time_samps);
-      read_index &= int(SIZE - 1);
-      const sample_t _yn = this->g * in[i] + this->xn[read_index] -
-                           this->g * this->yn[read_index];
-      this->yn[this->write_index] = _yn;
-      this->xn[this->write_index] = in[i];
-      this->write_index++;
-      this->write_index &= (SIZE - 1);
-      out[i] = _yn;
-    }
-  };
+  }
+
+  void setDelayTimeMillis(sample_t delayTimeMillis, sample_t samplerate) {
+    delayTimeSamples = (delayTimeMillis * samplerate) / 1000.0;
+  }
+
+  inline const sample_t tap(int pos) {
+    return yn[(writeIndex - pos) & INDEX_MASK];
+  }
+  const inline sample_t computeNextSample(const sample_t in) {
+
+    int readIndex = (this->writeIndex - this->delayTimeSamples);
+    readIndex &= INDEX_MASK;
+    const sample_t _yn =
+        this->g * in + this->xn[readIndex] - this->g * this->yn[readIndex];
+    this->yn[this->writeIndex] = _yn;
+    this->xn[this->writeIndex] = in;
+    this->writeIndex++;
+    this->writeIndex &= INDEX_MASK;
+    return _yn;
+  }
 };
 
 template <typename sample_t, size_t ORDER, size_t SIZE = ORDER - 1>
-struct AllpoleNthOrder {
+struct AllpoleNthOrder : Filter<sample_t, AllpoleNthOrder<sample_t, ORDER>> {
   sample_t input_gain = 1;
   sample_t as[ORDER];
   sample_t ys[ORDER];
@@ -562,35 +747,30 @@ struct AllpoleNthOrder {
     }
     input_gain = 1 / as[0];
   };
-  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
-    for (size_t i = 0; i < blocksize; i++) {
-      sample_t output = in[i] * input_gain;
-      for (size_t idx = SIZE; idx-- > 0;) {
-        output -= ys[idx] * as[idx];
-        ys[idx] = idx > 0 ? ys[idx - 1] : output;
-        out[i] = output;
-      }
+  const inline sample_t computeNextSample(const sample_t in) {
+    sample_t output = in * input_gain;
+    for (size_t idx = SIZE; idx-- > 0;) {
+      output -= ys[idx] * as[idx];
+      ys[idx] = idx > 0 ? ys[idx - 1] : output;
     }
-  };
+    return output;
+  }
 };
 
-template <typename sample_t> struct DCBlocker {
-
+template <typename sample_t>
+struct DCBlocker : Filter<sample_t, DCBlocker<sample_t>> {
   sample_t y1;
   sample_t x1;
-
-  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
-
-    for (size_t i = 0; i < blocksize; i++) {
-      y1 = in[i] - x1 + 0.995 * y1;
-      x1 = in[i];
-      out[i] = y1;
-    }
-  };
+  const inline sample_t computeNextSample(const sample_t in) {
+    y1 = in - x1 + 0.995 * y1;
+    x1 = in;
+    return y1;
+  }
 };
 
 template <typename sample_t, typename frequency_t>
-struct ResonantBandpass2ndOrderIIR {
+struct ResonantBandpass2ndOrderIIR
+    : Filter<sample_t, ResonantBandpass2ndOrderIIR<sample_t, frequency_t>> {
   sample_t b0d;
   sample_t b1d;
   sample_t b2d;
@@ -628,19 +808,18 @@ struct ResonantBandpass2ndOrderIIR {
     a1d = 2 * (a0 - csq) / d;
     a2d = (a0 - a1 * c + csq) / d;
   };
-  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
-    for (size_t i = 0; i < blocksize; i++) {
-      sample_t xn = in[i];
-      sample_t yn = b0d * xn + b1d * x1 + b2d * x2 - a1d * y1 - a2d * y2;
-      out[i] = yn;
-      y2 = y1;
-      y1 = yn;
-      x2 = x1;
-      x1 = xn;
-    }
-  };
+  const inline sample_t computeNextSample(const sample_t in) {
+    const sample_t xn = in;
+    const sample_t yn = b0d * xn + b1d * x1 + b2d * x2 - a1d * y1 - a2d * y2;
+    y2 = y1;
+    y1 = yn;
+    x2 = x1;
+    x1 = xn;
+    return yn;
+  }
 };
-
+// based off of distorted bandpass filter design in Non-linear filterrs by Risto
+// Holopainen
 template <typename sample_t, typename frequency_t> struct DistortedBandpass {
 
   ResonantBandpass2ndOrderIIR<sample_t, frequency_t> resonator;
@@ -649,13 +828,11 @@ template <typename sample_t, typename frequency_t> struct DistortedBandpass {
 
   void setCoefficients(const sample_t b0, const sample_t b1, const sample_t b2,
                        const sample_t a1, const sample_t a2) {
-
     resonator.setCoefficients(b0, b1, b2, a1, a2);
   };
 
   void bandpass(const frequency_t freq, const sample_t q, const sample_t gain,
                 const frequency_t samplerate) {
-
     resonator.bandpass(freq, q, gain, samplerate);
   };
 
@@ -674,34 +851,83 @@ template <typename sample_t, typename frequency_t> struct DistortedBandpass {
   };
 };
 
+template <typename sample_t>
+struct BabylonianSqrtFilter : Filter<sample_t, BabylonianSqrtFilter<sample_t>> {
+  sample_t y1 = 1;
+  inline const sample_t computeNextSample(const sample_t in) {
+    sample_t xn = in + 1 + std::numeric_limits<sample_t>::epsilon();
+    sample_t yn = 0.5 * (y1 + (xn / y1));
+    y1 = yn;
+    return y1 - 1 - std::numeric_limits<sample_t>::epsilon();
+  }
+};
+
 } // namespace filter
 
 namespace oscillator {
+
 template <typename frequency_t>
 const inline frequency_t computePhaseIncrement(const frequency_t frequency,
                                                const frequency_t sample_rate,
                                                const frequency_t period = 1) {
   return period * frequency / sample_rate;
 }
-template <typename sample_t, typename frequency_t> struct Phasor {
+template <typename sample_t, typename frequency_t>
+struct Phasor : Generator<sample_t, Phasor<sample_t, sample_t>> {
   sample_t phase = 0;
   sample_t phase_increment = 0;
   void setFrequency(const frequency_t frequency, const frequency_t samplerate) {
     phase_increment = static_cast<sample_t>(frequency / samplerate);
   };
 
+  const inline sample_t computeNextSample(sample_t pm) {
+    phase += phase_increment + pm;
+    phase = (phase > 1) ? phase - 1 : phase;
+    return phase;
+  }
+  const inline sample_t computeNextSample() { return computeNextSample(0); }
+
   void process(const sample_t *pm, const size_t blocksize, sample_t *out) {
     for (size_t i = 0; i < blocksize; i++) {
-      phase += phase_increment + pm[i];
-      phase = (phase > 1) ? phase - 1 : phase;
-      out[i] = phase;
+      out[i] = computeNextSample(pm[i]);
+    }
+  };
+};
+
+template <typename sample_t>
+struct TriangleLFO : Generator<sample_t, TriangleLFO<sample_t>> {
+  Phasor<sample_t, sample_t> phasor;
+  void setFrequency(sample_t frequency, sample_t samplerate) {
+    phasor.setFrequency(frequency, samplerate);
+  }
+  inline const sample_t computeNextSample() {
+    return 2.0 * phasor.next() - 1.0;
+  }
+};
+template <typename sample_t, typename frequency_t> class RawSawOsc {
+private:
+  sample_t phase = 0;
+  sample_t phase_increment = 0;
+  inline const sample_t computeNextSample(const sample_t pm) {
+    const sample_t out = phase * 2 - 1;
+    phase += phase_increment + pm;
+    phase = (phase > 1) ? phase - 1 : phase;
+    return out;
+  }
+
+public:
+  void setFrequency(const frequency_t frequency, const frequency_t samplerate) {
+    phase_increment = static_cast<sample_t>(frequency / samplerate);
+  };
+
+  void process(const sample_t *pm, const size_t blocksize, sample_t *out) {
+    for (size_t i = 0; i < blocksize; i++) {
+      out[i] = computeNextSample(pm[i]);
     }
   };
   void process(const size_t blocksize, sample_t *out) {
     for (size_t i = 0; i < blocksize; i++) {
-      phase += phase_increment;
-      phase = (phase > 1) ? 0 : phase;
-      out[i] = phase;
+      out[i] = computeNextSample(0);
     }
   };
 };
@@ -986,18 +1212,72 @@ template <typename sample_t> struct SineTable<sample_t, 0> {
 };
 
 template <typename sample_t, typename frequency_t, size_t TABLE_SIZE = 0>
-struct SinOscillator {
+struct SinOscillator
+    : Generator<sample_t, SinOscillator<sample_t, frequency_t>> {
+
   sample_t phase = 0;
   sample_t phaseIncrement = 0;
-  void process(const size_t blocksize, sample_t *out) {
 
+  inline const sample_t computeNextSample(const sample_t p) {
+    const sample_t out = SineTable<sample_t, TABLE_SIZE>::lookup(p);
+    phase += phaseIncrement;
+    if (phase > 1)
+      phase -= 1;
+
+    return out;
+  }
+  void process(const size_t blocksize, sample_t *out) {
     for (size_t i = 0; i < blocksize; i++) {
-      out[i] = SineTable<sample_t, TABLE_SIZE>::lookup(phase);
-      phase += phaseIncrement;
-      if (phase > 1)
-        phase -= 1;
+      out[i] = computeNextSample(phase);
     }
   };
+  void process(const sample_t *pmod, const size_t blocksize, sample_t *out) {
+    for (size_t i = 0; i < blocksize; i++) {
+      out[i] = computeNextSample(math::wrap(phase + pmod[i]));
+    }
+  };
+  void setFrequency(const frequency_t frequency, const frequency_t samplerate) {
+    phaseIncrement = computePhaseIncrement(frequency, samplerate);
+  };
+};
+
+template <typename sample_t, typename frequency_t>
+struct FeedbackSinOscillator
+    : Generator<sample_t, FeedbackSinOscillator<sample_t, frequency_t>> {
+
+  sample_t phase = 0;
+  sample_t phaseIncrement = 0;
+  sample_t y1 = 0;
+  sample_t feedback = 0;
+  inline const sample_t computeNextSample(const sample_t p) {
+    // const sample_t out = SineTable<sample_t, TABLE_SIZE>::lookup(
+    //     math::wrap(p + ((y1 * feedback) / 2.0 * M_PI)));
+    const sample_t out = sin(2 * M_PI * p + (y1 * feedback));
+    y1 = out;
+    phase += phaseIncrement;
+    if (phase > 1)
+      phase -= 1;
+
+    return out;
+  }
+  inline const sample_t next(const sample_t pm) {
+    return computeNextSample(pm);
+  }
+  inline const sample_t computeNextSample() { return computeNextSample(phase); }
+
+  void process(const sample_t *pmod, const size_t blocksize, sample_t *out) {
+    for (size_t i = 0; i < blocksize; i++) {
+      out[i] = computeNextSample(phase + pmod[i]);
+    }
+  };
+  void process(const sample_t *pmod, const sample_t *fb, const size_t blocksize,
+               sample_t *out) {
+    for (size_t i = 0; i < blocksize; i++) {
+      setFeedback(fb[i]);
+      out[i] = computeNextSample(phase + pmod[i]);
+    }
+  };
+  void setFeedback(const sample_t _fb) { feedback = _fb; }
   void setFrequency(const frequency_t frequency, const frequency_t samplerate) {
     phaseIncrement = computePhaseIncrement(frequency, samplerate);
   };
@@ -1013,6 +1293,26 @@ template <typename sample_t> struct WhiteNoise {
       out[i] = noise<sample_t>();
     }
   };
+};
+
+template <typename sample_t>
+struct SmoothRand : Generator<sample_t, SmoothRand<sample_t>> {
+  sample_t phase = 0;
+  sample_t phaseIncrement = 440.0 / 48000.0;
+  sample_t y1 = 0, y2 = 0;
+  void setFrequency(sample_t frequency, sample_t samplerate) {
+    phaseIncrement = frequency / samplerate;
+  }
+  const inline sample_t computeNextSample() {
+    sample_t t = phase * phase * (3 - 2 * phase);
+    sample_t yn = lerp(y2, y1, t);
+    phase += phaseIncrement;
+    if (phase > 1) {
+      phase -= 1;
+      y2 = y1;
+      y1 = noise<sample_t>();
+    }
+  }
 };
 
 template <typename sample_t>
@@ -1424,15 +1724,15 @@ const sample_t blackman_harris(const sample_t &phase) {
   //     w[n] = a_0 - a_1cos(\frac{2\pi\n}{N}) + a_2cos(\frac{4\pi\n}{N}) -
   //     a_3cos(\frac{6\pi\n}{N})
   // a_0 = 0.35875; a_1 = 0.48829; a_2 = 0.14128; a_3 = 0.01168
-  constexpr sample_t FOUR_PI = 2 * math::TwoPi<sample_t>();
-  constexpr sample_t SIX_PI = 3 * math::TwoPi<sample_t>();
+  constexpr sample_t FourPi = 2 * math::TwoPi<sample_t>();
+  constexpr sample_t SixPi = 3 * math::TwoPi<sample_t>();
   sample_t a_0 = 0.35875;
   sample_t a_1 = 0.48829;
   sample_t a_2 = 0.14128;
   sample_t a_3 = 0.01168;
 
   return a_0 - a_1 * cos(math::TwoPi<sample_t>() * phase) +
-         a_2 * cos(FOUR_PI * phase) - a_3 * cos(SIX_PI * phase);
+         a_2 * cos(FourPi * phase) - a_3 * cos(SixPi * phase);
 }
 
 template <typename sample_t> const sample_t hann(const sample_t &phase) {
@@ -1449,23 +1749,125 @@ void apply_window(const sample_t *block, const size_t BLOCKSIZE,
   }
 }
 
+template <typename sample_t> struct Slew {
+  sample_t target;
+  sample_t previous;
+  sample_t phaseIncrement;
+  sample_t phase = 0;
+  Slew() {}
+  Slew(sample_t v) {
+    target = v;
+    previous = v;
+    phase = 1;
+  }
+  void set(sample_t _target, sample_t slewTimeMillis, sample_t samplerate) {
+    previous = target;
+    target = _target;
+    sample_t slewTimeSamples = (slewTimeMillis / 1000.0) * samplerate;
+    phaseIncrement = (target - previous) / slewTimeSamples;
+    phase = 0;
+  }
+  void process(const size_t blocksize, sample_t *out) {
+    for (size_t i = 0; i < blocksize; i++) {
+      if (phase < 1) {
+        out[i] = math::lerp(previous, target, phase);
+        phase += phaseIncrement;
+      } else {
+        out[i] = target;
+      }
+    }
+  }
+};
+
 } // namespace control
 
 namespace spacialization {
-template <typename sample_t> struct Pan {
+template <typename sample_t, size_t TABLE_SIZE = 0> struct Pan {
   sample_t position;
   void setPosition(const sample_t position) { this->position = position; };
+  inline void next(const sample_t in, sample_t &outL, sample_t &outR) {
+
+    const sample_t powerLeft = 0.25 * position;
+    const sample_t powerRight = powerLeft + 0.75;
+    outL =
+        in * oscillator::CosineTable<sample_t, TABLE_SIZE>::lookup(powerLeft);
+    outR =
+        in * oscillator::CosineTable<sample_t, TABLE_SIZE>::lookup(powerRight);
+  }
   void process(const sample_t *in, const size_t blocksize, sample_t *outLeft,
                sample_t *outRight) {
 
     for (size_t i = 0; i < blocksize; i++) {
-      const sample_t powerLeft = 0.25 * position;
-      const sample_t powerRight = powerLeft + 0.75;
-      outLeft[i] = in[i] * cos(math::TwoPi<sample_t>() * powerLeft);
-      outRight[i] = in[i] * cos(math::TwoPi<sample_t>() * powerRight);
+      next(in[i], outLeft[i], outRight[i]);
     }
   };
 };
 } // namespace spacialization
+
+namespace effects {
+using algae::dsp::filter::InterpolatedDelay;
+using algae::dsp::math::lerp;
+template <typename sample_t, size_t MAX_DELAY_SAMPS,
+          const sample_t (*interp)(const sample_t, const sample_t,
+                                   const sample_t) = lerp<sample_t>,
+          typename LFO = algae::dsp::oscillator::TriangleLFO<sample_t>>
+struct ModulatedDelay {
+  InterpolatedDelay<sample_t, MAX_DELAY_SAMPS, interp> delay;
+  sample_t delayTimeSamples = MAX_DELAY_SAMPS / 2.0;
+  sample_t modDepth = 10;
+  LFO lfo;
+  ModulatedDelay() { lfo.setFrequency(1, 48000); }
+  void setModFrequency(sample_t freq, sample_t samplerate) {
+    lfo.setFrequency(freq, samplerate);
+  }
+  void setDelayTimeMillis(sample_t delayTimeMillis, sample_t samplerate) {
+    delayTimeSamples = (delayTimeMillis * samplerate) / 1000.0;
+  }
+  inline const sample_t tap(int pos) { return delay.tap(pos); }
+  const sample_t next(const sample_t in) {
+    delay.delayTimeSamples = delayTimeSamples + lfo.next() * modDepth;
+    return delay.next(in);
+  }
+  void process(const sample_t *in, const size_t blocksize, sample_t *out) {
+    sample_t lfoSignal[blocksize];
+    lfo.process(blocksize, lfoSignal);
+    algae::dsp::block::mult(lfoSignal, modDepth, blocksize, lfoSignal);
+    for (size_t i = 0; i < blocksize; i++) {
+      delay.delayTimeSamples = delayTimeSamples + lfoSignal[i];
+      out[i] = delay.next(in[i]);
+    }
+  }
+};
+
+template <typename sample_t, size_t MAX_DELAY_SAMPS,
+          const sample_t (*interp)(const sample_t, const sample_t,
+                                   const sample_t) = lerp<sample_t>,
+          typename LFO = algae::dsp::oscillator::TriangleLFO<sample_t>>
+struct ModulatedAllpassFilter
+    : Filter<sample_t,
+             ModulatedAllpassFilter<sample_t, MAX_DELAY_SAMPS, interp, LFO>> {
+  ModulatedDelay<sample_t, MAX_DELAY_SAMPS, interp, LFO> delay;
+  sample_t g = 0;
+  sample_t d1 = 0;
+  sample_t delayTimeSamples = MAX_DELAY_SAMPS / 2.0;
+  sample_t modDepth = 10;
+  void setModFrequency(sample_t freq, sample_t samplerate) {
+    delay.setModFrequency(freq, samplerate);
+  }
+  void setDelayTimeMillis(sample_t delayTimeMillis, sample_t samplerate) {
+    delayTimeSamples = (delayTimeMillis * samplerate) / 1000.0;
+  }
+  inline const sample_t tap(int pos) { return delay.tap(pos); }
+  inline const sample_t computeNextSample(const sample_t in) {
+    delay.delayTimeSamples = delayTimeSamples;
+    delay.modDepth = modDepth;
+    sample_t inSum = (in + d1 * g);
+    d1 = delay.next(inSum);
+    sample_t out = -g * inSum + d1;
+    return out;
+  }
+};
+
+} // namespace effects
 
 } // namespace algae::dsp

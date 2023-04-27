@@ -12,7 +12,7 @@ TEST(Filter_Test, CORE_allpass_2comb_construction) {
   filter.set(delay_time_samps, g);
 
   EXPECT_EQ(g, filter.g);
-  EXPECT_EQ(0, filter.write_index);
+  EXPECT_EQ(0, filter.writeIndex);
   for (size_t idx = 0; idx < SIZE - 1; idx++) {
     EXPECT_EQ(0, filter.xn[idx]);
     EXPECT_EQ(0, filter.yn[idx]);
