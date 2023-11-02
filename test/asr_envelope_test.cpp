@@ -2,25 +2,31 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-using algae::dsp::control::ADEnvelope;
+using algae::dsp::control::ASREnvelope;
 
-TEST(DSP_Test, ADEnvelopeTest) {
+TEST(DSP_Test, ASREnvelopeTest) {
 
-  ADEnvelope<double> envelope;
+  ASREnvelope<double> envelope;
   double a = 4;
   double d = 4;
   const double sampleRate = 1000;
   envelope.set(a, d, sampleRate);
 
   // attack phase
-  envelope.trigger();
+  envelope.setGate(true);
   EXPECT_FLOAT_EQ(0, envelope.next());
   EXPECT_FLOAT_EQ(0.25, envelope.next());
   EXPECT_FLOAT_EQ(0.5, envelope.next());
   EXPECT_FLOAT_EQ(0.75, envelope.next());
   EXPECT_FLOAT_EQ(1, envelope.next());
 
+  // sustain phase
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  EXPECT_FLOAT_EQ(1, envelope.next());
   // decay phase
+  envelope.setGate(false);
   EXPECT_FLOAT_EQ(1, envelope.next());
   EXPECT_FLOAT_EQ(0.75, envelope.next());
   EXPECT_FLOAT_EQ(0.5, envelope.next());
@@ -29,9 +35,9 @@ TEST(DSP_Test, ADEnvelopeTest) {
   EXPECT_FLOAT_EQ(0, envelope.next());
 }
 
-TEST(DSP_Test, ADEnvelopeTest_setGate) {
+TEST(DSP_Test, ASREnvelopeTest_setGate) {
 
-  ADEnvelope<double> envelope;
+  ASREnvelope<double> envelope;
   double a = 4;
   double d = 4;
   const double sampleRate = 1000;
@@ -48,24 +54,29 @@ TEST(DSP_Test, ADEnvelopeTest_setGate) {
   EXPECT_FLOAT_EQ(0.75, envelope.next());
   envelope.setGate(true);
   EXPECT_FLOAT_EQ(1, envelope.next());
+  // sustain phase
   envelope.setGate(true);
-
-  // decay phase
   EXPECT_FLOAT_EQ(1, envelope.next());
   envelope.setGate(true);
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  envelope.setGate(true);
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  envelope.setGate(true);
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  // decay phase
+  envelope.setGate(false);
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  envelope.setGate(false);
   EXPECT_FLOAT_EQ(0.75, envelope.next());
-  envelope.setGate(true);
+  envelope.setGate(false);
   EXPECT_FLOAT_EQ(0.5, envelope.next());
-  envelope.setGate(true);
+  envelope.setGate(false);
   EXPECT_FLOAT_EQ(0.25, envelope.next());
-  envelope.setGate(true);
-  EXPECT_FLOAT_EQ(0, envelope.next());
-  envelope.setGate(true);
-  EXPECT_FLOAT_EQ(0, envelope.next());
   envelope.setGate(false);
   EXPECT_FLOAT_EQ(0, envelope.next());
   envelope.setGate(false);
   EXPECT_FLOAT_EQ(0, envelope.next());
+  envelope.setGate(false);
 
   // attack phase
   envelope.setGate(true);
@@ -79,7 +90,17 @@ TEST(DSP_Test, ADEnvelopeTest_setGate) {
   envelope.setGate(true);
   EXPECT_FLOAT_EQ(1, envelope.next());
   envelope.setGate(true);
+  // sustain phase
+  envelope.setGate(true);
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  envelope.setGate(true);
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  envelope.setGate(true);
+  EXPECT_FLOAT_EQ(1, envelope.next());
+  envelope.setGate(true);
+  EXPECT_FLOAT_EQ(1, envelope.next());
   // interrupted decay phase
+  envelope.setGate(false);
   EXPECT_FLOAT_EQ(1, envelope.next());
   envelope.setGate(false);
   EXPECT_FLOAT_EQ(0.75, envelope.next());
@@ -95,9 +116,9 @@ TEST(DSP_Test, ADEnvelopeTest_setGate) {
   EXPECT_FLOAT_EQ(1, envelope.next());
   envelope.setGate(true);
 }
-TEST(DSP_Test, ADEnvelopeTest_setGate_interruptedAttack) {
+TEST(DSP_Test, ASREnvelopeTest_setGate_interruptedAttack) {
 
-  ADEnvelope<double> envelope;
+  ASREnvelope<double> envelope;
   double a = 4;
   double d = 4;
   const double sampleRate = 1000;
@@ -110,32 +131,33 @@ TEST(DSP_Test, ADEnvelopeTest_setGate_interruptedAttack) {
   EXPECT_FLOAT_EQ(0.25, envelope.next());
   envelope.setGate(true);
   EXPECT_FLOAT_EQ(0.5, envelope.next());
-  envelope.setGate(false);
 
   // decay phase
+  envelope.setGate(false);
   EXPECT_FLOAT_EQ(0.75, envelope.next());
   envelope.setGate(false);
-  EXPECT_FLOAT_EQ(0.5, envelope.next());
+  EXPECT_FLOAT_EQ(0.50, envelope.next());
   envelope.setGate(false);
   EXPECT_FLOAT_EQ(0.25, envelope.next());
   envelope.setGate(false);
-  EXPECT_FLOAT_EQ(0.0, envelope.next());
+  EXPECT_FLOAT_EQ(0, envelope.next());
   envelope.setGate(false);
   EXPECT_FLOAT_EQ(0, envelope.next());
 }
 
-TEST(DSP_Test, ADEnvelopeTest_INIT) {
+TEST(DSP_Test, ASREnvelopeTest_INIT) {
 
-  ADEnvelope<double> envelope;
+  ASREnvelope<double> envelope;
   double a = 0;
   double d = 0;
   const double sampleRate = 1000;
   envelope.set(a, d, sampleRate);
 
-  envelope.trigger();
+  envelope.setGate(true);
   //  attack
   EXPECT_FLOAT_EQ(0, envelope.next());
   EXPECT_FLOAT_EQ(1, envelope.next());
+  envelope.setGate(false);
   // decay
   EXPECT_FLOAT_EQ(1, envelope.next());
   EXPECT_FLOAT_EQ(0, envelope.next());

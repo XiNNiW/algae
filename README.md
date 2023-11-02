@@ -4,7 +4,7 @@ a barebones dsp library, the powerplant of lichen
 # dependencies
 algae itself has no dependencies other than gcc and c++17. However, the unit tests rely on gtest and fftw3 for frequency analysis. These must be installed in order to run unit tests
 
-# compiling 
+# compiling
 `make`
 
 # testing
@@ -13,3 +13,6 @@ algae itself has no dependencies other than gcc and c++17. However, the unit tes
 # install
 `make install`
 
+
+# contributions
+I am not currently accepting contributions.
