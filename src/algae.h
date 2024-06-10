@@ -10,30 +10,8 @@
 
 namespace algae::dsp {
 
-template <typename sample_t> struct Generator {
-  virtual const inline sample_t next() { return 0; };
-};
+template <typename sample_t, typename DerivedT> struct _Filter {
 
-template <typename sample_t> struct StereoGenerator {
-  virtual const inline void next(sample_t *outL, sample_t *outR) {
-    outL = 0;
-    outR = 0;
-  };
-};
-template <typename sample_t> struct Filter {
-  virtual const inline sample_t next(sample_t in) { return 0; };
-};
-
-template <typename sample_t> struct StereoFilter {
-  virtual const inline void next(sample_t inL, sample_t inR, sample_t *outL,
-                                 sample_t *outR) {
-    outL = 0;
-    outR = 0;
-  };
-};
-
-template <typename sample_t, typename DerivedT>
-struct _Filter : Filter<sample_t> {
   virtual inline void process(const sample_t *in, const size_t blocksize,
                               sample_t *out) {
     for (size_t i = 0; i < blocksize; i++)
@@ -41,91 +19,27 @@ struct _Filter : Filter<sample_t> {
   }
 };
 
-template <typename sample_t, typename DerivedT>
-struct _StereoFilter : StereoFilter<sample_t> {
+template <typename sample_t, typename DerivedT> struct _StereoFilter {
   inline void process(const sample_t *inL, const sample_t *inR,
                       const size_t blocksize, sample_t *outL, sample_t *outR) {
     for (size_t i = 0; i < blocksize; i++)
       static_cast<DerivedT *>(this)->next(inL[i], inR[i], outL[i], outR[i]);
   }
 };
-template <typename sample_t, typename DerivedT>
-struct _Generator : Generator<sample_t> {
+template <typename sample_t, typename DerivedT> struct _Generator {
   inline void process(const size_t blocksize, sample_t *out) {
     for (size_t i = 0; i < blocksize; i++)
       out[i] = static_cast<DerivedT *>(this)->next();
   }
 };
-template <typename sample_t, typename DerivedT>
-struct _StereoGenerator : StereoGenerator<sample_t> {
+template <typename sample_t, typename DerivedT> struct _StereoGenerator {
   inline void process(const size_t blocksize, sample_t *outL, sample_t *outR) {
     for (size_t i = 0; i < blocksize; i++) {
       static_cast<DerivedT *>(this)->next(outL[i], outR[i]);
     }
   }
 };
-// template <typename sample_t, typename DerivedT, size_t NUM_CHANNELS>
-// struct MultichannelFilter {
-//   inline void next(const sample_t **inputs, const sample_t **outputs) = 0;
-// };
-// enum class UGenType {
-//  MONO_GENERATOR,
-//  STEREO_GENERATOR,
-//  MONO_FILTER,
-//  STEREO_FILTER
-//};
-// template <typename sample_t> struct UGen {
-//   UGenType type;
-//   union {
-//     Generator<sample_t> g;
-//     StereoGenerator<sample_t> sg;
-//     Filter<sample_t> f;
-//     StereoFilter<sample_t> sf;
-//   } _node;
-//   template <typename T>
-//   const inline T &asType(){
-//
-//   };
-//
-//   const static inline UGen &asUGen(const Generator<sample_t> &g) {
-//     return UGen{._node = g, .type = UGenType::MONO_GENERATOR};
-//   };
-//   const static inline UGen &asUGen(const Filter<sample_t> &g) {
-//     return UGen{._node = g, .type = UGenType::MONO_FILTER};
-//   };
-//   const static inline UGen &asUGen(const StereoGenerator<sample_t> &g) {
-//     return UGen{._node = g, .type = UGenType::STEREO_GENERATOR};
-//   };
-//   const static inline UGen &asUGen(const StereoFilter<sample_t> &g) {
-//     return UGen{._node = g, .type = UGenType::STEREO_FILTER};
-//   };
-//
-//   template <typename T> const bool isType() { return false; }
-//
-//   template <> const bool isType<Generator<sample_t>>() {
-//     return type == UGenType::MONO_GENERATOR;
-//   }
-//   template <> const bool isType<StereoGenerator<sample_t>>() {
-//     return type == UGenType::STEREO_GENERATOR;
-//   }
-//   template <> const bool isType<StereoFilter<sample_t>>() {
-//     return type == UGenType::STEREO_FILTER;
-//   }
-//   template <> const bool isType<Filter<sample_t>>() {
-//     return type == UGenType::MONO_FILTER;
-//   }
-// };
 
-// template <typename sample_t>
-// struct UGen : std::variant<Generator<sample_t>, StereoGenerator<sample_t>,
-//                            Filter<sample_t>, StereoFilter<sample_t>> {};
-
-// template <typename sample_t, size_t NUM_INPUTS, size_t NUM_OUTPUTS>
-// struct Node : UGen<sample_t> {
-//   std::array<Node, NUM_INPUTS> inputNodes;
-//   std::array<Node, NUM_OUTPUTS> outputNodes;
-//   const inline void update(sample_t);
-// };
 namespace math {
 // CONSTANTS
 #define LOGTEN 2.302585092994046
@@ -530,7 +444,7 @@ template <typename sample_t, size_t MAX_DELAY_SAMPS,
               algae::dsp::math::lerp<sample_t>>
 struct InterpolatedDelay
     : _Filter<sample_t, InterpolatedDelay<sample_t, MAX_DELAY_SAMPS, interp>> {
-  static const size_t BUFFER_SIZE =
+  static constexpr size_t BUFFER_SIZE =
       algae::dsp::math::nextPowerOf2(MAX_DELAY_SAMPS);
   static constexpr int INDEX_MASK = int(BUFFER_SIZE - 1);
   sample_t buffer[BUFFER_SIZE];
@@ -558,6 +472,46 @@ struct InterpolatedDelay
     return out;
   }
 };
+
+// template <typename sample_t,
+//           const sample_t (*interp)(const sample_t, const sample_t,
+//                                    const sample_t)>
+// struct InterpolatedDelay<sample_t, 0, interp>
+//     : _Filter<sample_t, InterpolatedDelay<sample_t, 0, interp>> {
+//   //  static constexpr size_t BUFFER_SIZE =
+//   //      algae::dsp::math::nextPowerOf2(MAX_DELAY_SAMPS);
+//   //  static constexpr int INDEX_MASK = int(BUFFER_SIZE - 1);
+//   sample_t **buffer;
+//   size_t bufferSize;
+//   int indexMask;
+//   int writePosition = 0;
+//   sample_t delayTimeSamples;
+//
+//   InterpolatedDelay(sample_t **_buffer, const size_t _bufferSize)
+//       : buffer(_buffer), bufferSize(_bufferSize), indexMask(bufferSize - 1),
+//         delayTimeSamples(bufferSize / 2) {
+//     algae::dsp::block::empty(bufferSize, buffer);
+//   }
+//   void setDelayTimeMillis(sample_t delayTimeMillis, sample_t samplerate) {
+//     delayTimeSamples = (delayTimeMillis * samplerate) / 1000.0;
+//   }
+//
+//   inline const sample_t tap(int pos) {
+//     return buffer[(writePosition - pos) & indexMask];
+//   }
+//
+//   inline const sample_t next(const sample_t in) {
+//     int dtWhole = floor(delayTimeSamples);
+//     sample_t dtMantissa = delayTimeSamples - dtWhole;
+//     int r1 = (writePosition - dtWhole) & indexMask;
+//     int r2 = (r1 + 1) & indexMask;
+//     sample_t out = interp((*buffer)[r1], (*buffer)[r2], dtMantissa);
+//     (*buffer)[writePosition] = in;
+//     writePosition++;
+//     writePosition &= indexMask;
+//     return out;
+//   }
+// };
 
 // inspired by CParamSmooth from moc.liamg@earixela at musicdsp.org
 template <typename sample_t> struct SmoothParameter {
@@ -715,7 +669,16 @@ struct Onepole : _Filter<sample_t, Onepole<sample_t, frequency_t>> {
     type_coefficient = -1;
   };
 };
-
+template <typename sample_t>
+struct Onezero : _Filter<sample_t, Onezero<sample_t>> {
+  sample_t x1 = 0;
+  sample_t b1 = 0.1;
+  const inline sample_t next(const sample_t in) {
+    sample_t out = in + b1 * x1;
+    x1 = in;
+    return out * 0.5;
+  }
+};
 template <typename sample_t, typename frequency_t>
 struct OnepoleOnezero
     : _Filter<sample_t, OnepoleOnezero<sample_t, frequency_t>> {
@@ -1191,8 +1154,9 @@ template <typename sample_t>
 const inline sample_t table_lookup_linear_interp(const sample_t *table,
                                                  const int tablesize,
                                                  const sample_t phase) {
-  sample_t _phase = phase - floor(phase);
-  _phase = _phase < 0 ? _phase + 1 : _phase;
+  // sample_t _phase = phase - floor(phase);
+  //_phase = _phase < 0 ? _phase + 1 : _phase;
+  auto _phase = math::wrap(phase);
   const sample_t position = _phase * (tablesize - 1);
   const int index = floor(position);
   const int x0 = index;
@@ -1945,21 +1909,32 @@ struct ASREnvelope : _Generator<sample_t, ASREnvelope<sample_t>> {
   enum Stage { OFF, ATTACK, SUSTAIN, RELEASE } stage = OFF;
   sample_t nextOutput = 0;
   sample_t attack_increment = 1.0 / 5.0;
-  sample_t decay_increment = 1.0 / 4100.0;
+  sample_t release_increment = 1.0 / 4100.0;
   sample_t lastGate = 0;
-  void set(const sample_t attack_ms, const sample_t decay_ms,
-           const sample_t samplerate) {
 
+  inline void setAttackTime(const sample_t attack_ms,
+                            const sample_t samplerate) {
     sample_t attack_in_samples = (attack_ms * samplerate) / 1000.0;
-    sample_t decay_in_samples = (decay_ms * samplerate) / 1000.0;
     if (attack_in_samples <= 0) {
       attack_in_samples = 1;
     }
-    if (decay_in_samples <= 0) {
-      decay_in_samples = 1;
-    }
+
     attack_increment = 1.0 / attack_in_samples;
-    decay_increment = 1.0 / decay_in_samples;
+  }
+  inline void setReleaseTime(const sample_t release_ms,
+                             const sample_t samplerate) {
+
+    sample_t release_in_samples = (release_ms * samplerate) / 1000.0;
+    if (release_in_samples <= 0) {
+      release_in_samples = 1;
+    }
+    release_increment = 1.0 / release_in_samples;
+  };
+
+  inline void set(const sample_t attack_ms, const sample_t release_ms,
+                  const sample_t samplerate) {
+    setAttackTime(attack_ms, samplerate);
+    setReleaseTime(release_ms, samplerate);
   };
 
   inline void setGate(const bool gate) {
@@ -2014,7 +1989,7 @@ struct ASREnvelope : _Generator<sample_t, ASREnvelope<sample_t>> {
       break;
     }
     case Stage::RELEASE: {
-      nextOutput -= decay_increment;
+      nextOutput -= release_increment;
       if (nextOutput < 0) {
         nextOutput = out = 0;
         stage = Stage::OFF;

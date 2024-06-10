@@ -42,13 +42,13 @@ CFLAGS_TEST = -std=$(CC_VERSION) -Wall -I. $(TEST_DEPENDENCIES_COMPILE) -I$(TEST
 
 #linker and settings
 LINKER = g++
+LINKER_VERSION = C++17
 # LFLAGS = -Wall -I. -lm -lc -I$(INCLUDES)
 TEST_LFLAGS = -Wall -I. $(TEST_DEPENDENCIES_LINK) -I$(TEST_INCLUDES) -L./$(BIN) -L./$(BIN)/$(TARGET) -lm -O2 -lalgae
 
 #archiver and settings
 AR  = ar
 AR_OPTS = rvs
-
 
 #targets
 .PHONY: all
@@ -62,7 +62,6 @@ test_directories:
 
 install:
 	cp $(BIN)/$(TARGET) $(INSTALL_DIR)
-	cp $(SRC)/algae.h /usr/local/include
 
 .PHONY: clean
 clean:
