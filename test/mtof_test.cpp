@@ -37,3 +37,21 @@ TEST(DSP_Test, CORE_mtof) {
 
   EXPECT_FLOAT_EQ(8.1757994, mtof<double>(0));
 }
+
+using algae::dsp::math::ftom;
+TEST(DSP_Test, CORE_ftom) {
+
+  EXPECT_FLOAT_EQ(60.0, ftom<double>(261.62558));
+  EXPECT_FLOAT_EQ(61.0, ftom<double>(277.18262));
+  EXPECT_FLOAT_EQ(62.0, ftom<double>(293.66476));
+  EXPECT_FLOAT_EQ(63.0, ftom<double>(311.12698));
+  EXPECT_FLOAT_EQ(64.0, ftom<double>(329.62756));
+  EXPECT_FLOAT_EQ(65.0, ftom<double>(349.22824));
+  EXPECT_NEAR(66.0, ftom<double>(369.984427), 0.01);
+  EXPECT_FLOAT_EQ(67.0, ftom<double>(391.99542));
+  EXPECT_FLOAT_EQ(68.0, ftom<double>(415.30469));
+  EXPECT_FLOAT_EQ(69.0, ftom<double>(440.0));
+  EXPECT_FLOAT_EQ(70.0, ftom<double>(466.16376));
+  EXPECT_FLOAT_EQ(71.0, ftom<double>(493.8833));
+  EXPECT_FLOAT_EQ(72.0, ftom<double>(523.25116));
+}
