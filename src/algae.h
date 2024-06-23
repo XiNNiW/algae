@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <math.h>
 #include <utility>
 #include <variant>
 
@@ -267,6 +268,13 @@ inline constexpr frequency_t mtof(const frequency_t n) {
   const frequency_t REF_FREQ = 440.0;
   const int REF_NOTE = 69;
   return REF_FREQ * pow(2, (n - REF_NOTE) / 12);
+}
+
+template <typename frequency_t>
+inline constexpr frequency_t ftom(const frequency_t f) {
+  const frequency_t REF_FREQ = 440.0;
+  const int REF_NOTE = 69;
+  return 12 * log2(f / REF_FREQ) + REF_NOTE;
 }
 
 // implementation borrowed from Miller Puckette's Pure Data project
