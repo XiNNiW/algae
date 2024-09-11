@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <math.h>
 #include <utility>
-
+#define UNUSED(x) (void)(x)
 namespace algae::dsp {
 
 template <typename sample_t, typename DerivedT> struct _Filter {
@@ -59,7 +59,7 @@ template <typename sample_t> constexpr sample_t Pi() {
 // FUNCTIONS
 
 constexpr size_t nextPowerOf2(const size_t &x) {
-  int next = 1;
+  size_t next = 1;
   while (next < x) {
     next = next << 1;
   }
@@ -135,6 +135,7 @@ static const inline sample_t fmod(const sample_t x, const sample_t y) {
 template <typename sample_t>
 static inline void fmod(const sample_t *x, const sample_t *y,
                         const size_t blocksize, sample_t *out) {
+  UNUSED(y);
   for (size_t i = 0; i < blocksize; i++) {
     out[i] = fmod<sample_t>(x[i]);
   }
@@ -294,7 +295,10 @@ inline const int32_t hash(int32_t in) {
   hash ^= hash >> 6;
   hash += ~(hash << 11);
   hash ^= hash >> 16;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
   return (uint32_t)hash;
+#pragma GCC diagnostic push
 }
 
 } // namespace math
@@ -560,31 +564,33 @@ struct Biquad : _Filter<sample_t, Biquad<sample_t, frequency_t>> {
   sample_t x1 = 0;
   sample_t x2 = 0;
 
-  void setCoefficients(const sample_t b0, const sample_t b1, const sample_t b2,
-                       const sample_t a1, const sample_t a2) {
-    this->b0 = b0;
-    this->b1 = b1;
-    this->b2 = b2;
-    this->a1 = a1;
-    this->a2 = a2;
+  void setCoefficients(const sample_t _b0, const sample_t _b1,
+                       const sample_t _b2, const sample_t _a1,
+                       const sample_t _a2) {
+    this->b0 = _b0;
+    this->b1 = _b1;
+    this->b2 = _b2;
+    this->a1 = _a1;
+    this->a2 = _a2;
   };
 
   const sample_t next(const sample_t in) {
-    const sample_t b0 = this->b0;
-    const sample_t b1 = this->b1;
-    const sample_t b2 = this->b2;
-    const sample_t a1 = this->a1;
-    const sample_t a2 = this->a2;
-    const sample_t x0 = in;
-    const sample_t x1 = this->x1;
-    const sample_t x2 = this->x2;
-    const sample_t y1 = this->y1;
-    const sample_t y2 = this->y2;
-    const sample_t y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+    const sample_t _b0 = this->b0;
+    const sample_t _b1 = this->b1;
+    const sample_t _b2 = this->b2;
+    const sample_t _a1 = this->a1;
+    const sample_t _a2 = this->a2;
+    const sample_t _x0 = in;
+    const sample_t _x1 = this->x1;
+    const sample_t _x2 = this->x2;
+    const sample_t _y1 = this->y1;
+    const sample_t _y2 = this->y2;
+    const sample_t y0 =
+        _b0 * _x0 + _b1 * _x1 + _b2 * _x2 - _a1 * _y1 - _a2 * _y2;
     this->y1 = y0;
-    this->y2 = y1;
-    this->x1 = x0;
-    this->x2 = x1;
+    this->y2 = _y1;
+    this->x1 = _x0;
+    this->x2 = _x1;
     return y0;
   }
 
@@ -654,7 +660,7 @@ struct Onepole : _Filter<sample_t, Onepole<sample_t, frequency_t>> {
   sample_t type_coefficient = 1;
   sample_t y1 = 0;
 
-  void setCoefficients(const sample_t a0) { this->a0 = a0; };
+  void setCoefficients(const sample_t _a0) { this->a0 = _a0; };
   inline const sample_t next(const sample_t in) {
     const sample_t _y1 = type_coefficient * y1;
     y1 = a0 * (in - _y1) + _y1;
@@ -703,12 +709,12 @@ struct OnepoleOnezero
   };
 
   inline const sample_t next(const sample_t in) {
-    const sample_t a1 = this->a1;
-    const sample_t b0 = this->b0;
+    const sample_t _a1 = this->a1;
+    const sample_t _b0 = this->b0;
     const sample_t x0 = in;
-    const sample_t x1 = this->x1;
-    const sample_t y1 = this->y1;
-    const sample_t y = b0 * (x0 - x1) + a1 * y1;
+    const sample_t _x1 = this->x1;
+    const sample_t _y1 = this->y1;
+    const sample_t y = _b0 * (x0 - _x1) + _a1 * _y1;
     this->y1 = y;
     this->x1 = x0;
     return y;
@@ -778,9 +784,9 @@ struct Allpass2Comb
     block::empty(SIZE, yn);
     block::empty(SIZE, xn);
   }
-  void set(sample_t delayTimeSamps, sample_t g) {
+  void set(sample_t delayTimeSamps, sample_t _g) {
     this->delayTimeSamples = delayTimeSamps;
-    this->g = g;
+    this->g = _g;
   }
 
   void setDelayTimeMillis(sample_t delayTimeMillis, sample_t samplerate) {
@@ -813,12 +819,12 @@ struct AllpoleNthOrder : _Filter<sample_t, AllpoleNthOrder<sample_t, ORDER>> {
     block::empty(ORDER, as);
     block::empty(ORDER, ys);
   };
-  void setCoefficients(const sample_t *as) {
+  void setCoefficients(const sample_t *_as) {
     for (size_t idx = 0; idx < SIZE; idx++) {
       this->ys[idx] = 0;
-      this->as[idx] = as[idx + 1] / as[0];
+      this->as[idx] = _as[idx + 1] / _as[0];
     }
-    input_gain = 1 / as[0];
+    input_gain = 1 / _as[0];
   };
   const inline sample_t next(const sample_t in) {
     sample_t output = in * input_gain;
@@ -1195,6 +1201,7 @@ constexpr const sample_t _cos(const sample_t phase) {
 template <typename sample_t, int TABLE_SIZE, std::size_t... INDEX>
 constexpr const std::array<sample_t, TABLE_SIZE>
 _makeCosTable(const std::index_sequence<INDEX...> index_seq) {
+  UNUSED(index_seq);
 
   const sample_t phase_increment = 2.0 * M_PI / sample_t(TABLE_SIZE);
   return {{_cos<sample_t>(sample_t(INDEX) * phase_increment)...}};
@@ -1250,7 +1257,7 @@ constexpr const sample_t _sin(const sample_t phase) {
 template <typename sample_t, int TABLE_SIZE, std::size_t... INDEX>
 constexpr const std::array<sample_t, TABLE_SIZE>
 _makeSineTable(const std::index_sequence<INDEX...> index_seq) {
-
+  UNUSED(index_seq);
   const sample_t phase_increment =
       2.0 * math::Pi<sample_t>() / sample_t(TABLE_SIZE);
   return {{_sin<sample_t>(sample_t(INDEX) * phase_increment)...}};
@@ -1510,10 +1517,10 @@ struct LCGNoise : _Generator<sample_t, LCGNoise<sample_t>> {
   long c = 0;
   long m = (1LL << 32);
   long y1 = 2533;
-  void set(sample_t a, sample_t c, sample_t m) {
-    this->a = a;
-    this->c = c;
-    this->m = m;
+  void set(sample_t _a, sample_t _c, sample_t _m) {
+    this->a = _a;
+    this->c = _c;
+    this->m = _m;
   }
   //  void setFrequency(sample_t frequency, sample_t samplerate) {
   //    long period = floor(samplerate / frequency);
@@ -1556,11 +1563,11 @@ struct TriangleNoiseOsc : _Generator<sample_t, TriangleNoiseOsc<sample_t>> {
   sample_t pwidth = 0.5;
   int i = 1;
 
-  void setFrequency(const sample_t frequency, const sample_t samplerate) {
-    this->frequency = frequency;
+  void setFrequency(const sample_t _frequency, const sample_t samplerate) {
+    this->frequency = _frequency;
     R = exp(-1.0 / (0.0025 * samplerate));
-    phi = static_cast<sample_t>(frequency / samplerate);
-    auto period = (samplerate / frequency);
+    phi = static_cast<sample_t>(_frequency / samplerate);
+    auto period = (samplerate / _frequency);
     a = exp(-2 * M_PI / period);
     b = 1.0 - a;
   }
@@ -1647,9 +1654,9 @@ struct SquareNoiseOsc : _Generator<sample_t, TriangleNoiseOsc<sample_t>> {
   sample_t frequency = 440;
   sample_t mod = 1;
 
-  void setFrequency(const sample_t frequency, const sample_t samplerate) {
-    this->frequency = frequency;
-    phi = static_cast<sample_t>(frequency / samplerate);
+  void setFrequency(const sample_t _frequency, const sample_t samplerate) {
+    this->frequency = _frequency;
+    phi = static_cast<sample_t>(_frequency / samplerate);
   }
   const inline sample_t polyblep(sample_t dt, sample_t t) {
     if (t < dt) {
@@ -1714,11 +1721,11 @@ template <typename sample_t> struct Ramp {
   sample_t end;
   sample_t ramptime_in_samples;
   sample_t phase_increment;
-  void set(const sample_t begin, const sample_t end,
-           const sample_t ramptime_in_samples) {
-    this->begin = begin;
-    this->end = end;
-    this->phase_increment = 1.0 / static_cast<sample_t>(ramptime_in_samples);
+  void set(const sample_t _begin, const sample_t _end,
+           const sample_t _ramptime_in_samples) {
+    this->begin = _begin;
+    this->end = _end;
+    this->phase_increment = 1.0 / static_cast<sample_t>(_ramptime_in_samples);
   };
   void trigger() { phase = 0; };
   void process(const size_t blocksize, sample_t *out) {
@@ -1757,7 +1764,7 @@ struct Perc : _Generator<sample_t, Perc<sample_t>> {
   }
 
   void set(const sample_t attack_ms, const sample_t decay_ms,
-           const sample_t curve, const sample_t samplerate) {
+           const sample_t _curve, const sample_t samplerate) {
 
     sample_t attack_in_samples = (attack_ms * samplerate) / 1000.0;
     sample_t decay_in_samples = (decay_ms * samplerate) / 1000.0;
@@ -1769,7 +1776,7 @@ struct Perc : _Generator<sample_t, Perc<sample_t>> {
     }
     this->attack_increment = 1.0 / attack_in_samples;
     this->decay_increment = 1.0 / decay_in_samples;
-    this->curve = curve;
+    this->curve = _curve;
   };
 
   void trigger() {
@@ -2015,10 +2022,10 @@ template <typename sample_t> struct ADSREnvelope {
   sample_t release_increment = 1.0;
   sample_t gate = 0;
   void set(const sample_t attack_ms, const sample_t decay_ms,
-           const sample_t sustain, const sample_t release_ms,
+           const sample_t _sustain, const sample_t release_ms,
            const sample_t samplerate) {
 
-    this->sustain = sustain;
+    this->sustain = _sustain;
     sample_t attack_in_samples = (attack_ms * samplerate) / 1000.0;
     sample_t decay_in_samples = (decay_ms * samplerate) / 1000.0;
     sample_t release_in_samples = (release_ms * samplerate) / 1000.0;
@@ -2086,8 +2093,8 @@ template <typename sample_t> struct ADSREnvelope {
     }
     return nextValue;
   };
-  inline const sample_t next(sample_t gate) {
-    setGate(gate);
+  inline const sample_t next(sample_t _gate) {
+    setGate(_gate);
     return next();
   }
 
@@ -2169,7 +2176,7 @@ template <typename sample_t> struct Slew {
 namespace spacialization {
 template <typename sample_t, size_t TABLE_SIZE = 0> struct Pan {
   sample_t position;
-  void setPosition(const sample_t position) { this->position = position; };
+  void setPosition(const sample_t _position) { this->position = _position; };
   inline void next(const sample_t in, sample_t &outL, sample_t &outR) {
 
     const sample_t powerLeft = 0.25 * position;

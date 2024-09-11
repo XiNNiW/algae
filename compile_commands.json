@@ -1,15 +1,8 @@
 [
-  {
-    "arguments": [
-      "/usr/bin/clang++",
-      "-c",
-      "-o",
-      "-Wall",
-      "CMakeFiles/algae.dir/src/algae.cpp.o",
-      "/home/xinniw/Development/algae/src/algae.cpp"
-    ],
-    "directory": "/home/xinniw/Development/algae/build",
-    "file": "/home/xinniw/Development/algae/src/algae.cpp",
-    "output": "/home/xinniw/Development/algae/build/CMakeFiles/algae.dir/src/algae.cpp.o"
-  }
+{
+  "directory": "/home/xinniw/Development/algae/build",
+  "command": "/usr/bin/c++    -o CMakeFiles/algae.dir/src/algae.cpp.o -c /home/xinniw/Development/algae/src/algae.cpp -Wall -Wextra -Wpedantic -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wsign-compare -Wsign-conversion -Wunreachable-code -Wcast-align -Wno-implicit-fallthrough -Wno-maybe-uninitialized -Wno-ignored-qualifiers -Wswitch-enum -Wredundant-decls -Wno-strict-overflow -Wshadow -Wfloat-equal -Wmissing-field-initializers -Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant",
+  "file": "/home/xinniw/Development/algae/src/algae.cpp",
+  "output": "CMakeFiles/algae.dir/src/algae.cpp.o"
+}
 ]
