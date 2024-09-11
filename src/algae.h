@@ -4,10 +4,8 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
 #include <math.h>
 #include <utility>
-#include <variant>
 
 namespace algae::dsp {
 
@@ -93,8 +91,8 @@ template <typename sample_t> inline const sample_t d_sqrt(sample_t n) {
 template <typename sample_t>
 static const inline sample_t lerp(const sample_t origin, const sample_t dest,
                                   const sample_t amt) {
-  sample_t a = (amt > 1) ? 1 : (amt < 0) ? 0 : amt;
-  return origin + a * (dest - origin);
+  // sample_t a = (amt > 1) ? 1 : (amt < 0) ? 0 : amt;
+  return origin + amt * (dest - origin);
 };
 
 template <typename sample_t>
@@ -614,18 +612,18 @@ struct Biquad : _Filter<sample_t, Biquad<sample_t, frequency_t>> {
     frequency_t w0 = cutoff * math::TwoPi<frequency_t>() / samplerate;
     frequency_t a = fabs(sin(w0) / (2 * q));
     frequency_t c = cos(w0);
-    frequency_t b0 = (1 + c) / 2;
-    frequency_t b1 = -(1 + c);
-    frequency_t b2 = (1 + c) / 2;
-    frequency_t a0 = 1 + a;
-    frequency_t a1 = -2 * c;
-    frequency_t a2 = 1 - a;
+    frequency_t _b0 = (1 + c) / 2;
+    frequency_t _b1 = -(1 + c);
+    frequency_t _b2 = (1 + c) / 2;
+    frequency_t _a0 = 1 + a;
+    frequency_t _a1 = -2 * c;
+    frequency_t _a2 = 1 - a;
 
-    this->b0 = b0 / a0;
-    this->b1 = b1 / a0;
-    this->b2 = b2 / a0;
-    this->a1 = a1 / a0;
-    this->a2 = a2 / a0;
+    this->b0 = _b0 / _a0;
+    this->b1 = _b1 / _a0;
+    this->b2 = _b2 / _a0;
+    this->a1 = _a1 / _a0;
+    this->a2 = _a2 / _a0;
   };
 
   void bandpass(const frequency_t cutoff, const frequency_t quality,
@@ -635,17 +633,17 @@ struct Biquad : _Filter<sample_t, Biquad<sample_t, frequency_t>> {
     frequency_t w0 = cutoff * math::TwoPi<frequency_t>() / samplerate;
     frequency_t a = fabs(sin(w0) / (2 * q));
     frequency_t c = cos(w0);
-    frequency_t b0 = a;
-    frequency_t b1 = 0;
-    frequency_t b2 = -a;
-    frequency_t a0 = 1 + a;
-    frequency_t a1 = -2 * c;
-    frequency_t a2 = 1 - a;
-    this->b0 = b0 / a0;
-    this->b1 = b1 / a0;
-    this->b2 = b2 / a0;
-    this->a1 = a1 / a0;
-    this->a2 = a2 / a0;
+    frequency_t _b0 = a;
+    frequency_t _b1 = 0;
+    frequency_t _b2 = -a;
+    frequency_t _a0 = 1 + a;
+    frequency_t _a1 = -2 * c;
+    frequency_t _a2 = 1 - a;
+    this->b0 = _b0 / _a0;
+    this->b1 = _b1 / _a0;
+    this->b2 = _b2 / _a0;
+    this->a1 = _a1 / _a0;
+    this->a2 = _a2 / _a0;
   };
 };
 
@@ -1050,11 +1048,6 @@ template <typename sample_t, typename frequency_t> struct STKBlitImpulseTrain {
   };
 };
 
-template <typename sample_t> struct click_t {
-  sample_t phase = M_PI;
-  void process(const sample_t *trig, const sample_t *width_samps,
-               const size_t blocksize, sample_t *out);
-};
 // borrowed from the excellent Synthesis Toolkit (STK) library
 // https://ccrma.stanford.edu/software/stk/
 template <typename sample_t, typename frequency_t> struct STKBlitSaw {
@@ -2221,7 +2214,7 @@ struct ModulatedDelay {
     return delay.next(in);
   }
   void process(const sample_t *in, const size_t blocksize, sample_t *out) {
-    sample_t lfoSignal[blocksize];
+    sample_t lfoSignal[MAX_DELAY_SAMPS];
     lfo.process(blocksize, lfoSignal);
     algae::dsp::block::mult(lfoSignal, modDepth, blocksize, lfoSignal);
     for (size_t i = 0; i < blocksize; i++) {
