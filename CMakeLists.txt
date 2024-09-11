@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wstrict-aliasing -Wuninitialized 
 #target_include_directories(algae PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 file(GLOB sources src/*.cpp) # upper case variable names reserved for exported variables by convention
 file(GLOB headers src/*.h) # upper case variable names reserved for exported variables by convention
-add_library(algae ${sources} ${headers}) # STATIC by default
-#add_library(algae  INTERFACE ${sources} ${headers}) # STATIC by default
-target_compile_features(algae INTERFACE cxx_std_17)
+add_library(algae STATIC ${sources} ${headers}) # STATIC by default
+target_compile_features(algae PUBLIC cxx_std_17)
+target_include_directories(algae PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
