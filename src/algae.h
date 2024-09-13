@@ -1758,9 +1758,9 @@ struct Perc : _Generator<sample_t, Perc<sample_t>> {
 
   Perc() {}
 
-  Perc(const sample_t attack_ms, const sample_t decay_ms, const sample_t curve,
-       const sample_t samplerate) {
-    set(attack_ms, decay_ms, curve, samplerate);
+  Perc(const sample_t _attack_ms, const sample_t _decay_ms,
+       const sample_t _curve, const sample_t samplerate) {
+    set(_attack_ms, _decay_ms, _curve, samplerate);
   }
 
   void set(const sample_t attack_ms, const sample_t decay_ms,
